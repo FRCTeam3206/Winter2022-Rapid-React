@@ -30,7 +30,6 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rightLeadMotor;
   private CANSparkMax m_leftFollowMotor;
   private CANSparkMax m_rightFollowMotor;
-  private double lastVelocity=0;
   private long lastTime;
 
   @Override
@@ -58,19 +57,41 @@ public class Robot extends TimedRobot {
 
   double currRight=0;
   double currLeft=0;
-  
+  int prints=0;
   @Override
   public void teleopPeriodic() {
     //for acceleration limiting(uncomplete)
-     double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
-     double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
-     long currTime=System.currentTimeMillis();
-     double rightDiff=rightInput-currRight;
-     double leftDiff=leftInput-currLeft;
-     double timeDiff=currTime-lastTime;
-     
-     
-    m_myRobot.tankDrive(rightInput, leftInput);
+    double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
+    double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
+    long currTime=System.currentTimeMillis();
+    long elapsedTime=currTime-lastTime;
+    double rightDiff=rightInput-currRight;
+    double leftDiff=leftInput-currLeft;
+    double maxDiv=1;
+    double maxAccel=.25;
+    //rightDiff*1000/elapsedTime is essentially the slope of the line connecting the last rightMotor speed and the one given by the input(with respect to seconds)
+    if(Math.abs(rightDiff*1000/elapsedTime)>.1){
+    maxDiv=Math.max(maxDiv,Math.abs(rightDiff*1000/elapsedTime/maxAccel));
+    }
+    if(Math.abs(leftDiff*1000/elapsedTime)>.1){
+    maxDiv=Math.max(maxDiv,Math.abs(leftDiff*1000/elapsedTime/maxAccel));
+    }
+    
+    if(elapsedTime<25){
+      if(prints<25){
+        System.out.println(elapsedTime+" "+rightDiff+" "+maxDiv+" "+currRight+" "+currRight+rightDiff/maxDiv+" "+rightInput);
+        prints++;
+      }
+      currRight=cut(currRight+rightDiff/maxDiv);
+      currLeft=cut(currLeft+leftDiff/maxDiv);
+      //stop when the joysticks are released
+      if(Math.abs(m_joystick.getLeftY())<.05&&Math.abs(m_joystick.getLeftX())<.05){
+        currRight=0;
+        currLeft=0;
+      }
+    }
+    m_myRobot.tankDrive(currRight, currLeft);
+    lastTime=System.currentTimeMillis();
   }
   
   private double cut(double val){
