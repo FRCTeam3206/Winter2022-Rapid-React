@@ -60,7 +60,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    double ta=table.getEntry("ta").getDouble(0.0);
+    double ta=table.getEntry("tv").getDouble(0.0);
     double tx=table.getEntry("tx").getDouble(0.0);
     if(lastPrint+1000<=System.currentTimeMillis()){
       if(ta>.75){
