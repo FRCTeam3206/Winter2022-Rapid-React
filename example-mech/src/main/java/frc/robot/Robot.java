@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import java.lang.System;
 //import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -25,6 +26,13 @@ public class Robot extends TimedRobot {
 
   private XboxController m_stick;
 
+  private double xbox_xAxisRStick = 0;
+  private double xbox_yAxisRStick = 0;
+  private double xbox_xAxisLStick = 0;
+  private double xbox_yAxisLStick = 0;
+
+  private boolean debugMode = true;
+
   @Override
   public void robotInit() {
     // 8 controllers for 8 motors
@@ -35,19 +43,40 @@ public class Robot extends TimedRobot {
 
     // Invert the right side motors.
     // You may need to change or remove this to match your robot.
-    //frontRight.setInverted(true);
-    //rearRight.setInverted(true);
+    frontLeft.setInverted(true);
+    frontRight.setInverted(true);
 
     m_robotDrive = new MecanumDrive(frontLeft, rearLeft, frontRight, rearRight);
 
     m_stick = new XboxController(kXBOXChannel);
+
   }
 
   @Override
   public void teleopPeriodic() {
     // Use the joystick X axis for lateral movement, Y axis for forward
     // movement, and Z axis for rotation.
-    m_robotDrive.driveCartesian(m_stick.getLeftX(), m_stick.getLeftY(), m_stick.getRightX(), 0.0);
-      // The left stick isn't working for some reason. Don't know if it's code or mechanical
+    xbox_xAxisRStick = m_stick.getRightX() * 0.1;   // Get stick axies and normalize
+    xbox_yAxisRStick = m_stick.getRightY() * 0.1;     //-
+    xbox_xAxisLStick = m_stick.getLeftX() * 0.1;      //-
+    xbox_yAxisLStick = m_stick.getLeftY() * 0.1;    //-
+
+    m_robotDrive.driveCartesian(xbox_xAxisLStick, xbox_yAxisLStick, xbox_xAxisRStick, 0.0);
+    
+    if(debugMode == true) {
+      System.out.println("Right Stick X: " + m_stick.getRightX());
+      System.out.println("Right Stick Y: " + m_stick.getRightY());
+      System.out.println("---");
+      System.out.println("Left Stick X: " + m_stick.getLeftX());
+      System.out.println("Left Stick Y: " + m_stick.getLeftY());
+
+      System.out.println("=========");
+
+      System.out.println("Right Stick X (mod): " + xbox_xAxisRStick);
+      System.out.println("Right Stick Y (mod): " + xbox_yAxisRStick);
+      System.out.println("---");
+      System.out.println("Left Stick X (mod): " + xbox_xAxisLStick);
+      System.out.println("Left Stick Y (mod): " + xbox_yAxisLStick);
+    }
   }
 }
