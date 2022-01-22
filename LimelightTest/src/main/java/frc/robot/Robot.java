@@ -74,15 +74,18 @@ public class Robot extends TimedRobot {
           direction=-1;
         }
     }
-    System.out.println(ta+" "+tx+" "+direction);
+    System.out.println(direction);
+
     switch(direction){
       case 1:
-        //m_myRobot.arcadeDrive(0, .25);
+        m_myRobot.arcadeDrive(0, .4);
       break;
       case -1:
-        //m_myRobot.arcadeDrive(0,-.25);
+        m_myRobot.arcadeDrive(0,-.4);
+        break;
       default:
-        //m_myRobot.arcadeDrive(0, 0);
+        m_myRobot.arcadeDrive(0, 0);
+        break;
     }
 
   }
