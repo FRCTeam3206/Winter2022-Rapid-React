@@ -28,9 +28,8 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rightLeadMotor;
   private CANSparkMax m_leftFollowMotor;
   private CANSparkMax m_rightFollowMotor;
-  private double lastVelocity=0;
-  private long lastTime;
-
+  public static final double TOLERANCE=3;
+  public static final double MIN_SPEED=.6;
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -51,7 +50,6 @@ public class Robot extends TimedRobot {
 
     CameraServer.startAutomaticCapture();
 
-    lastTime=System.currentTimeMillis();
   }
 
   double currRight=0;
@@ -67,26 +65,15 @@ public class Robot extends TimedRobot {
     double ta=table.getEntry("ta").getDouble(0.0);//If limelight sees a target
     double tx=table.getEntry("tx").getDouble(0.0);
     int direction=0;
-    if(ta>.75){
-        if(tx>5){
-          direction=1;
-        }else if(tx<5){
-          direction=-1;
-        }
+    double speed=0;
+    if(Math.abs(tx)>TOLERANCE){
+      speed=-tx/22*.7;
+      if(speed>0&&speed<MIN_SPEED)speed=MIN_SPEED;
+      if(speed<0&&speed>-MIN_SPEED)speed=-MIN_SPEED;
+      System.out.println(direction+" "+tx+" "+speed);
     }
-    System.out.println(direction);
-
-    switch(direction){
-      case 1:
-        m_myRobot.arcadeDrive(0, .4);
-      break;
-      case -1:
-        m_myRobot.arcadeDrive(0,-.4);
-        break;
-      default:
-        m_myRobot.arcadeDrive(0, 0);
-        break;
-    }
+    
+    m_myRobot.arcadeDrive(0, speed);
 
   }
   private double cut(double val){
