@@ -79,7 +79,7 @@ public class Robot extends TimedRobot {
     switch(direction){
       case 1:
         m_myRobot.arcadeDrive(0, .4);
-      break;
+        break;
       case -1:
         m_myRobot.arcadeDrive(0,-.4);
         break;
