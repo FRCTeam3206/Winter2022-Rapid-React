@@ -56,10 +56,24 @@ public class Robot extends TimedRobot {
   public void teleopInit() {}
 
   /** This function is called periodically during teleoperated mode. */
+  long lastPrint=0;
   @Override
   public void teleopPeriodic() {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    System.out.println("Limelight See Prob:"+table.getEntry("tv").getDouble(12.3));
+    double ta=table.getEntry("ta").getDouble(0.0);
+    double tx=table.getEntry("tx").getDouble(0.0);
+    if(lastPrint+1000<=System.currentTimeMillis()){
+      if(ta>.75){
+          if(tx>10){
+            System.out.println("Right");
+          }else if(tx<10){
+            System.out.println("Left");
+          }else{
+            System.out.println("Centered");
+          }
+      }
+      lastPrint=System.currentTimeMillis();
+    }
   }
 
   /** This function is called once each time the robot enters test mode. */
