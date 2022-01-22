@@ -9,15 +9,14 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-
+import com.kauailabs.navx.frc.AHRS;
 /**
  * This is a sample program to demonstrate how to use a gyro sensor to make a robot drive straight.
  * This program uses a joystick to drive forwards and backwards while the gyro is used for direction
  * keeping.
  */
 public class Robot extends TimedRobot {
-  private static final int kGyroPort = 0;
-  private final AnalogGyro gyro = new AnalogGyro(kGyroPort);
+  AHRS imu=new AHRS(edu.wpi.first.wpilibj.I2C.Port.kMXP);
 
   @Override
   public void robotInit() {
@@ -30,6 +29,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    System.out.println(gyro.getAngle());
+    System.out.println(imu.getDisplacementX());
   }
 }
