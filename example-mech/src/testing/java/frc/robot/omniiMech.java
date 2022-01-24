@@ -107,6 +107,12 @@ public class Robot extends TimedRobot {
     }
   }
 
+  public double getHypo(double a, double b) {
+    // Pythagorean theorem: a^2 + b^2 = c^2
+      // Or: c = sqrt( a^2 + b^2 )
+    return Math.sqrt(Math.pow(a) + Math.pow(b));
+  }
+
   @Override
   public void teleopPeriodic() {
     // Use the joystick X axis for lateral movement, Y axis for forward
@@ -140,6 +146,17 @@ public class Robot extends TimedRobot {
     xbox_rStickNormalY = normalizeStickVals(xbox_yAxisRStick, xbox_yAxisRStickMAX, xbox_yAxisRStickMIN);
     xbox_lStickNormalX = normalizeStickVals(xbox_xAxisLStick, xbox_xAxisLStickMAX, xbox_xAxisLStickMIN);
     xbox_lStickNormalY = normalizeStickVals(xbox_yAxisLStick, xbox_yAxisLStickMAX, xbox_yAxisLStickMIN);
+
+    // Calculate the angle of the stick
+    double rStick_hypo = getHypo(xbox_rStickNormalX, xbox_rStickNormalY);
+    double rStick_sideA = xbox_rStickNormalX / rStick_hypo;
+    double rStick_sideB = xbox_rStickNormalY / rStick_hypo;
+    xbox_rStickAngle = Math.atan(rStick_sideB / rStick_sideA);
+
+    double lStick_hypo = getHypo(xbox_lStickNormalX, xbox_lStickNormalY);
+    double lStick_sideA = xbox_lStickNormalX / lStick_hypo;
+    double lStick_sideB = xbox_lStickNormalY / lStick_hypo;
+    xbox_lStickAngle = Math.atan(lStick_sideB / lStick_sideA);
 
     // TODO:
       // Calculate the stick's angle via trig
