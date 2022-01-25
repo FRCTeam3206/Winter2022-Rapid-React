@@ -65,13 +65,12 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    double forward=m_joystick.getLeftY();
-    double turn=-m_joystick.getLeftX();
+    double forward=m_joystick.getLeftY()*.5;
+    double turn=-m_joystick.getLeftX()*.7;
     if(m_joystick.getAButton()){
       double[] vals=alignToTarget(72, true, true);
       forward=vals[0];
       turn=vals[1];
-      System.out.println(forward+" "+turn);
     }
     m_myRobot.arcadeDrive(forward,turn);
   }
@@ -97,7 +96,7 @@ public class Robot extends TimedRobot {
    */
   private double[] alignToTarget(double distance,boolean shouldTurn,boolean shouldDrive){
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    double ta=table.getEntry("ta").getDouble(0.0);//If limelight sees a target
+    double tv=table.getEntry("tv").getDouble(0.0);//If limelight sees a target
     double tx=table.getEntry("tx").getDouble(0.0);
     int direction=0;
     double turn=0;
@@ -105,7 +104,7 @@ public class Robot extends TimedRobot {
     double dist=dist(table.getEntry("ty").getDouble(0.0));
     double distOff=dist-72;
     double isOff=0;
-    if(ta>.5){
+    if(tv>.5){
       if(Math.abs(tx)>TURN_TOLERANCE&&shouldTurn){
         turn=-tx/22*.7;
         if(turn>0&&turn<MIN_SPEED)turn=MIN_SPEED;
