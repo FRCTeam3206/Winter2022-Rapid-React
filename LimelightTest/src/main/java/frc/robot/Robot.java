@@ -68,7 +68,7 @@ public class Robot extends TimedRobot {
     double forward=m_joystick.getLeftY();
     double turn=-m_joystick.getLeftX();
     if(m_joystick.getAButton()){
-      double[] vals=alignToTarget(80, true, true);
+      double[] vals=alignToTarget(72, true, true);
       forward=vals[0];
       turn=vals[1];
       System.out.println(forward+" "+turn);
