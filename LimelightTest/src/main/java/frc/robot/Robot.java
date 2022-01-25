@@ -28,8 +28,16 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rightLeadMotor;
   private CANSparkMax m_leftFollowMotor;
   private CANSparkMax m_rightFollowMotor;
-  public static final double TOLERANCE=3;
+  public static final double TURN_TOLERANCE=3;//In Degrees
+  public static final double DRIVE_TOLERANCE=4;//In Inches
   public static final double MIN_SPEED=.6;
+
+  //Distance Callabration constants
+  public static final double CAL_T1=15.46*Math.PI/180;//Convert to Radians
+  public static final double CAL_D=5*12;
+  public static final double H1=39.5;
+  public static final double H2=8*12+8;
+  public static final double T0=Math.atan((H2-H1)/CAL_D)-CAL_T1;
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -57,28 +65,69 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    
+    double forward=m_joystick.getLeftY();
+    double turn=-m_joystick.getLeftX();
+    if(m_joystick.getAButton()){
+      double[] vals=alignToTarget(80, true, true);
+      forward=vals[0];
+      turn=vals[1];
+      System.out.println(forward+" "+turn);
+    }
+    m_myRobot.arcadeDrive(forward,turn);
   }
   @Override
   public void autonomousPeriodic() {
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    double ta=table.getEntry("ta").getDouble(0.0);//If limelight sees a target
-    double tx=table.getEntry("tx").getDouble(0.0);
-    int direction=0;
-    double speed=0;
-    if(Math.abs(tx)>TOLERANCE){
-      speed=-tx/22*.7;
-      if(speed>0&&speed<MIN_SPEED)speed=MIN_SPEED;
-      if(speed<0&&speed>-MIN_SPEED)speed=-MIN_SPEED;
-      System.out.println(direction+" "+tx+" "+speed);
-    }
-    
-    m_myRobot.arcadeDrive(0, speed);
-
+    alignToTarget(80,false,true);
+  }
+  private double dist(double y){
+    y=y*Math.PI/180;
+    return (H2-H1)/(Math.tan(y+T0));
   }
   private double cut(double val){
     if(val<-1)return -1;
     if(val>1)return 1;
     return val;
+  }
+  /**
+   * 
+   * @param distance desired distance to the target
+   * @param shouldTurn if the robot should turn toward the target
+   * @param shouldDrive if the robot should drive to or from the target
+   * @return  2 doubles. First is the forward speed of the bot, second is it's turn, and the third is if the robot is aligned(1.0 for is, 0.0 for is not)
+   */
+  private double[] alignToTarget(double distance,boolean shouldTurn,boolean shouldDrive){
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    double ta=table.getEntry("ta").getDouble(0.0);//If limelight sees a target
+    double tx=table.getEntry("tx").getDouble(0.0);
+    int direction=0;
+    double turn=0;
+    double forward=0;
+    double dist=dist(table.getEntry("ty").getDouble(0.0));
+    double distOff=dist-72;
+    double isOff=0;
+    if(ta>.5){
+      if(Math.abs(tx)>TURN_TOLERANCE&&shouldTurn){
+        turn=-tx/22*.7;
+        if(turn>0&&turn<MIN_SPEED)turn=MIN_SPEED;
+        if(turn<0&&turn>-MIN_SPEED)turn=-MIN_SPEED;
+        //System.out.println(direction+" "+tx+" "+speed);
+        isOff=1;
+      }
+      if(Math.abs(distOff)>DRIVE_TOLERANCE&&shouldDrive){
+        if(distOff<0){
+          forward=1;
+        }else{
+          forward=-1;
+        }
+        if(Math.abs(distOff)<12){
+          forward*=.35;
+        }else{
+          forward*=.5;
+        }
+        isOff=1;
+      }
+    }
+    //System.out.println(forward+" "+distOff);
+    return new double[]{forward,turn,1.0-isOff};
   }
 }
