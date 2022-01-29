@@ -13,13 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
-
-import javax.print.attribute.standard.Fidelity;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
-import org.opencv.core.Mat;
 
 /**
  * This sample program shows how to control a motor using a joystick. In the operator control part
@@ -34,8 +29,8 @@ import org.opencv.core.Mat;
 public class Robot extends TimedRobot {
   private static final int kMotorPort = 1;
   private static final int kJoystickPort = 0;
-  private static final int kEncoderPortA = 0;
-  private static final int kEncoderPortB = 1;
+  // private static final int kEncoderPortA = 0;
+  // private static final int kEncoderPortB = 1;
   private static final double increment = 0.02;
 
   private CANSparkMax m_motor;
