@@ -32,7 +32,7 @@ public class omnimech extends TimedRobot {
   private VictorSP frontRight = new VictorSP(kFrontRightChannel);  // Front Right
   private VictorSP rearRight = new VictorSP(kRearRightChannel);     // Back Right
 
-  private static boolean roboDebug = false;
+  private static int debugMode = 0; // 0 for normal operation. Other numbers result in other functionality
 
   private double accelValues[] = {0, 0, 0};
   private static int FORWARD = 0;
@@ -43,7 +43,7 @@ public class omnimech extends TimedRobot {
   private static double STICK_MOD = 1; // Artifical limit on input range
   private static double STICK_DEADZONE = 0.1; // xbox controller deadband
 
-  private double stickTotal = 0;  // Total values of all stick inputs outside the deadband
+  //private double stickTotal = 0;  // Total values of all stick inputs outside the deadband
 
   private double stick_LX = 0;
   private double stick_LY = 0;
@@ -53,9 +53,11 @@ public class omnimech extends TimedRobot {
   private int fakeBool_Strafe = 0;
   private int fakeBool_Rotate = 0;
 
+  /*
   private double leftX_Fine = 0;
   private double leftY_Fine = 0;
   private double rightX_Fine = 0;
+  */
 
   private double powVals[] = {0, 0, 0};
 
@@ -77,67 +79,100 @@ public class omnimech extends TimedRobot {
     return a + -2 * a * fakeBool;     // If fakeBool is 1, the input value is negative  
   }
 
+  public void debugHandle(int mode) {
+    switch(mode) {
+      case(1):
+      // Motor check
+      frontRight.set(0.1);
+      frontLeft.set(0.1);
+      rearRight.set(0.1);
+      rearLeft.set(0.1);
+      break;
+      case(2):
+        // Input check
+        final double DBGSTICK = 0.1;
+        double leftStick_X = m_stick.getLeftX() * DBGSTICK * -1;
+        double leftStick_Y = m_stick.getLeftY() * DBGSTICK * -1;
+        double rightStickX = m_stick.getRightX() * DBGSTICK;
+
+        frontRight.set(leftStick_Y - leftStick_X - rightStickX);
+        frontLeft.set(leftStick_Y + leftStick_X + rightStickX);
+        rearRight.set(leftStick_Y + leftStick_X - rightStickX);
+        rearLeft.set(leftStick_Y - leftStick_X + rightStickX);
+      break;
+      default:
+        System.out.println("[DEBUG] Error: Incorrect debugMode value");
+      return;
+    }
+  }
+
   @Override
   public void teleopPeriodic() {
+    if(debugMode == 0) {
+      stick_LX = m_stick.getLeftX() * STICK_MOD * -1;
+      stick_LY = m_stick.getLeftY() * STICK_MOD * -1;
+      stick_RX = m_stick.getRightX() * STICK_MOD;
+      
+      fakeBool_Forward = (m_stick.getLeftY() >= STICK_DEADZONE || m_stick.getLeftY() <= -1 * STICK_DEADZONE) ? 1 : 0;   // Set the fake boolean to "true" or "false" on whether the stick is outside of the deadband
+      fakeBool_Strafe = (m_stick.getLeftX() >= STICK_DEADZONE || m_stick.getLeftX() <= -1 * STICK_DEADZONE) ? 1 : 0;    // --
+      fakeBool_Rotate = (m_stick.getRightX() >= STICK_DEADZONE || m_stick.getRightX() <= -1 * STICK_DEADZONE) ? 1 : 0;  // --
 
-    stick_LX = m_stick.getLeftX() * STICK_MOD;
-    stick_LY = m_stick.getLeftY() * STICK_MOD * -1;
-    stick_RX = m_stick.getRightX() * STICK_MOD;
+      /*
+      if(fakeBool_Forward == 1) {
+        stickTotal += realValue(m_stick.getLeftY());
+      }
+      if(fakeBool_Strafe == 1) {
+        stickTotal += realValue(m_stick.getLeftX());
+      }
+      if(fakeBool_Rotate == 1) {
+        stickTotal += realValue(m_stick.getRightX());
+      }
+      */
 
-    fakeBool_Forward = (m_stick.getLeftY() >= STICK_DEADZONE || m_stick.getLeftY() <= -1 * STICK_DEADZONE) ? 1 : 0;   // Set the fake boolean to "true" or "false" on whether the stick is outside of the deadband
-    fakeBool_Strafe = (m_stick.getLeftX() >= STICK_DEADZONE || m_stick.getLeftX() <= -1 * STICK_DEADZONE) ? 1 : 0;    // --
-    fakeBool_Rotate = (m_stick.getRightX() >= STICK_DEADZONE || m_stick.getRightX() <= -1 * STICK_DEADZONE) ? 1 : 0;  // --
+      /*  This is a good idea, yet a bad implementation
+      leftY_Fine = m_stick.getLeftY() * (realValue(m_stick.getLeftY()) / stickTotal) * fakeBool_Forward;
+      leftX_Fine = m_stick.getLeftX() * (realValue(m_stick.getLeftX()) / stickTotal) * fakeBool_Strafe;
+      rightX_Fine = m_stick.getRightX() * (realValue(m_stick.getRightX()) / stickTotal) * fakeBool_Rotate;
+      */
 
-    if(fakeBool_Forward == 1) {
-      stickTotal += realValue(m_stick.getLeftY());
-    }
-    if(fakeBool_Strafe == 1) {
-      stickTotal += realValue(m_stick.getLeftX());
-    }
-    if(fakeBool_Rotate == 1) {
-      stickTotal += realValue(m_stick.getRightX());
-    }
+      // Accelleration formula so the motor speed isn't crazy right off the bat
+        // This fomrula is simplified from: 1/k * input + (k - 1)/k * old motor pow = new motor pow
+      accelValues[FORWARD] = (stick_LY + powVals[FORWARD] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
+      accelValues[STRAFE] = (stick_LX + powVals[STRAFE] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
+      accelValues[ROTATE] = (stick_RX + powVals[ROTATE] * ACCEL_CO - powVals[ROTATE]) / ACCEL_CO;
+        
+      // Automatically "break" when the driver isn't pressing anything
+      if(fakeBool_Forward == 1) {
+        powVals[FORWARD] = accelValues[FORWARD];// * leftY_Fine;
+      } else {
+        powVals[FORWARD] = 0;
+      }
+      if(fakeBool_Strafe == 1) {
+        powVals[STRAFE] = accelValues[STRAFE];// * leftX_Fine;
+      } else {
+        powVals[STRAFE] = 0;
+      }
+      if(fakeBool_Rotate == 1) {
+        powVals[ROTATE] = accelValues[ROTATE];// * rightX_Fine;
+      } else {
+        powVals[ROTATE] = 0;
+      }
 
-    leftY_Fine = m_stick.getLeftY() * (realValue(m_stick.getLeftY()) / stickTotal) * fakeBool_Forward;
-    leftX_Fine = m_stick.getLeftX() * (realValue(m_stick.getLeftX()) / stickTotal) * fakeBool_Strafe;
-    rightX_Fine = m_stick.getRightX() * (realValue(m_stick.getRightX()) / stickTotal) * fakeBool_Rotate;
+      // Idea:
+        // Use weighted averages to set the controller's fine tuning
+          // Find whether a stick axis is greater / less than the deadzone
+          // If so, add its value to the total & flip a boolean
+          // Divide each stick's value by the total, then multiply the value with the previous result
+          // Multiply the stick values by the weight value
 
-    // Accelleration formula so the motor speed isn't crazy right off the bat
-      // This fomrula is simplified from: 1/k * input + (k - 1)/k * old motor pow = new motor pow
-    accelValues[FORWARD] = (stick_LY + powVals[FORWARD] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
-    accelValues[STRAFE] = (stick_LX + powVals[STRAFE] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
-    accelValues[ROTATE] = (stick_RX + powVals[ROTATE] * ACCEL_CO - powVals[ROTATE]) / ACCEL_CO;
-    
-    // Automatically "break" when the driver isn't pressing anything
-    if(fakeBool_Forward == 1) {
-      powVals[FORWARD] = accelValues[FORWARD];// * leftY_Fine;
+      frontRight.set(powVals[FORWARD] - powVals[STRAFE] - powVals[ROTATE]);
+      frontLeft.set(powVals[FORWARD] + powVals[STRAFE] + powVals[ROTATE]);
+      rearRight.set(powVals[FORWARD] + powVals[STRAFE] - powVals[ROTATE]);
+      rearLeft.set(powVals[FORWARD] - powVals[STRAFE] + powVals[ROTATE]);
+
+      //stickTotal = 0; // Reset stick total value so it doesn't skyrocket over time
     } else {
-      powVals[FORWARD] = 0;
+      debugHandle(debugMode);
     }
-    if(fakeBool_Strafe == 1) {
-      powVals[STRAFE] = accelValues[STRAFE];// * leftX_Fine;
-    } else {
-      powVals[STRAFE] = 0;
-    }
-    if(fakeBool_Rotate == 1) {
-      powVals[ROTATE] = accelValues[ROTATE];// * rightX_Fine;
-    } else {
-      powVals[ROTATE] = 0;
-    }
-
-    // Idea:
-      // Use weighted averages to set the controller's fine tuning
-        // Find whether a stick axis is greater / less than the deadzone
-        // If so, add its value to the total & flip a boolean
-        // Divide each stick's value by the total, then multiply the value with the previous result
-        // Multiply the stick values by the weight value
-
-    frontRight.set(powVals[FORWARD] - powVals[STRAFE] - powVals[ROTATE]);
-    frontLeft.set(powVals[FORWARD] + powVals[STRAFE] + powVals[ROTATE]);
-    rearRight.set(powVals[FORWARD] + powVals[STRAFE] - powVals[ROTATE]);
-    rearLeft.set(powVals[FORWARD] - powVals[STRAFE] + powVals[ROTATE]);
-
-    stickTotal = 0; // Reset stick total value so it doesn't skyrocket over time
-
   }
 }
