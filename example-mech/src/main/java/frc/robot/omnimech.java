@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.lang.System;
+
 //import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -30,16 +32,22 @@ public class omnimech extends TimedRobot {
   private VictorSP frontRight = new VictorSP(kFrontRightChannel);  // Front Right
   private VictorSP rearRight = new VictorSP(kRearRightChannel);     // Back Right
 
-  private double accelValues[];
+  private static boolean roboDebug = false;
+
+  private double accelValues[] = {0, 0, 0};
   private static int FORWARD = 0;
   private static int STRAFE = 1;
   private static int ROTATE = 2;
 
   private static int ACCEL_CO = 8; // Accelleration coefficient
-  private static double STICK_MOD = 0.5; // Artifical limit on input range
+  private static double STICK_MOD = 1; // Artifical limit on input range
   private static double STICK_DEADZONE = 0.1; // xbox controller deadband
 
   private double stickTotal = 0;  // Total values of all stick inputs outside the deadband
+
+  private double stick_LX = 0;
+  private double stick_LY = 0;
+  private double stick_RX = 0;
 
   private int fakeBool_Forward = 0;
   private int fakeBool_Strafe = 0;
@@ -49,7 +57,7 @@ public class omnimech extends TimedRobot {
   private double leftY_Fine = 0;
   private double rightX_Fine = 0;
 
-  private double powVals[];
+  private double powVals[] = {0, 0, 0};
 
   @Override
   public void robotInit() {
@@ -72,9 +80,13 @@ public class omnimech extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    fakeBool_Forward = (m_stick.getLeftY() >= STICK_DEADZONE || m_stick.getLeftY() <= -STICK_DEADZONE) ? 1 : 0;   // Set the fake boolean to "true" or "false" on whether the stick is outside of the deadband
-    fakeBool_Strafe = (m_stick.getLeftX() >= STICK_DEADZONE || m_stick.getLeftX() <= -STICK_DEADZONE) ? 1 : 0;    // --
-    fakeBool_Rotate = (m_stick.getRightX() >= STICK_DEADZONE || m_stick.getRightX() <= -STICK_DEADZONE) ? 1 : 0;  // --
+    stick_LX = m_stick.getLeftX() * STICK_MOD;
+    stick_LY = m_stick.getLeftY() * STICK_MOD * -1;
+    stick_RX = m_stick.getRightX() * STICK_MOD;
+
+    fakeBool_Forward = (m_stick.getLeftY() >= STICK_DEADZONE || m_stick.getLeftY() <= -1 * STICK_DEADZONE) ? 1 : 0;   // Set the fake boolean to "true" or "false" on whether the stick is outside of the deadband
+    fakeBool_Strafe = (m_stick.getLeftX() >= STICK_DEADZONE || m_stick.getLeftX() <= -1 * STICK_DEADZONE) ? 1 : 0;    // --
+    fakeBool_Rotate = (m_stick.getRightX() >= STICK_DEADZONE || m_stick.getRightX() <= -1 * STICK_DEADZONE) ? 1 : 0;  // --
 
     if(fakeBool_Forward == 1) {
       stickTotal += realValue(m_stick.getLeftY());
@@ -91,13 +103,27 @@ public class omnimech extends TimedRobot {
     rightX_Fine = m_stick.getRightX() * (realValue(m_stick.getRightX()) / stickTotal) * fakeBool_Rotate;
 
     // Accelleration formula so the motor speed isn't crazy right off the bat
-    accelValues[FORWARD] = (1 / ACCEL_CO) * (m_stick.getLeftY() * -STICK_MOD) + ((ACCEL_CO - 1) / ACCEL_CO);
-    accelValues[STRAFE] = (1 / ACCEL_CO) * (m_stick.getLeftX() * STICK_MOD) + ((ACCEL_CO - 1) / ACCEL_CO);
-    accelValues[ROTATE] = (1 / ACCEL_CO) * (m_stick.getRightX() * STICK_MOD) + ((ACCEL_CO - 1) / ACCEL_CO);
-
-    powVals[FORWARD] = accelValues[FORWARD] * leftY_Fine;
-    powVals[STRAFE] = accelValues[STRAFE] * leftX_Fine;
-    powVals[ROTATE] = accelValues[ROTATE] * rightX_Fine;
+      // This fomrula is simplified from: 1/k * input + (k - 1)/k * old motor pow = new motor pow
+    accelValues[FORWARD] = (stick_LY + powVals[FORWARD] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
+    accelValues[STRAFE] = (stick_LX + powVals[STRAFE] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
+    accelValues[ROTATE] = (stick_RX + powVals[ROTATE] * ACCEL_CO - powVals[ROTATE]) / ACCEL_CO;
+    
+    // Automatically "break" when the driver isn't pressing anything
+    if(fakeBool_Forward == 1) {
+      powVals[FORWARD] = accelValues[FORWARD];// * leftY_Fine;
+    } else {
+      powVals[FORWARD] = 0;
+    }
+    if(fakeBool_Strafe == 1) {
+      powVals[STRAFE] = accelValues[STRAFE];// * leftX_Fine;
+    } else {
+      powVals[STRAFE] = 0;
+    }
+    if(fakeBool_Rotate == 1) {
+      powVals[ROTATE] = accelValues[ROTATE];// * rightX_Fine;
+    } else {
+      powVals[ROTATE] = 0;
+    }
 
     // Idea:
       // Use weighted averages to set the controller's fine tuning
@@ -112,5 +138,6 @@ public class omnimech extends TimedRobot {
     rearLeft.set(powVals[FORWARD] - powVals[STRAFE] + powVals[ROTATE]);
 
     stickTotal = 0; // Reset stick total value so it doesn't skyrocket over time
+
   }
 }
