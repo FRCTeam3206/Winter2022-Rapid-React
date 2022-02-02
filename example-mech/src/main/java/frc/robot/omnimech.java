@@ -106,7 +106,7 @@ public class omnimech extends TimedRobot {
     // Return the fine conversion value of a variable linear transformation
     // Credit: Simone on StackExchange: https://stats.stackexchange.com/a/178629
     double result = (upperBound - lowerBound) * ((stickVal - minVal) / (maxVal - minVal)) + lowerBound;
-    return (result > upperBound || result < lowerBound) ? 0 : result; // Check if the values aren't crazy. IDK how to filter out NaN without also getting werid numbers
+    return (result > upperBound || result < lowerBound ||  Double.isNaN(result) == true) ? 0 : result; // Check if the values aren't crazy. IDK how to filter out NaN without also getting werid numbers
   }
 
   protected boolean checkDeadzone(double stickIn) {
@@ -122,55 +122,7 @@ public class omnimech extends TimedRobot {
   }
 
   protected double setPowVals(double accel, double fine, boolean isDirection) {
-    if(isDirection == true) {
-      return accel * fine;
-    } else {
-      return 0;
-    }
-  }
-
-  protected double setAccelVals(double stickVal, double lastPow) {
-    return (stickVal + lastPow * ACCEL_CO - lastPow) / ACCEL_CO;
-  }
-
-  @Override
-  public void teleopPeriodic() {
-    if(debugMode == 0) {
-      stick_LX = m_stick.getLeftX() * STICK_MOD;
-      stick_LY = m_stick.getLeftY() * STICK_MOD * -1;
-      stick_RX = m_stick.getRightX() * STICK_MOD;
-      
-      boolean isForward = checkDeadzone(m_stick.getLeftY());
-      boolean isStrafe = checkDeadzone(m_stick.getLeftX());
-      boolean isRotate = checkDeadzone(m_stick.getRightX());
-
-      stickTotal += incStickTotal(isForward);
-      stickTotal += incStickTotal(isStrafe);
-      stickTotal += incStickTotal(isRotate);
-      
-      // These currently can return numbers like NAN, -INFINITY and INFINITY. It doesn't break driving, but it's good to know
-      leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, -1, 1);   // Map -3 -> 3 to -1 -> 1
-      leftX_Fine = stickFine(m_stick.getLeftX(), stickTotal * -1, stickTotal, -1, 1);   
-      rightX_Fine = stickFine(m_stick.getRightX(), stickTotal * -1, stickTotal, -1, 1);
-
-      /*
-      reportWarning("Left Stick Y Fine: " + leftY_Fine);
-      reportWarning("Left Stick X Fine: " + leftX_Fine);
-      reportWarning("Right Stick X Fine: " + rightX_Fine);
-      */
-
-      // Accelleration formula so the motor speed isn't crazy right off the bat
-        // This fomrula is simplified from: 1/k * input + (k - 1)/k * old motor pow = new motor pow
-      /*
-      accelValues[FORWARD] = (stick_LY + powVals[FORWARD] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
-      accelValues[STRAFE] = (stick_LX + powVals[STRAFE] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
-      accelValues[ROTATE] = (stick_RX + powVals[ROTATE] * ACCEL_CO - powVals[ROTATE]) / ACCEL_CO;
-      */
-      
-      accelValues[FORWARD] = setAccelVals(stick_LY, powVals[FORWARD]);
-      accelValues[STRAFE] = setAccelVals(stick_LX, powVals[STRAFE]);
-      accelValues[ROTATE] = setAccelVals(stick_RX, powVals[ROTATE]);
-
+    // Based on:
       /*
       if(isForward = true) {
         powVals[FORWARD] = accelValues[FORWARD] * leftY_Fine;
@@ -185,31 +137,103 @@ public class omnimech extends TimedRobot {
       if(isRotate == true) {
         powVals[ROTATE] = accelValues[ROTATE] * rightX_Fine;
       } else {
-        powVals[ROTATE] = 0;
+      powVals[ROTATE] = 0;
       }
       */
+    
+    if(isDirection == true) {
+      return accel * fine;
+    } else {
+      return 0;
+    }
+  }
 
-      powVals[FORWARD] = setPowVals(accelValues[FORWARD], leftY_Fine, isForward);
-      powVals[STRAFE] = setPowVals(accelValues[STRAFE], leftX_Fine, isStrafe);
-      powVals[ROTATE] = setPowVals(accelValues[ROTATE], rightX_Fine, isRotate);
-      
-      reportWarning("Forward Power: " + powVals[FORWARD]);
-      reportWarning("Strafe Power: " + powVals[STRAFE]);
-      reportWarning("Rotate Power: " + powVals[ROTATE]);
+  protected double setAccelVals(double stickVal, double lastPow) {
+    // Based on:
+      // Accelleration formula so the motor speed isn't crazy right off the bat
+      // This fomrula is simplified from: 1/k * input + (k - 1)/k * old motor pow = new motor pow
+      /*
+      accelValues[FORWARD] = (stick_LY + powVals[FORWARD] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
+      accelValues[STRAFE] = (stick_LX + powVals[STRAFE] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
+      accelValues[ROTATE] = (stick_RX + powVals[ROTATE] * ACCEL_CO - powVals[ROTATE]) / ACCEL_CO;
+      */
 
-      // Idea:
+    return (stickVal + lastPow * ACCEL_CO - lastPow) / ACCEL_CO;
+  }
+
+  protected double setMechanumSpeed(double forward, double strafe, double rotate, int wheel) {
+    // Based on:
+      /*
+      frontRight.set(powVals[FORWARD] - powVals[STRAFE] - powVals[ROTATE]);
+      frontLeft.set(powVals[FORWARD] + powVals[STRAFE] + powVals[ROTATE]);
+      rearRight.set(powVals[FORWARD] + powVals[STRAFE] - powVals[ROTATE]);
+      rearLeft.set(powVals[FORWARD] - powVals[STRAFE] + powVals[ROTATE]);
+      */
+    
+    switch(wheel) {
+      case(0):  // Front right wheel
+        return forward - strafe - rotate;
+      case(1): // Front left wheel
+        return forward + strafe + rotate;
+      case(2): // Back right wheel
+        return forward + strafe - rotate;
+      case(3): // Back left wheel
+        return forward - strafe + rotate;
+      default:
+        reportWarning("Invalid wheel choice in func 'setMechanumSpeed'. Use a number 0-4");
+        return 0;
+    }
+  }
+
+  protected void mechDriveCRW() {
+    // Idea:
         // Use weighted averages to set the controller's fine tuning
           // Find whether a stick axis is greater / less than the deadzone
           // If so, add its value to the total & flip a boolean
           // Divide each stick's value by the total, then multiply the value with the previous result
           // Multiply the stick values by the weight value
+    
+    stick_LX = m_stick.getLeftX() * STICK_MOD;
+    stick_LY = m_stick.getLeftY() * STICK_MOD * -1;
+    stick_RX = m_stick.getRightX() * STICK_MOD;
+          
+    boolean isForward = checkDeadzone(m_stick.getLeftY());
+    boolean isStrafe = checkDeadzone(m_stick.getLeftX());
+    boolean isRotate = checkDeadzone(m_stick.getRightX());
+    
+    stickTotal += incStickTotal(isForward);
+    stickTotal += incStickTotal(isStrafe);
+    stickTotal += incStickTotal(isRotate);
+          
+    // These currently can return numbers like NAN, -INFINITY and INFINITY. It doesn't break driving, but it's good to know
+    leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, -1, 1);   // Map anywhere between -3 & 3, -2 & 2, -1 & 1 to -1 & 1
+    leftX_Fine = stickFine(m_stick.getLeftX(), stickTotal * -1, stickTotal, -1, 1);   
+    rightX_Fine = stickFine(m_stick.getRightX(), stickTotal * -1, stickTotal, -1, 1);
+          
+    accelValues[FORWARD] = setAccelVals(stick_LY, powVals[FORWARD]);
+    accelValues[STRAFE] = setAccelVals(stick_LX, powVals[STRAFE]);
+    accelValues[ROTATE] = setAccelVals(stick_RX, powVals[ROTATE]);
+    
+    powVals[FORWARD] = setPowVals(accelValues[FORWARD], leftY_Fine, isForward);
+    powVals[STRAFE] = setPowVals(accelValues[STRAFE], leftX_Fine, isStrafe);
+    powVals[ROTATE] = setPowVals(accelValues[ROTATE], rightX_Fine, isRotate);
+          
+    reportWarning("Forward Power: " + powVals[FORWARD]);
+    reportWarning("Strafe Power: " + powVals[STRAFE]);
+    reportWarning("Rotate Power: " + powVals[ROTATE]);
+    
+    frontRight.set(setMechanumSpeed(powVals[FORWARD], powVals[STRAFE], powVals[ROTATE], 0));
+    frontLeft.set(setMechanumSpeed(powVals[FORWARD], powVals[STRAFE], powVals[ROTATE], 1));
+    rearRight.set(setMechanumSpeed(powVals[FORWARD], powVals[STRAFE], powVals[ROTATE], 2));
+    rearLeft.set(setMechanumSpeed(powVals[FORWARD], powVals[STRAFE], powVals[ROTATE], 3));
+    
+    stickTotal = 0; // Reset stick total value so it doesn't skyrocket over time
+  }
 
-      frontRight.set((powVals[FORWARD] - powVals[STRAFE] - powVals[ROTATE]) );
-      frontLeft.set((powVals[FORWARD] + powVals[STRAFE] + powVals[ROTATE]) );
-      rearRight.set((powVals[FORWARD] + powVals[STRAFE] - powVals[ROTATE]) );
-      rearLeft.set((powVals[FORWARD] - powVals[STRAFE] + powVals[ROTATE]) );
-
-      stickTotal = 0; // Reset stick total value so it doesn't skyrocket over time
+  @Override
+  public void teleopPeriodic() {
+    if(debugMode == 0) {
+      mechDriveCRW();
     } else {
       debugHandle(debugMode);
     }
