@@ -29,7 +29,7 @@ public class OmniMech extends TimedRobot {
   private static final int kDriveChannel = 0;
   private MechanumXboxController driveController;
 
-  private static boolean debugMode = false;
+  private static boolean debug = false;
 
   @Override
   public void robotInit() {
