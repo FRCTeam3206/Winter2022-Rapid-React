@@ -106,9 +106,10 @@ public class omnimech extends TimedRobot {
     }
   }
 
-  protected double stickFine(double stickVal, double min, double max, double lower, double upper) {
+  protected double stickFine(double stickVal, double minVal, double maxVal, double lowerBound, double upperBound) {
     // Return the fine conversion value of a variable linear transformation
-    return ((upper * stickVal) - (upper * min) - (lower * stickVal) + (2 * lower * min) - (lower * max) / (max - min));
+    // Credit: Simone on StackExchange: https://stats.stackexchange.com/a/178629
+    return (upperBound - lowerBound) * ((stickVal - minVal) / (maxVal - minVal)) + lowerBound;
   }
 
   protected boolean checkDeadzone(double stickIn) {
@@ -138,7 +139,7 @@ public class omnimech extends TimedRobot {
       stickTotal += incStickTotal(isStrafe);
       stickTotal += incStickTotal(isRotate);
       
-      leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, -1, 1);   // Map values between -3 and 3 to -1 and 1
+      leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, -1, 1);   // Map -3 -> 3 to -1 -> 1
       leftX_Fine = stickFine(m_stick.getLeftX(), stickTotal * -1, stickTotal, -1, 1);   
       rightX_Fine = stickFine(m_stick.getRightX(), stickTotal * -1, stickTotal, -1, 1);
       
