@@ -138,9 +138,9 @@ public class omnimech extends TimedRobot {
       stickTotal += incStickTotal(isStrafe);
       stickTotal += incStickTotal(isRotate);
       
-      leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, stickTotal * -1, stickTotal);   // Yes, this repeats values. This is because the min and max happen to also be the upper and lower bounds of the dataset
-      leftX_Fine = stickFine(m_stick.getLeftX(), stickTotal * -1, stickTotal, stickTotal * -1, stickTotal);   // It's not a huge problem, but it can be confusing if you don't understand why the values are there
-      rightX_Fine = stickFine(m_stick.getRightX(), stickTotal * -1, stickTotal, stickTotal * -1, stickTotal);
+      leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, -1, 1);   // Map values between -3 and 3 to -1 and 1
+      leftX_Fine = stickFine(m_stick.getLeftX(), stickTotal * -1, stickTotal, -1, 1);   
+      rightX_Fine = stickFine(m_stick.getRightX(), stickTotal * -1, stickTotal, -1, 1);
       
       /*
       edu.wpi.first.wpilibj.DriverStation.reportWarning("Left Stick Y Fine: " + leftY_Fine, false);
