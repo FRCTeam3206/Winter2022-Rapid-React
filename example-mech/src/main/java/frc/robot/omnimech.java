@@ -51,10 +51,6 @@ public class omnimech extends TimedRobot {
   private double stick_LY = 0;
   private double stick_RX = 0;
 
-  private int fakeBool_Forward = 0;
-  private int fakeBool_Strafe = 0;
-  private int fakeBool_Rotate = 0;
-
   private double leftX_Fine = 0;
   private double leftY_Fine = 0;
   private double rightX_Fine = 0;
@@ -109,7 +105,8 @@ public class omnimech extends TimedRobot {
   protected double stickFine(double stickVal, double minVal, double maxVal, double lowerBound, double upperBound) {
     // Return the fine conversion value of a variable linear transformation
     // Credit: Simone on StackExchange: https://stats.stackexchange.com/a/178629
-    return (upperBound - lowerBound) * ((stickVal - minVal) / (maxVal - minVal)) + lowerBound;
+    double result = (upperBound - lowerBound) * ((stickVal - minVal) / (maxVal - minVal)) + lowerBound;
+    return (result > upperBound || result < lowerBound) ? 0 : result; // Check if the values aren't crazy. IDK how to filter out NaN without also getting werid numbers
   }
 
   protected boolean checkDeadzone(double stickIn) {
@@ -122,6 +119,18 @@ public class omnimech extends TimedRobot {
 
   protected void reportWarning(String msg) {
     edu.wpi.first.wpilibj.DriverStation.reportWarning(msg, false);
+  }
+
+  protected double setPowVals(double accel, double fine, boolean isDirection) {
+    if(isDirection == true) {
+      return accel * fine;
+    } else {
+      return 0;
+    }
+  }
+
+  protected double setAccelVals(double stickVal, double lastPow) {
+    return (stickVal + lastPow * ACCEL_CO - lastPow) / ACCEL_CO;
   }
 
   @Override
@@ -139,42 +148,54 @@ public class omnimech extends TimedRobot {
       stickTotal += incStickTotal(isStrafe);
       stickTotal += incStickTotal(isRotate);
       
+      // These currently can return numbers like NAN, -INFINITY and INFINITY. It doesn't break driving, but it's good to know
       leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, -1, 1);   // Map -3 -> 3 to -1 -> 1
       leftX_Fine = stickFine(m_stick.getLeftX(), stickTotal * -1, stickTotal, -1, 1);   
       rightX_Fine = stickFine(m_stick.getRightX(), stickTotal * -1, stickTotal, -1, 1);
-      
-      /*
-      edu.wpi.first.wpilibj.DriverStation.reportWarning("Left Stick Y Fine: " + leftY_Fine, false);
-      edu.wpi.first.wpilibj.DriverStation.reportWarning("Left Stick X Fine: " + leftX_Fine, false);
-      edu.wpi.first.wpilibj.DriverStation.reportWarning("Right Stick X Fine: " + rightX_Fine, false);
-      */
 
+      /*
       reportWarning("Left Stick Y Fine: " + leftY_Fine);
       reportWarning("Left Stick X Fine: " + leftX_Fine);
       reportWarning("Right Stick X Fine: " + rightX_Fine);
+      */
 
       // Accelleration formula so the motor speed isn't crazy right off the bat
         // This fomrula is simplified from: 1/k * input + (k - 1)/k * old motor pow = new motor pow
+      /*
       accelValues[FORWARD] = (stick_LY + powVals[FORWARD] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
       accelValues[STRAFE] = (stick_LX + powVals[STRAFE] * ACCEL_CO - powVals[FORWARD]) / ACCEL_CO;
       accelValues[ROTATE] = (stick_RX + powVals[ROTATE] * ACCEL_CO - powVals[ROTATE]) / ACCEL_CO;
-        
-      // Automatically "break" when the driver isn't pressing anything
-      if(fakeBool_Forward == 1) {
+      */
+      
+      accelValues[FORWARD] = setAccelVals(stick_LY, powVals[FORWARD]);
+      accelValues[STRAFE] = setAccelVals(stick_LX, powVals[STRAFE]);
+      accelValues[ROTATE] = setAccelVals(stick_RX, powVals[ROTATE]);
+
+      /*
+      if(isForward = true) {
         powVals[FORWARD] = accelValues[FORWARD] * leftY_Fine;
       } else {
         powVals[FORWARD] = 0;
       }
-      if(fakeBool_Strafe == 1) {
+      if(isStrafe == true) {
         powVals[STRAFE] = accelValues[STRAFE] * leftX_Fine;
       } else {
         powVals[STRAFE] = 0;
       }
-      if(fakeBool_Rotate == 1) {
+      if(isRotate == true) {
         powVals[ROTATE] = accelValues[ROTATE] * rightX_Fine;
       } else {
         powVals[ROTATE] = 0;
       }
+      */
+
+      powVals[FORWARD] = setPowVals(accelValues[FORWARD], leftY_Fine, isForward);
+      powVals[STRAFE] = setPowVals(accelValues[STRAFE], leftX_Fine, isStrafe);
+      powVals[ROTATE] = setPowVals(accelValues[ROTATE], rightX_Fine, isRotate);
+      
+      reportWarning("Forward Power: " + powVals[FORWARD]);
+      reportWarning("Strafe Power: " + powVals[STRAFE]);
+      reportWarning("Rotate Power: " + powVals[ROTATE]);
 
       // Idea:
         // Use weighted averages to set the controller's fine tuning
