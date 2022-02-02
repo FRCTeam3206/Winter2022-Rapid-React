@@ -6,8 +6,6 @@ package frc.robot;
 
 import java.lang.System;
 
-import org.opencv.features2d.FlannBasedMatcher;
-
 import edu.wpi.first.wpilibj.DriverStation;
 
 //import edu.wpi.first.wpilibj.Joystick;
@@ -108,6 +106,23 @@ public class omnimech extends TimedRobot {
     }
   }
 
+  protected double stickFine(double stickVal, double min, double max, double lower, double upper) {
+    // Return the fine conversion value of a variable linear transformation
+    return ((upper * stickVal) - (upper * min) - (lower * stickVal) + (2 * lower * min) - (lower * max) / (max - min));
+  }
+
+  protected boolean checkDeadzone(double stickIn) {
+    return (stickIn >= STICK_DEADZONE || stickIn <= STICK_DEADZONE * -1) ? true : false;
+  }
+
+  protected int incStickTotal(boolean isDirection) {
+    return (isDirection == true) ? 1 : 0;
+  }
+
+  protected void reportWarning(String msg) {
+    edu.wpi.first.wpilibj.DriverStation.reportWarning(msg, false);
+  }
+
   @Override
   public void teleopPeriodic() {
     if(debugMode == 0) {
@@ -115,34 +130,27 @@ public class omnimech extends TimedRobot {
       stick_LY = m_stick.getLeftY() * STICK_MOD * -1;
       stick_RX = m_stick.getRightX() * STICK_MOD;
       
-      fakeBool_Forward = (m_stick.getLeftY() >= STICK_DEADZONE || m_stick.getLeftY() <= -1 * STICK_DEADZONE) ? 1 : 0;   // Set the fake boolean to "true" or "false" on whether the stick is outside of the deadband
-      fakeBool_Strafe = (m_stick.getLeftX() >= STICK_DEADZONE || m_stick.getLeftX() <= -1 * STICK_DEADZONE) ? 1 : 0;    // --
-      fakeBool_Rotate = (m_stick.getRightX() >= STICK_DEADZONE || m_stick.getRightX() <= -1 * STICK_DEADZONE) ? 1 : 0;  // --
+      boolean isForward = checkDeadzone(m_stick.getLeftY());
+      boolean isStrafe = checkDeadzone(m_stick.getLeftX());
+      boolean isRotate = checkDeadzone(m_stick.getRightX());
 
-      if(fakeBool_Forward == 1) {
-        stickTotal += realValue(m_stick.getLeftY());
-      }
-      if(fakeBool_Strafe == 1) {
-        stickTotal += realValue(m_stick.getLeftX());
-      }
-      if(fakeBool_Rotate == 1) {
-        stickTotal += realValue(m_stick.getRightX());
-      }
-
-      /*  This is a good idea, yet a bad implementation
-      leftY_Fine = m_stick.getLeftY() * (realValue(m_stick.getLeftY()) / stickTotal) * fakeBool_Forward;
-      leftX_Fine = m_stick.getLeftX() * (realValue(m_stick.getLeftX()) / stickTotal) * fakeBool_Strafe;
-      rightX_Fine = m_stick.getRightX() * (realValue(m_stick.getRightX()) / stickTotal) * fakeBool_Rotate;
-      */
-
-      leftY_Fine = m_stick.getLeftY() * (m_stick.getLeftY() / stickTotal);
-      leftX_Fine = m_stick.getLeftX() * (m_stick.getLeftX() / stickTotal);
-      rightX_Fine = m_stick.getRightX() * (m_stick.getRightX() / stickTotal);
-
+      stickTotal += incStickTotal(isForward);
+      stickTotal += incStickTotal(isStrafe);
+      stickTotal += incStickTotal(isRotate);
+      
+      leftY_Fine = stickFine(m_stick.getLeftY(), stickTotal * -1, stickTotal, stickTotal * -1, stickTotal);   // Yes, this repeats values. This is because the min and max happen to also be the upper and lower bounds of the dataset
+      leftX_Fine = stickFine(m_stick.getLeftX(), stickTotal * -1, stickTotal, stickTotal * -1, stickTotal);   // It's not a huge problem, but it can be confusing if you don't understand why the values are there
+      rightX_Fine = stickFine(m_stick.getRightX(), stickTotal * -1, stickTotal, stickTotal * -1, stickTotal);
+      
+      /*
       edu.wpi.first.wpilibj.DriverStation.reportWarning("Left Stick Y Fine: " + leftY_Fine, false);
       edu.wpi.first.wpilibj.DriverStation.reportWarning("Left Stick X Fine: " + leftX_Fine, false);
       edu.wpi.first.wpilibj.DriverStation.reportWarning("Right Stick X Fine: " + rightX_Fine, false);
+      */
 
+      reportWarning("Left Stick Y Fine: " + leftY_Fine);
+      reportWarning("Left Stick X Fine: " + leftX_Fine);
+      reportWarning("Right Stick X Fine: " + rightX_Fine);
 
       // Accelleration formula so the motor speed isn't crazy right off the bat
         // This fomrula is simplified from: 1/k * input + (k - 1)/k * old motor pow = new motor pow
@@ -174,12 +182,12 @@ public class omnimech extends TimedRobot {
           // Divide each stick's value by the total, then multiply the value with the previous result
           // Multiply the stick values by the weight value
 
-      frontRight.set(powVals[FORWARD] - powVals[STRAFE] - powVals[ROTATE]);
-      frontLeft.set(powVals[FORWARD] + powVals[STRAFE] + powVals[ROTATE]);
-      rearRight.set(powVals[FORWARD] + powVals[STRAFE] - powVals[ROTATE]);
-      rearLeft.set(powVals[FORWARD] - powVals[STRAFE] + powVals[ROTATE]);
+      frontRight.set((powVals[FORWARD] - powVals[STRAFE] - powVals[ROTATE]) );
+      frontLeft.set((powVals[FORWARD] + powVals[STRAFE] + powVals[ROTATE]) );
+      rearRight.set((powVals[FORWARD] + powVals[STRAFE] - powVals[ROTATE]) );
+      rearLeft.set((powVals[FORWARD] - powVals[STRAFE] + powVals[ROTATE]) );
 
-      //stickTotal = 0; // Reset stick total value so it doesn't skyrocket over time
+      stickTotal = 0; // Reset stick total value so it doesn't skyrocket over time
     } else {
       debugHandle(debugMode);
     }
