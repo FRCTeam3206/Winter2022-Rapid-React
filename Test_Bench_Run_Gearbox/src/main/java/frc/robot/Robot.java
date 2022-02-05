@@ -4,9 +4,17 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import edu.wpi.first.wpilibj.XboxController;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -20,6 +28,19 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  private static final int leadMotorID = 2;
+  private static final int followMotorID = 4;
+
+  private CANSparkMax m_leadMotor;
+  private CANSparkMax m_followMotor;
+  private RelativeEncoder m_encoder;
+
+  private XboxController m_joystick;
+
+  private double setpoint = 0.0;
+  private double increment = 0.02;
+
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -29,6 +50,18 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+
+    m_joystick = new XboxController(0);
+
+    m_leadMotor = new CANSparkMax(leadMotorID, MotorType.kBrushless);
+    m_followMotor = new CANSparkMax(followMotorID, MotorType.kBrushless);
+
+    m_leadMotor.restoreFactoryDefaults();
+    m_followMotor.restoreFactoryDefaults();
+
+    m_followMotor.follow(m_leadMotor);
+    m_encoder = m_leadMotor.getEncoder();
+
   }
 
   /**
@@ -39,7 +72,10 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    SmartDashboard.putNumber("Velocity (rpm)", m_encoder.getVelocity());
+    SmartDashboard.putNumber("Setpoint", setpoint);
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -78,7 +114,19 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    if (m_joystick.getBButtonPressed()) {
+      setpoint = 0.0;
+    } else if (m_joystick.getYButtonPressed()) {
+      setpoint += increment;
+    } else if (m_joystick.getAButtonPressed()) {
+      setpoint -= increment;
+    }
+    setpoint = MathUtil.clamp(setpoint, -1.0, 1.0);
+
+    m_leadMotor.set(setpoint);
+
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
