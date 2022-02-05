@@ -5,7 +5,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.controller.PIDController;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -28,7 +30,7 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rightLeadMotor;
   private CANSparkMax m_leftFollowMotor;
   private CANSparkMax m_rightFollowMotor;
-  public static final double TURN_TOLERANCE=3;//In Degrees
+  public static final double TURN_TOLERANCE=5;//In Degrees
   public static final double DRIVE_TOLERANCE=4;//In Inches
   public static final double MIN_SPEED=.6;
 
@@ -38,6 +40,9 @@ public class Robot extends TimedRobot {
   public static final double H1=39.5;
   public static final double H2=8*12+8;
   public static final double T0=Math.atan((H2-H1)/CAL_D)-CAL_T1;
+
+  public static PIDController pidDrive=new PIDController(1/(27*2), 1, 1);
+  public static PIDController pidRotate=new PIDController((1.0/27.0)*.7, .1, 0);
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -55,7 +60,7 @@ public class Robot extends TimedRobot {
 
     m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
     m_joystick = new XboxController(0);
-
+    
     CameraServer.startAutomaticCapture();
 
   }
@@ -64,11 +69,11 @@ public class Robot extends TimedRobot {
   double currLeft=0;
   
   @Override
-  public void teleopPeriodic() {
+  public void testPeriodic() {
     double forward=m_joystick.getLeftY()*.5;
     double turn=-m_joystick.getLeftX()*.7;
     if(m_joystick.getAButton()){
-      double[] vals=alignToTarget(72, true, true);
+      double[] vals=alignToTarget(12*5, true, false);
       forward=vals[0];
       turn=vals[1];
     }
@@ -101,10 +106,14 @@ public class Robot extends TimedRobot {
     int direction=0;
     double turn=0;
     double forward=0;
-    double dist=dist(table.getEntry("ty").getDouble(0.0));
-    double distOff=dist-72;
+    double distAway=dist(table.getEntry("ty").getDouble(0.0));
     double isOff=0;
     if(tv>.5){
+      forward=pidDrive.calculate(distAway,distance);
+      turn=pidRotate.calculate(tx,0);
+      SmartDashboard.putNumber("rotate", turn);
+      forward=0;
+      /*
       if(Math.abs(tx)>TURN_TOLERANCE&&shouldTurn){
         turn=-tx/22*.7;
         if(turn>0&&turn<MIN_SPEED)turn=MIN_SPEED;
@@ -125,6 +134,7 @@ public class Robot extends TimedRobot {
         }
         isOff=1;
       }
+      */
     }
     //System.out.println(forward+" "+distOff);
     return new double[]{forward,turn,1.0-isOff};
