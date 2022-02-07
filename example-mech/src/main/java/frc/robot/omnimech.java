@@ -34,7 +34,7 @@ public class omnimech extends TimedRobot {
   private VictorSP frontRight = new VictorSP(kFrontRightChannel);  // Front Right
   private VictorSP rearRight = new VictorSP(kRearRightChannel);     // Back Right
 
-  private static int debugMode = 3; // 0 for normal operation. Other numbers result in other functionality
+  private static int debugMode = 0; // 0 for normal operation. Other numbers result in other functionality
 
   private double accelValues[] = {0, 0, 0};
   private static int FORWARD = 0;
