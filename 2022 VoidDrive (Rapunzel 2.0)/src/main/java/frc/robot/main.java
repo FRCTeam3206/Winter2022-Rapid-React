@@ -15,11 +15,33 @@ public class main extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
-        double stick = _Joystick.getRawAxis(0);
-        _Spx0.set(ControlMode.PercentOutput, stick);
-        _Spx1.set(ControlMode.PercentOutput, stick);
-        _Spx2.set(ControlMode.PercentOutput, stick);
-        _Spx3.set(ControlMode.PercentOutput, stick);
+        double stickX = _Joystick.getRawAxis(0);
+        double stickY = _Joystick.getRawAxis(1);
+
+        _Spx2.follow(_Spx1);
+        _Spx3.follow(_Spx0);
+
+        stickY = stickY * -1;
+        
+        if (stickX > 0.10) {
+            // Turn Right
+            _Spx0.set(ControlMode.PercentOutput, stickX);
+            _Spx1.set(ControlMode.PercentOutput, stickX);
+        } else if (stickX < 0.10) {
+            // Turn Left
+            _Spx0.set(ControlMode.PercentOutput, stickX);
+            _Spx1.set(ControlMode.PercentOutput, stickX);
+        } else if (stickY > 0.10) {
+            // Move Forward
+            _Spx0.set(ControlMode.PercentOutput, -stickY);
+            _Spx1.set(ControlMode.PercentOutput, stickY);
+        } else if (stickY < 0.10) {
+            _Spx0.set(ControlMode.PercentOutput, stickY);
+            _Spx1.set(ControlMode.PercentOutput, -stickY);
+        } else {
+            _Spx0.set(ControlMode.PercentOutput, 0);
+            _Spx1.set(ControlMode.PercentOutput, 0);
+        }
 
     }
 }
