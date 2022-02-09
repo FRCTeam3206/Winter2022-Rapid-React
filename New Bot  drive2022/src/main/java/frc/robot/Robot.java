@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -48,15 +49,32 @@ public class Robot extends TimedRobot {
   String autoSelected;
 
   //the folliwing four lines are part of the original basic code
- 
+ /*
   private final PWMSparkMax m_leftMotor = new PWMSparkMax(0);
   private final PWMSparkMax m_rightMotor = new PWMSparkMax(1);
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
   private final Joystick m_stick = new Joystick(0);
+*/
 
+  // Joysticks
+  Joystick leftStick;
+  Joystick rightStick;
+
+ // Acceleration Limiting Variables
+ boolean accelerationLimiting = true;
+ double accelLimitedLeftGetY;
+ double accelLimitedRightGetY;
+ double accelLimitedSlideDrive;
+ double accelDriveKonstant = 6; // Change from 2-32. 32 is super slow to react, 2 is little improvement
+ double leftDriveCoef = .7;
+ double rightDriveCoef = .7;
+ double rightStickDeadband = .1;
+ double leftStickDeadband = .1;
+ double leftAdjusted;
+ double rightAdjusted;
 
   // DriveTrain
-  DifferentialDrive chewbreakaDrive;
+  DifferentialDrive newBotDrive;
   // Drivetrain Motors
   CANSparkMax leftFrontDrive;
   CANSparkMax rightFrontDrive;
@@ -70,7 +88,7 @@ public class Robot extends TimedRobot {
   double tLateTurn = 15;//longest time it takes to drive for any function
 
   Timer velocityTimer = new Timer();
-
+  
   // DriveTrain Pneumatics
   DoubleSolenoid driveSol = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, 0, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
@@ -79,11 +97,32 @@ public class Robot extends TimedRobot {
   RelativeEncoder leftEncoder;
   RelativeEncoder rightEncoder;
 
+  //Intake 
+  //values,motors,and motor controller types are subject to change
+  WPI_VictorSPX intakeMotor = new WPI_VictorSPX(5);
+  DoubleSolenoid intakeSol = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, 3, 4);
+  Timer intakeTimer = new Timer();
+  // Intake Toggle Variables
+  int intakeToggle = 0;
+  boolean intakeToggleStick;
+  boolean extakeToggleStick;
+  int extakeToggle = 0;
+  // Motor Speed
+  double intakeSpeed = .65;
+
+  //transport
+  WPI_TalonSRX frontBallTransport = new WPI_TalonSRX(10);
+  WPI_TalonSRX backBallTransport = new WPI_TalonSRX(11);
+  DigitalInput ballSwitch = new DigitalInput(3);
+
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
+
+    leftStick = new Joystick(0);
+    rightStick = new Joystick(1);
 
     leftFrontDrive = new CANSparkMax(1, MotorType.kBrushless);
     rightFrontDrive = new CANSparkMax(3, MotorType.kBrushless);
@@ -102,19 +141,29 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
 
-    chewbreakaDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    newBotDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
    
     //m_rightMotor is part of original code
-    m_rightMotor.setInverted(true);
+   // m_rightMotor.setInverted(true);
     
   }
 
   @Override
   public void teleopPeriodic() {
+
     // Drive with arcade drive.
     // That means that the Y axis drives forward
     // and backward, and the X turns left and right.
-    m_robotDrive.arcadeDrive(-m_stick.getY(), m_stick.getX());
+    newBotDrive.arcadeDrive(-rightStick.getY(), rightStick.getX());
+
+//joystick drive
+    if (rightStick.getRawButton(1)) { // Low Speed
+      driveSol.set(Value.kForward);
+    } else if (rightStick.getRawButton(2)) { // High Speed
+      driveSol.set(Value.kReverse);
+    } else {
+      driveSol.set(Value.kOff); // Ensures Pistons are Off
+    }
   }
 
   public void Drive(double distance) {
@@ -124,7 +173,7 @@ public class Robot extends TimedRobot {
     DriveLabel: if (distance > 0) {
       while (desiredDistance > distanceTraveled) {
         distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-        chewbreakaDrive.tankDrive(-.6, -.6);
+        newBotDrive.tankDrive(-.6, -.6);
         if (velocityTimer.get() >= tLateDrive) {
           break DriveLabel;
         }
@@ -132,15 +181,15 @@ public class Robot extends TimedRobot {
     } else if (distance < 0) {
       while (desiredDistance < distanceTraveled) {
         distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-        chewbreakaDrive.tankDrive(.7, .7);
+        newBotDrive.tankDrive(.7, .7);
         if (velocityTimer.get() >= tLateDrive) {
           break DriveLabel;
         }
       }
     } else {
-      chewbreakaDrive.tankDrive(0, 0);
+      newBotDrive.tankDrive(0, 0);
     }
-    chewbreakaDrive.tankDrive(0, 0);
+    newBotDrive.tankDrive(0, 0);
   }
 
   @Override
