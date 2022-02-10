@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Compressor;
@@ -16,6 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.lang.Math;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -45,6 +45,14 @@ import edu.wpi.first.cscore.UsbCamera;
  */
 public class Robot extends TimedRobot {
 
+    // Drive Type
+    boolean XboxDrive = true;
+    // Joysticks
+    Joystick leftStick;
+    Joystick rightStick;
+    XboxController driveStick;  
+    XboxController weaponStick;
+  // Sendable Chooser
   SendableChooser<String> autoChoices = new SendableChooser<>();
   String autoSelected;
 
@@ -55,11 +63,6 @@ public class Robot extends TimedRobot {
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
   private final Joystick m_stick = new Joystick(0);
 */
-
-  // Joysticks
-  Joystick leftStick;
-  Joystick rightStick;
-
  // Acceleration Limiting Variables
  boolean accelerationLimiting = true;
  double accelLimitedLeftGetY;
@@ -88,7 +91,7 @@ public class Robot extends TimedRobot {
   double tLateTurn = 15;//longest time it takes to drive for any function
 
   Timer velocityTimer = new Timer();
-  
+
   // DriveTrain Pneumatics
   DoubleSolenoid driveSol = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, 0, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
@@ -96,6 +99,17 @@ public class Robot extends TimedRobot {
   // DriveTrain Encoders
   RelativeEncoder leftEncoder;
   RelativeEncoder rightEncoder;
+
+  // Drive Variables
+  double leftDriveSpeed;
+  double rightDriveSpeed;
+  double triggerDeadzone = .1;
+  int desiredDirection;
+  double powerNumber = 3;
+  double primeConstant = .8; // This needs to be between 0 and 1. 0 means that the drive train is just x^3
+                             // and 1 means that it is just x. 1 is more sensitive and 0 is less sensitive.
+  double rightPrime;
+  double leftPrime;
 
   //Intake 
   //values,motors,and motor controller types are subject to change
@@ -115,14 +129,32 @@ public class Robot extends TimedRobot {
   WPI_TalonSRX backBallTransport = new WPI_TalonSRX(11);
   DigitalInput ballSwitch = new DigitalInput(3);
 
+  //shooter
+  int shooterToggle = 0;
+  boolean shooterToggleStick;
+  boolean shooter2ToggleStick;
+  int shooter2Toggle = 0;
+
+  //Alliance information
+ // public static final DriverStation.Alliance ValueOf(String red blue);
+
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
 
-    leftStick = new Joystick(0);
-    rightStick = new Joystick(1);
+    if (XboxDrive == false) {
+      leftStick = new Joystick(0);
+      rightStick = new Joystick(1);
+      weaponStick = new XboxController(2);
+    } else {
+      driveStick = new XboxController(0);
+      weaponStick = new XboxController(2);
+    }
+
+    // For later notes: assign buttons for when we are on red/blue alliance so that we can 
+    //identify what color balls we have in transport and whether to shoot them or to get rid of them
 
     leftFrontDrive = new CANSparkMax(1, MotorType.kBrushless);
     rightFrontDrive = new CANSparkMax(3, MotorType.kBrushless);
@@ -156,6 +188,22 @@ public class Robot extends TimedRobot {
     // and backward, and the X turns left and right.
     newBotDrive.arcadeDrive(-rightStick.getY(), rightStick.getX());
 
+     // Acceleration Limiting
+     leftPrime = primeConstant * driveStick.getLeftY()
+     + (1 - primeConstant) * Math.pow(driveStick.getLeftY(), 3); // The formula that this is making is
+ rightPrime = -(primeConstant * driveStick.getRightY()
+     + (1 - primeConstant) * Math.pow(driveStick.getRightY(), 3));
+
+ if (accelerationLimiting == true) {
+   accelLimitedLeftGetY = leftPrime / accelDriveKonstant
+       + accelLimitedLeftGetY * (accelDriveKonstant - 1) / accelDriveKonstant;
+   accelLimitedRightGetY = rightPrime / accelDriveKonstant
+       + accelLimitedRightGetY * (accelDriveKonstant - 1) / accelDriveKonstant;
+   newBotDrive.tankDrive(accelLimitedLeftGetY * leftDriveCoef, accelLimitedRightGetY * rightDriveCoef);
+ } else {
+   newBotDrive.tankDrive(driveStick.getLeftY() * leftDriveCoef,
+       driveStick.getRightY() * rightDriveCoef); // No acceleration limiting.
+ }
 //joystick drive
     if (rightStick.getRawButton(1)) { // Low Speed
       driveSol.set(Value.kForward);
