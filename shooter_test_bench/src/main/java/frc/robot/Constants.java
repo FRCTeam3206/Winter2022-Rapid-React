@@ -1,11 +1,11 @@
 package frc.robot;
 
 public class Constants {
-    public static final double sparkmax_kP = 6e-15;
+    public static final double sparkmax_kP = 6e-5;
     public static final double sparkmax_kI = 0;
     public static final double sparkmax_kD = 0;
     public static final double sparkmax_kIz = 0;
-    public static final double sparkmax_kFF = 0.000015;
+    public static final double sparkmax_kFF = 0.0003;
     public static final double sparkmax_kMaxOut = 1;
     public static final double sparkmax_kMinOut = -1;
 

@@ -30,33 +30,39 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
  * to the Dashboard.
  */
 public class Robot extends TimedRobot {
-  private static final int kMotorPort = 1;
+  private static final int kShooterPort = 1;
+  private static final int kHoodPort = 2;
   private static final int kJoystickPort = 0;
-  // private static final int kEncoderPortA = 0;
-  // private static final int kEncoderPortB = 1;
+
   private static final double increment = 0.02;
 
-  private CANSparkMax m_motor;
   private XboxController m_joystick;
+
+  private CANSparkMax m_shooter;
   private SparkMaxPIDController m_pidController;
   private RelativeEncoder m_encoder;
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
-  private double setpoint = 0;
+  private double shooterSetPoint = 0;
 
-  private WPI_TalonSRX _talon;
+  private WPI_TalonSRX m_hoodMotor;
 
 
   @Override
   public void robotInit() {
-    m_motor = new CANSparkMax(kMotorPort, MotorType.kBrushless);
+    shooterInit();
+    // hoodInit();
+  }
+
+  private void shooterInit() {
+    m_shooter = new CANSparkMax(kShooterPort, MotorType.kBrushless);
     m_joystick = new XboxController(kJoystickPort);
     // m_encoder = new Encoder(kEncoderPortA, kEncoderPortB);
 
-    m_motor.restoreFactoryDefaults();
+    m_shooter.restoreFactoryDefaults();
 
-    m_pidController = m_motor.getPIDController();
+    m_pidController = m_shooter.getPIDController();
 
-    m_encoder = m_motor.getEncoder();
+    m_encoder = m_shooter.getEncoder();
 
     // Use SetDistancePerPulse to set the multiplier for GetDistance
     // This is set up assuming a 6 inch wheel with a 360 CPR encoder.
@@ -87,47 +93,48 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Max Output", kMaxOutput);
     SmartDashboard.putNumber("Min Output", kMinOutput);
 
+  }
+
+  private void hoodInit() {
     //========================= Set up hood-angle controlling motor =========================//
-    _talon.configFactoryDefault();
+    m_hoodMotor.configFactoryDefault();
 		
 		/* Config the sensor used for Primary PID and sensor direction */
-        _talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 
-                                            Constants.kPIDLoopIdx,
-				                            Constants.kTimeoutMs);
+    m_hoodMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
 
 		/* Ensure sensor is positive when output is positive */
-		_talon.setSensorPhase(Constants.kSensorPhase);
+		m_hoodMotor.setSensorPhase(Constants.kSensorPhase);
 
 		/**
 		 * Set based on what direction you want forward/positive to be.
 		 * This does not affect sensor phase. 
 		 */ 
-		_talon.setInverted(Constants.kMotorInvert);
+		m_hoodMotor.setInverted(Constants.kMotorInvert);
 
 		/* Config the peak and nominal outputs, 12V means full */
-		_talon.configNominalOutputForward(0, Constants.kTimeoutMs);
-		_talon.configNominalOutputReverse(0, Constants.kTimeoutMs);
-		_talon.configPeakOutputForward(1, Constants.kTimeoutMs);
-		_talon.configPeakOutputReverse(-1, Constants.kTimeoutMs);
+		m_hoodMotor.configNominalOutputForward(0, Constants.kTimeoutMs);
+		m_hoodMotor.configNominalOutputReverse(0, Constants.kTimeoutMs);
+		m_hoodMotor.configPeakOutputForward(1, Constants.kTimeoutMs);
+		m_hoodMotor.configPeakOutputReverse(-1, Constants.kTimeoutMs);
 
 		/**
 		 * Config the allowable closed-loop error, Closed-Loop output will be
 		 * neutral within this range. See Table in Section 17.2.1 for native
 		 * units per rotation.
 		 */
-		_talon.configAllowableClosedloopError(0, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
+		m_hoodMotor.configAllowableClosedloopError(0, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
 
 		/* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
-		_talon.config_kF(Constants.kPIDLoopIdx, Constants.hood_kF, Constants.kTimeoutMs);
-		_talon.config_kP(Constants.kPIDLoopIdx, Constants.hood_kP, Constants.kTimeoutMs);
-		_talon.config_kI(Constants.kPIDLoopIdx, Constants.hood_kI, Constants.kTimeoutMs);
-		_talon.config_kD(Constants.kPIDLoopIdx, Constants.hood_kD, Constants.kTimeoutMs);
+		m_hoodMotor.config_kF(Constants.kPIDLoopIdx, Constants.hood_kF, Constants.kTimeoutMs);
+		m_hoodMotor.config_kP(Constants.kPIDLoopIdx, Constants.hood_kP, Constants.kTimeoutMs);
+		m_hoodMotor.config_kI(Constants.kPIDLoopIdx, Constants.hood_kI, Constants.kTimeoutMs);
+		m_hoodMotor.config_kD(Constants.kPIDLoopIdx, Constants.hood_kD, Constants.kTimeoutMs);
 
 		/**
 		 * Grab the 360 degree position of the MagEncoder's absolute
 		 * position, and intitally set the relative sensor to match.
 		 */
-		int absolutePosition = _talon.getSensorCollection().getPulseWidthPosition();
+		int absolutePosition = m_hoodMotor.getSensorCollection().getPulseWidthPosition();
 
 		/* Mask out overflows, keep bottom 12 bits */
 		absolutePosition &= 0xFFF;
@@ -135,8 +142,10 @@ public class Robot extends TimedRobot {
 		if (Constants.kMotorInvert) { absolutePosition *= -1; }
 		
 		/* Set the quadrature (relative) sensor to match absolute */
-		_talon.setSelectedSensorPosition(absolutePosition, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
+		m_hoodMotor.setSelectedSensorPosition(absolutePosition, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
+    
   }
+
 
   /*
    * The RobotPeriodic function is called every control packet no matter the
@@ -149,6 +158,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    shooterPeriodic();
+    // hoodPeriodic();
+    
+		// double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
+		// m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
+  }
+
+  private void shooterPeriodic() {
     // read PID coefficients from SmartDashboard
     double p = SmartDashboard.getNumber("P Gain", 0);
     double i = SmartDashboard.getNumber("I Gain", 0);
@@ -183,25 +200,25 @@ public class Robot extends TimedRobot {
      *  com.revrobotics.CANSparkMax.ControlType.kVelocity
      *  com.revrobotics.CANSparkMax.ControlType.kVoltage
      */
-    //double setPoint = -m_joystick.getRightY()*maxRPM;
+    
     if (m_joystick.getBButtonPressed()) {
-      setpoint = 0.0;
+      shooterSetPoint = 0.0;
     } else if (m_joystick.getYButtonPressed()) {
-      setpoint += increment;
+      shooterSetPoint += increment;
     } else if (m_joystick.getAButtonPressed()) {
-      setpoint -= increment;
+      shooterSetPoint -= increment;
     }
-    setpoint = MathUtil.clamp(setpoint, kMinOutput, kMaxOutput);
+    shooterSetPoint = MathUtil.clamp(shooterSetPoint, kMinOutput, kMaxOutput);
 
-    double rpm_target = setpoint*maxRPM;
+    double rpm_target = shooterSetPoint*maxRPM;
 
     m_pidController.setReference(rpm_target, CANSparkMax.ControlType.kVelocity);
     
-    SmartDashboard.putNumber("SetPoint", setpoint);
+    SmartDashboard.putNumber("SetPoint", shooterSetPoint);
     SmartDashboard.putNumber("RPM_Target", rpm_target);
     SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
     
-		double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
-		_talon.set(ControlMode.Position, targetPositionRotations);
+		// double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
+		// m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
   }
 }
