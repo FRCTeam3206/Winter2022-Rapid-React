@@ -38,20 +38,20 @@ public class Robot extends TimedRobot {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    m_leftLeadMotor = new CANSparkMax(leftLeadDeviceID, MotorType.kBrushed);
-    m_leftFollowMotor = new CANSparkMax(leftFollowDeviceID, MotorType.kBrushed);
-    m_rightLeadMotor = new CANSparkMax(rightLeadDeviceID, MotorType.kBrushed);
-    m_rightFollowMotor = new CANSparkMax(rightFollowDeviceID, MotorType.kBrushed);
+    m_leftLeadMotor = new CANSparkMax(leftLeadDeviceID, MotorType.kBrushless);
+    m_leftFollowMotor = new CANSparkMax(leftFollowDeviceID, MotorType.kBrushless);
+    m_rightLeadMotor = new CANSparkMax(rightLeadDeviceID, MotorType.kBrushless);
+    m_rightFollowMotor = new CANSparkMax(rightFollowDeviceID, MotorType.kBrushless);
 
     m_leftFollowMotor.follow(m_leftLeadMotor);
     m_rightFollowMotor.follow(m_rightLeadMotor);
 
     m_leftLeadMotor.setInverted(true);
 
-    m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
+    // m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
     m_joystick = new XboxController(0);
 
-    CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
 
     lastTime=System.currentTimeMillis();
   }
@@ -64,7 +64,9 @@ public class Robot extends TimedRobot {
     //for acceleration limiting(uncomplete)
      double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
      double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
-    m_myRobot.tankDrive(rightInput, leftInput);
+     m_leftLeadMotor.set(leftInput);
+     m_rightLeadMotor.set(rightInput);
+    // m_myRobot.tankDrive(rightInput, leftInput);
   }
   
   private double cut(double val){
