@@ -34,6 +34,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.cscore.UsbCamera;
+//import com.analog.adis16448.frc.ADIS16448_IMU;
 
 //import edu.wpi.first.cameraserver.CameraServer;
 //import edu.wpi.first.wpilibj.AddressableLED;
@@ -46,12 +47,13 @@ import edu.wpi.first.cscore.UsbCamera;
 public class Robot extends TimedRobot {
 
     // Drive Type
-    boolean XboxDrive = true;
+    //boolean XboxDrive = true;
     // Joysticks
     Joystick leftStick;
     Joystick rightStick;
-    XboxController driveStick;  
-    XboxController weaponStick;
+    //XboxController driveStick;  
+    //XboxController weaponStick;
+
   // Sendable Chooser
   SendableChooser<String> autoChoices = new SendableChooser<>();
   String autoSelected;
@@ -77,7 +79,7 @@ public class Robot extends TimedRobot {
  double rightAdjusted;
 
   // DriveTrain
-  DifferentialDrive newBotDrive;
+  DifferentialDrive morpheusDrive;
   // Drivetrain Motors
   CANSparkMax leftFrontDrive;
   CANSparkMax rightFrontDrive;
@@ -88,7 +90,7 @@ public class Robot extends TimedRobot {
   double desiredDistance;
   double distanceTraveled;
   double tLateDrive = 18;//longest time it takes to drive for any function
-  double tLateTurn = 15;//longest time it takes to drive for any function
+  double tLateTurn = 15;//longest time it takes to turn for any function
 
   Timer velocityTimer = new Timer();
 
@@ -128,30 +130,32 @@ public class Robot extends TimedRobot {
   WPI_TalonSRX frontBallTransport = new WPI_TalonSRX(10);
   WPI_TalonSRX backBallTransport = new WPI_TalonSRX(11);
   DigitalInput ballSwitch = new DigitalInput(3);
+  double ballCount = 0; //this is the initial # of balls in transport at the biginning of a match
+  double ballMagScale = .00110390625;// (1/4096 * 3.14 * 1.972) scaled to inches instead
+  double ballDesiredDistance = 5.5;
+  double ballDistanceTraveled;
+  int ballToggle = 0;
+  boolean ballToggleButton;
 
-  //shooter
+
+  //shooter 
   int shooterToggle = 0;
   boolean shooterToggleStick;
   boolean shooter2ToggleStick;
   int shooter2Toggle = 0;
+  double hoodAngle; //manual shooting
+  double shooterSpeed; //manual shooting
+  boolean shootingStyle; //automated shooting (limelight) vs. manual shooting (slider value)
 
-  //Alliance information
- // public static final DriverStation.Alliance ValueOf(String red blue);
 
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-
-    if (XboxDrive == false) {
+    morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
       leftStick = new Joystick(0);
       rightStick = new Joystick(1);
-      weaponStick = new XboxController(2);
-    } else {
-      driveStick = new XboxController(0);
-      weaponStick = new XboxController(2);
-    }
 
     // For later notes: assign buttons for when we are on red/blue alliance so that we can 
     //identify what color balls we have in transport and whether to shoot them or to get rid of them
@@ -170,10 +174,21 @@ public class Robot extends TimedRobot {
     leftEncoder.setPosition(0);
     rightEncoder.setPosition(0);
 
+    autoChoices.setDefaultOption("AutoLine", "AutoLine");
+    autoChoices.addOption("BallPickup", "BallPickup");
+    autoChoices.addOption("Shoot", "Shoot");
+
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
 
-    newBotDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    //this allows the driver to manually move transport forward and backward
+    backBallTransport.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
+    backBallTransport.configNominalOutputForward(0, 30);
+    backBallTransport.configNominalOutputReverse(0, 30);
+    backBallTransport.configPeakOutputForward(1, 30);
+    backBallTransport.configPeakOutputReverse(-1, 30);
+
+    morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
    
     //m_rightMotor is part of original code
    // m_rightMotor.setInverted(true);
@@ -182,29 +197,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-
-    // Drive with arcade drive.
-    // That means that the Y axis drives forward
-    // and backward, and the X turns left and right.
-    newBotDrive.arcadeDrive(-rightStick.getY(), rightStick.getX());
-
-     // Acceleration Limiting
-     leftPrime = primeConstant * driveStick.getLeftY()
-     + (1 - primeConstant) * Math.pow(driveStick.getLeftY(), 3); // The formula that this is making is
- rightPrime = -(primeConstant * driveStick.getRightY()
-     + (1 - primeConstant) * Math.pow(driveStick.getRightY(), 3));
-
- if (accelerationLimiting == true) {
-   accelLimitedLeftGetY = leftPrime / accelDriveKonstant
-       + accelLimitedLeftGetY * (accelDriveKonstant - 1) / accelDriveKonstant;
-   accelLimitedRightGetY = rightPrime / accelDriveKonstant
-       + accelLimitedRightGetY * (accelDriveKonstant - 1) / accelDriveKonstant;
-   newBotDrive.tankDrive(accelLimitedLeftGetY * leftDriveCoef, accelLimitedRightGetY * rightDriveCoef);
- } else {
-   newBotDrive.tankDrive(driveStick.getLeftY() * leftDriveCoef,
-       driveStick.getRightY() * rightDriveCoef); // No acceleration limiting.
- }
-//joystick drive
+    //joystick drive
     if (rightStick.getRawButton(1)) { // Low Speed
       driveSol.set(Value.kForward);
     } else if (rightStick.getRawButton(2)) { // High Speed
@@ -212,8 +205,15 @@ public class Robot extends TimedRobot {
     } else {
       driveSol.set(Value.kOff); // Ensures Pistons are Off
     }
-  }
+    morpheusDrive.tankDrive(leftStick.getY(), rightStick.getY());
+    
+    //make toggle button to switch between automated shooting and manual shooting and have the value for 
+    //shooterSpeed only be taken into account when on manual
 
+    //Trigger is shoot on right
+
+    //intake/extake button assignments
+  }
   public void Drive(double distance) {
     distanceTraveled = leftEncoder.getPosition() * -1 / 12;
     desiredDistance = distance + distanceTraveled;
@@ -221,24 +221,84 @@ public class Robot extends TimedRobot {
     DriveLabel: if (distance > 0) {
       while (desiredDistance > distanceTraveled) {
         distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-        newBotDrive.tankDrive(-.6, -.6);
-        if (velocityTimer.get() >= tLateDrive) {
-          break DriveLabel;
-        }
-      }
-    } else if (distance < 0) {
-      while (desiredDistance < distanceTraveled) {
-        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-        newBotDrive.tankDrive(.7, .7);
-        if (velocityTimer.get() >= tLateDrive) {
-          break DriveLabel;
-        }
-      }
-    } else {
-      newBotDrive.tankDrive(0, 0);
+        ballToggleButton = ballSwitch.get();
+        morpheusDrive.tankDrive(-.6, -.6);
+     // Set Button to Integer Value
+     if (ballToggleButton == false && ballToggle == 0) { // First Press
+      ballToggle = 1; // If trigger is pressed and toggle hasn't been set yet/has cycled through then
+                      // toggle = 1
+
+    } else if (ballToggleButton == true && ballToggle == 1) { // First Release
+      ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
     }
-    newBotDrive.tankDrive(0, 0);
+    // Determine Piston Position Based on Integer Value
+    if (ballToggle == 1 || ballToggle == 2) { // Trigger is Pressed
+      if (frontBallTransport.getSelectedSensorPosition() * ballMagScale < ballDesiredDistance) {
+        frontBallTransport.set(ControlMode.PercentOutput, -.7);
+        backBallTransport.set(ControlMode.PercentOutput, -.7);
+      } else if (frontBallTransport.getSelectedSensorPosition() * ballMagScale > ballDesiredDistance) {
+        ballToggle = 0;
+        frontBallTransport.stopMotor();
+        backBallTransport.stopMotor();
+        frontBallTransport.setSelectedSensorPosition(0);
+      }
+    }
+    morpheusDrive.tankDrive(-.7, -.7);
+    if (velocityTimer.get() >= tLateDrive) {
+      break DriveLabel;
+    }
   }
+} else if (distance < 0) {
+  while (desiredDistance < distanceTraveled) {
+    distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+    ballToggleButton = ballSwitch.get();
+    // Set Button to Integer Value
+    if (ballToggleButton == false && ballToggle == 0) { // First Press
+      ballToggle = 1; // If trigger is pressed and toggle hasn't been set yet/has cycled through then
+                      // toggle = 1
+
+    } else if (ballToggleButton == true && ballToggle == 1) { // First Release
+      ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
+    }
+    // Determine Piston Position Based on Integer Value
+    if (ballToggle == 1 || ballToggle == 2) { // Trigger is Pressed
+      if (frontBallTransport.getSelectedSensorPosition() * ballMagScale < ballDesiredDistance) {
+        frontBallTransport.set(ControlMode.PercentOutput, -.7);
+        backBallTransport.set(ControlMode.PercentOutput, -.7);
+      } else if (frontBallTransport.getSelectedSensorPosition() * ballMagScale > ballDesiredDistance) {
+        ballToggle = 0;
+        frontBallTransport.stopMotor();
+        backBallTransport.stopMotor();
+        frontBallTransport.setSelectedSensorPosition(0);
+      }
+    }
+    morpheusDrive.tankDrive(.8, .8);
+    if (velocityTimer.get() >= tLateDrive) {
+      break DriveLabel;
+    }
+  }
+}
+}
+//have a default shooting setting to fall back on in case of limelight issues
+
+
+
+//the following are autonomous only commands
+public void BallPickup(){
+ //will need to put out intake (requires pneumatic stuffs)
+ //run motors to pull balls in
+ //run transport to hold balls in bot
+}
+
+public void Shoot(){
+ // THIS IS THE PRIORITY FOR AUTO
+ //move balls up to shooter
+ //turn on shooter motors
+ //find goal with limelight
+ //shoot based on location/distance and stuff
+ //know how many balls are in transport so it can know whether or not to keep going
+ 
+}
 
   @Override
   public void autonomousInit() {
@@ -248,26 +308,18 @@ public class Robot extends TimedRobot {
     driveSol.set(Value.kReverse);
     switch (autoSelected) {
     case "AutoLine":
-      Drive(5);
+      Drive(9); //will want to drive at least the length of the robot forward, must be fully off tarmac to get easy points
       break;
-      /*
-    case "Center Shot":
-      CenterShot();
+    case "BallPickup":
+      BallPickup();
       break;
-    case "Left Shot":
-      LeftShot();
-      break;
-    case "Right Shot":
-      RightShot();
-      break;
-    case "4Auto":
-      // 4Auto();
-      break;
-    default:
-      Drive(5);
-      break;
-      */
+    case "Shoot":
+      Shoot();
+      break;   
     }
+  }
+  public void autonomousPeriodic(){
+
   }
   }
 
