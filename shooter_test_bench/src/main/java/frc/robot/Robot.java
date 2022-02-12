@@ -34,7 +34,7 @@ public class Robot extends TimedRobot {
   private static final int kHoodPort = 2;
   private static final int kJoystickPort = 0;
 
-  private static final double increment = 0.02;
+  private static final double increment = 0.01;
 
   private XboxController m_joystick;
 
