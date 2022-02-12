@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -40,6 +43,8 @@ public class Robot extends TimedRobot {
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
   private double setpoint = 0;
 
+  private WPI_TalonSRX _talon;
+
 
   @Override
   public void robotInit() {
@@ -56,13 +61,13 @@ public class Robot extends TimedRobot {
     // Use SetDistancePerPulse to set the multiplier for GetDistance
     // This is set up assuming a 6 inch wheel with a 360 CPR encoder.
     // m_encoder.setDistancePerPulse((Math.PI * 6) / 360.0);
-    kP = 6e-5; 
-    kI = 0;
-    kD = 0; 
-    kIz = 0; 
-    kFF = 0.000015; 
-    kMaxOutput = 1; 
-    kMinOutput = -1;
+    kP = Constants.sparkmax_kP;
+    kI = Constants.sparkmax_kI;
+    kD = Constants.sparkmax_kD; 
+    kIz = Constants.sparkmax_kIz; 
+    kFF = Constants.sparkmax_kFF; 
+    kMaxOutput = Constants.sparkmax_kMaxOut; 
+    kMinOutput = Constants.sparkmax_kMinOut;
     maxRPM = 5700;
 
     // set PID coefficients
@@ -81,6 +86,56 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Feed Forward", kFF);
     SmartDashboard.putNumber("Max Output", kMaxOutput);
     SmartDashboard.putNumber("Min Output", kMinOutput);
+
+    //========================= Set up hood-angle controlling motor =========================//
+    _talon.configFactoryDefault();
+		
+		/* Config the sensor used for Primary PID and sensor direction */
+        _talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 
+                                            Constants.kPIDLoopIdx,
+				                            Constants.kTimeoutMs);
+
+		/* Ensure sensor is positive when output is positive */
+		_talon.setSensorPhase(Constants.kSensorPhase);
+
+		/**
+		 * Set based on what direction you want forward/positive to be.
+		 * This does not affect sensor phase. 
+		 */ 
+		_talon.setInverted(Constants.kMotorInvert);
+
+		/* Config the peak and nominal outputs, 12V means full */
+		_talon.configNominalOutputForward(0, Constants.kTimeoutMs);
+		_talon.configNominalOutputReverse(0, Constants.kTimeoutMs);
+		_talon.configPeakOutputForward(1, Constants.kTimeoutMs);
+		_talon.configPeakOutputReverse(-1, Constants.kTimeoutMs);
+
+		/**
+		 * Config the allowable closed-loop error, Closed-Loop output will be
+		 * neutral within this range. See Table in Section 17.2.1 for native
+		 * units per rotation.
+		 */
+		_talon.configAllowableClosedloopError(0, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
+
+		/* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
+		_talon.config_kF(Constants.kPIDLoopIdx, Constants.hood_kF, Constants.kTimeoutMs);
+		_talon.config_kP(Constants.kPIDLoopIdx, Constants.hood_kP, Constants.kTimeoutMs);
+		_talon.config_kI(Constants.kPIDLoopIdx, Constants.hood_kI, Constants.kTimeoutMs);
+		_talon.config_kD(Constants.kPIDLoopIdx, Constants.hood_kD, Constants.kTimeoutMs);
+
+		/**
+		 * Grab the 360 degree position of the MagEncoder's absolute
+		 * position, and intitally set the relative sensor to match.
+		 */
+		int absolutePosition = _talon.getSensorCollection().getPulseWidthPosition();
+
+		/* Mask out overflows, keep bottom 12 bits */
+		absolutePosition &= 0xFFF;
+		if (Constants.kSensorPhase) { absolutePosition *= -1; }
+		if (Constants.kMotorInvert) { absolutePosition *= -1; }
+		
+		/* Set the quadrature (relative) sensor to match absolute */
+		_talon.setSelectedSensorPosition(absolutePosition, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
   }
 
   /*
@@ -146,5 +201,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("RPM_Target", rpm_target);
     SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
     
+		double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
+		_talon.set(ControlMode.Position, targetPositionRotations);
   }
 }
