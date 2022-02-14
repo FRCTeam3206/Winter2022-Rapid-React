@@ -44,13 +44,14 @@ public class Robot extends TimedRobot {
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
   private double shooterSetPoint = 0;
 
-  private WPI_TalonSRX m_hoodMotor;
+  private WPI_TalonSRX m_hood;
+  public double kP_Hood, kI_Hood, kD_Hood, kFF_Hood;
 
 
   @Override
   public void robotInit() {
     shooterInit();
-    // hoodInit();
+    hoodInit();
   }
 
   private void shooterInit() {
@@ -85,56 +86,58 @@ public class Robot extends TimedRobot {
     m_pidController.setOutputRange(kMinOutput, kMaxOutput);
 
     // display PID coefficients on SmartDashboard
-    SmartDashboard.putNumber("P Gain", kP);
-    SmartDashboard.putNumber("I Gain", kI);
-    SmartDashboard.putNumber("D Gain", kD);
-    SmartDashboard.putNumber("I Zone", kIz);
-    SmartDashboard.putNumber("Feed Forward", kFF);
-    SmartDashboard.putNumber("Max Output", kMaxOutput);
-    SmartDashboard.putNumber("Min Output", kMinOutput);
+    SmartDashboard.putNumber("Shooter P Gain", kP);
+    SmartDashboard.putNumber("Shooter I Gain", kI);
+    SmartDashboard.putNumber("Shooter D Gain", kD);
+    SmartDashboard.putNumber("Shooter I Zone", kIz);
+    SmartDashboard.putNumber("Shooter Feed Forward", kFF);
+    SmartDashboard.putNumber("Shooter Max Output", kMaxOutput);
+    SmartDashboard.putNumber("Shooter Min Output", kMinOutput);
 
   }
 
   private void hoodInit() {
+    m_hood = new WPI_TalonSRX(kHoodPort);
+
     //========================= Set up hood-angle controlling motor =========================//
-    m_hoodMotor.configFactoryDefault();
+    m_hood.configFactoryDefault();
 		
 		/* Config the sensor used for Primary PID and sensor direction */
-    m_hoodMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
+    m_hood.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
 
 		/* Ensure sensor is positive when output is positive */
-		m_hoodMotor.setSensorPhase(Constants.kSensorPhase);
+		m_hood.setSensorPhase(Constants.kSensorPhase);
 
 		/**
 		 * Set based on what direction you want forward/positive to be.
 		 * This does not affect sensor phase. 
 		 */ 
-		m_hoodMotor.setInverted(Constants.kMotorInvert);
+		m_hood.setInverted(Constants.kMotorInvert);
 
 		/* Config the peak and nominal outputs, 12V means full */
-		m_hoodMotor.configNominalOutputForward(0, Constants.kTimeoutMs);
-		m_hoodMotor.configNominalOutputReverse(0, Constants.kTimeoutMs);
-		m_hoodMotor.configPeakOutputForward(1, Constants.kTimeoutMs);
-		m_hoodMotor.configPeakOutputReverse(-1, Constants.kTimeoutMs);
+		m_hood.configNominalOutputForward(0, Constants.kTimeoutMs);
+		m_hood.configNominalOutputReverse(0, Constants.kTimeoutMs);
+		m_hood.configPeakOutputForward(1, Constants.kTimeoutMs);
+		m_hood.configPeakOutputReverse(-1, Constants.kTimeoutMs);
 
 		/**
 		 * Config the allowable closed-loop error, Closed-Loop output will be
 		 * neutral within this range. See Table in Section 17.2.1 for native
 		 * units per rotation.
 		 */
-		m_hoodMotor.configAllowableClosedloopError(0, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
+		m_hood.configAllowableClosedloopError(0, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
 
 		/* Config Position Closed Loop gains in slot0, tsypically kF stays zero. */
-		m_hoodMotor.config_kF(Constants.kPIDLoopIdx, Constants.hood_kF, Constants.kTimeoutMs);
-		m_hoodMotor.config_kP(Constants.kPIDLoopIdx, Constants.hood_kP, Constants.kTimeoutMs);
-		m_hoodMotor.config_kI(Constants.kPIDLoopIdx, Constants.hood_kI, Constants.kTimeoutMs);
-		m_hoodMotor.config_kD(Constants.kPIDLoopIdx, Constants.hood_kD, Constants.kTimeoutMs);
+		m_hood.config_kF(Constants.kPIDLoopIdx, Constants.hood_kF, Constants.kTimeoutMs);
+		m_hood.config_kP(Constants.kPIDLoopIdx, Constants.hood_kP, Constants.kTimeoutMs);
+		m_hood.config_kI(Constants.kPIDLoopIdx, Constants.hood_kI, Constants.kTimeoutMs);
+		m_hood.config_kD(Constants.kPIDLoopIdx, Constants.hood_kD, Constants.kTimeoutMs);
 
 		/**
 		 * Grab the 360 degree position of the MagEncoder's absolute
 		 * position, and intitally set the relative sensor to match.
 		 */
-		int absolutePosition = m_hoodMotor.getSensorCollection().getPulseWidthPosition();
+		int absolutePosition = m_hood.getSensorCollection().getPulseWidthPosition();
 
 		/* Mask out overflows, keep bottom 12 bits */
 		absolutePosition &= 0xFFF;
@@ -142,7 +145,7 @@ public class Robot extends TimedRobot {
 		if (Constants.kMotorInvert) { absolutePosition *= -1; }
 		
 		/* Set the quadrature (relative) sensor to match absolute */
-		m_hoodMotor.setSelectedSensorPosition(absolutePosition, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
+		m_hood.setSelectedSensorPosition(absolutePosition, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
     
   }
 
