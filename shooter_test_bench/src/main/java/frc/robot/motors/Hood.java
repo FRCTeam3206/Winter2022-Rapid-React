@@ -88,6 +88,6 @@ public class Hood {
           }
         double targetPositionRotations =  pos * 10.0 * 4096;
         System.out.println(targetPositionRotations);
-		m_hoodMotor.set(ControlMode.Position, -targetPositionRotations);
+		    m_hoodMotor.set(ControlMode.Position, -targetPositionRotations);
     }
 }
