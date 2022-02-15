@@ -1,7 +1,7 @@
 package frc.robot;
 
 public class Constants {
-    public static final double sparkmax_kP = 6e-5;
+    public static final double sparkmax_kP = 8e-4;
     public static final double sparkmax_kI = 0;
     public static final double sparkmax_kD = 0;
     public static final double sparkmax_kIz = 0;
@@ -9,9 +9,9 @@ public class Constants {
     public static final double sparkmax_kMaxOut = 1;
     public static final double sparkmax_kMinOut = -1;
 
-    public static final double hood_kP = 0.15;
+    public static final double hood_kP = 0.01;
     public static final double hood_kI = 0;
-    public static final double hood_kD = 1;
+    public static final double hood_kD = 0;
     public static final double hood_kF = 0;
     public static final int hood_kIz = 0;
     public static final double hood_kMaxOut = 1;
