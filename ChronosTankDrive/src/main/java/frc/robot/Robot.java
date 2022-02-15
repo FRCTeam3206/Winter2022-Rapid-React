@@ -5,12 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.cameraserver.CameraServer;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -20,7 +17,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
  */
 
 public class Robot extends TimedRobot {
-  private DifferentialDrive m_myRobot;
+  private DifferentialDrive driveTrain;
   private XboxController m_joystick;
   private static final int leftLeadDeviceID = 1; 
   private static final int rightLeadDeviceID = 2;
@@ -30,8 +27,6 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rightLeadMotor;
   private CANSparkMax m_leftFollowMotor;
   private CANSparkMax m_rightFollowMotor;
-  private double lastVelocity=0;
-  private long lastTime;
 
   @Override
   public void robotInit() {
@@ -48,12 +43,10 @@ public class Robot extends TimedRobot {
 
     m_leftLeadMotor.setInverted(true);
 
-    // m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
+    driveTrain = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
     m_joystick = new XboxController(0);
 
-    // CameraServer.startAutomaticCapture();
-
-    lastTime=System.currentTimeMillis();
+    CameraServer.startAutomaticCapture();
   }
 
   double currRight=0;
@@ -61,12 +54,11 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    //for acceleration limiting(uncomplete)
      double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
      double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
      m_leftLeadMotor.set(leftInput);
      m_rightLeadMotor.set(rightInput);
-    // m_myRobot.tankDrive(rightInput, leftInput);
+     driveTrain.tankDrive(rightInput, leftInput);
   }
   
   private double cut(double val){
