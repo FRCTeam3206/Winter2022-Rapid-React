@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
@@ -64,7 +65,7 @@ public class Shooter {
     
       }
     
-      private void hoodInit() {
+      public void hoodInit() {
         m_hood = new WPI_TalonSRX(kHoodPort);
     
         //========================= Set up hood-angle controlling motor =========================//
@@ -116,7 +117,18 @@ public class Shooter {
             m_hood.setSelectedSensorPosition(absolutePosition, Constants.kPIDLoopIdx, Constants.kTimeoutMs);
         
       }
-      private void shooterPeriodic(XboxController m_joystick) {
+      public void setSpeed(double rpmTarget){
+        m_pidController.setReference(rpmTarget, CANSparkMax.ControlType.kVelocity);
+        
+        SmartDashboard.putNumber("SetPoint", shooterSetPoint);
+        SmartDashboard.putNumber("RPM_Target", rpmTarget);
+        SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
+      }
+      public void setRawHoodPosition(double percentTurn){
+        double targetPositionRotations = percentTurn * 10.0 * 4096;
+        m_hood.set(ControlMode.Position, targetPositionRotations);
+      }
+      public void shooterPeriodic(XboxController m_joystick) {
         // read PID coefficients from SmartDashboard
         double p = SmartDashboard.getNumber("P Gain", 0);
         double i = SmartDashboard.getNumber("I Gain", 0);
@@ -161,16 +173,9 @@ public class Shooter {
         }
         shooterSetPoint = MathUtil.clamp(shooterSetPoint, kMinOutput, kMaxOutput);
     
-        double rpm_target = shooterSetPoint*maxRPM;
-    
-        m_pidController.setReference(rpm_target, CANSparkMax.ControlType.kVelocity);
+        double rpmTarget = shooterSetPoint*maxRPM;
+        setSpeed(rpmTarget);
         
-        SmartDashboard.putNumber("SetPoint", shooterSetPoint);
-        SmartDashboard.putNumber("RPM_Target", rpm_target);
-        SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
-        
-            // double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
-            // m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
       }
       public static class Constants {
         public static final double sparkmax_kP = 6e-5;
