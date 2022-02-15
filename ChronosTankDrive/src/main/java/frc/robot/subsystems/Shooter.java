@@ -177,6 +177,14 @@ public class Shooter {
         setSpeed(rpmTarget);
         
       }
+      public void shoot(double distance){
+        double angle=distance/27*45;//TODO:Discuss what we want for the angle
+        angle*=Math.PI/180;
+        double tLinearVelocity=distance*Math.sqrt(32)/(Math.cos(angle)*Math.sqrt(Math.abs(-2*distance*Math.tan(angle)+2*Constants.shooterHeight-2*8.6667)));
+        double tRPM=tLinearVelocity*240/Math.PI;
+        double adjustedRPM=tRPM;//TODO:use experimental evidence to make function
+        setSpeed(adjustedRPM);
+      }
       public static class Constants {
         public static final double sparkmax_kP = 6e-5;
         public static final double sparkmax_kI = 0;
@@ -220,5 +228,7 @@ public class Shooter {
          * this does not affect motor invert. 
          */
         public static boolean kMotorInvert = false;
+
+        public static double shooterHeight=2;
     }
 }
