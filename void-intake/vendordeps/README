@@ -1,0 +1,10 @@
+This project requires VictorSPX and ControlMode from the com.ctre.phoenix packages. These are included with WPILib-VSCode, but MUST be explicitly added to the vendordeps folder (the folder this file sits in)
+
+To do this:
+	1- Press the Ctrl+Shift+P keybind in WPILib-VSCode
+	2- Type "Manage Vendor Libraries"
+	3- Click "Install New Libraries (offline)"
+	4- Select the phoenix library
+	5- Run "gradlew build" and reload the window (Ctrl+Shift+P, type "reload"), or click the popup VSCode provides
+
+If you don't do this, VSCode won't recognize the libraries even though they're installed and gradlew builds will fail
