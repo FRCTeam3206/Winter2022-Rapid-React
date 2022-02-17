@@ -222,22 +222,26 @@ public class Robot extends TimedRobot {
       _Spx0.set(ControlMode.PercentOutput, -stickY);
       _Spx1.set(ControlMode.PercentOutput, stickY);
 
-    } else if(stickX >= JOY_DEADZONE && (!priorityForward && !priorityBack) || priorityRight) {
+    } 
+    if(stickX >= JOY_DEADZONE && (!priorityForward && !priorityBack) || priorityRight) {
       // Turn Right
       _Spx0.set(ControlMode.PercentOutput, -stickX);
       _Spx1.set(ControlMode.PercentOutput, -stickX);
 
-    } else if(stickX <= -JOY_DEADZONE && (!priorityForward && !priorityBack) || priorityLeft) {
+    }
+    if(stickX <= -JOY_DEADZONE && (!priorityForward && !priorityBack) || priorityLeft) {
       // Turn Left
       _Spx0.set(ControlMode.PercentOutput, -stickX);
       _Spx1.set(ControlMode.PercentOutput, -stickX);
 
-    } else if(stickY <= -JOY_DEADZONE && (!priorityRight && !priorityLeft) || priorityBack) {
+    }
+    if(stickY <= -JOY_DEADZONE && (!priorityRight && !priorityLeft) || priorityBack) {
       // Move backward
       _Spx0.set(ControlMode.PercentOutput, -stickY);
       _Spx1.set(ControlMode.PercentOutput, stickY);
 
-    } else {
+    } 
+    if(!((stickX >= JOY_DEADZONE || stickX <= -JOY_DEADZONE) || (stickY >= JOY_DEADZONE || stickY <= -JOY_DEADZONE))) {
       // Stop
       _Spx0.set(ControlMode.PercentOutput, 0);
       _Spx1.set(ControlMode.PercentOutput, 0);
