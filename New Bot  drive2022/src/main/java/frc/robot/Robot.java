@@ -47,7 +47,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 public class Robot extends TimedRobot {
 
     // Drive Type
-    //boolean XboxDrive = true;
     // Joysticks
     Joystick leftStick;
     Joystick rightStick;
@@ -79,7 +78,7 @@ public class Robot extends TimedRobot {
  double rightAdjusted;
 
   // DriveTrain
-  DifferentialDrive morpheusDrive;
+  DifferentialDrive chronosDrive;
   // Drivetrain Motors
   CANSparkMax rightFrontDrive;
   CANSparkMax leftFrontDrive;
@@ -153,7 +152,7 @@ public class Robot extends TimedRobot {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    //morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    //chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
       leftStick = new Joystick(0);
       rightStick = new Joystick(1);
 
@@ -165,7 +164,7 @@ public class Robot extends TimedRobot {
     leftBackDrive = new CANSparkMax(3, MotorType.kBrushless);
     rightBackDrive = new CANSparkMax(4, MotorType.kBrushless);
 
-    morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     leftEncoder = leftFrontDrive.getEncoder();
     rightEncoder = rightFrontDrive.getEncoder();
   
@@ -190,7 +189,7 @@ public class Robot extends TimedRobot {
     backBallTransport.configPeakOutputForward(1, 30);
     backBallTransport.configPeakOutputReverse(-1, 30);
 */
-    morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);    
+    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);    
   }
 
   @Override
@@ -205,7 +204,7 @@ public class Robot extends TimedRobot {
       driveSol.set(Value.kOff); // Ensures Pistons are Off
       
     }*/
-    morpheusDrive.tankDrive(leftStick.getY(), -rightStick.getY());
+    chronosDrive.tankDrive(leftStick.getY(), -rightStick.getY());
     
     //make toggle button to switch between automated shooting and manual shooting and have the value for 
     //shooterSpeed only be taken into account when on manual
@@ -223,7 +222,7 @@ public class Robot extends TimedRobot {
       while (desiredDistance > distanceTraveled) {
         distanceTraveled = leftEncoder.getPosition() * -1 / 12;
         ballToggleButton = ballSwitch.get();
-        morpheusDrive.tankDrive(-.6, -.6);
+        chronosDrive.tankDrive(-.6, -.6);
      // Set Button to Integer Value
      if (ballToggleButton == false && ballToggle == 0) { // First Press
       ballToggle = 1; // If trigger is pressed and toggle hasn't been set yet/has cycled through then
@@ -245,7 +244,7 @@ public class Robot extends TimedRobot {
       }
     }
    */
-   morpheusDrive.tankDrive(-7, 7);
+   chronosDrive.tankDrive(-7, 7);
    /*
     if (velocityTimer.get() >= tLateDrive) {
       break DriveLabel;
@@ -275,7 +274,7 @@ public class Robot extends TimedRobot {
         frontBallTransport.setSelectedSensorPosition(0);
       }
     }
-    morpheusDrive.tankDrive(.8, .8);
+    chronosDrive.tankDrive(.8, .8);
     if (velocityTimer.get() >= tLateDrive) {
       break DriveLabel;
     }
@@ -322,9 +321,8 @@ public void Shoot(){
      break;   
  
     }*/
- //Drive(9);
- while (Timer.getMatchTime() < 15){
-  morpheusDrive.tankDrive(.5, -.5); //left should be negative, right should be positive   
+ while (Timer.getMatchTime() < 8){
+  chronosDrive.tankDrive(.5, -.5); //left should be negative, right should be positive   
  }
   }
   public void autonomousPeriodic(){
