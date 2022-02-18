@@ -205,6 +205,9 @@ public class Robot extends TimedRobot {
       adjusted=false;
     }
     if(angleAway<0)turn*=-1;
+    double rightInput=forward-turn;
+    double leftInput=forward+turn;
+    accelLimit(rightInput, leftInput);
     return adjusted;
   }
   public void Drive(double distance) {
