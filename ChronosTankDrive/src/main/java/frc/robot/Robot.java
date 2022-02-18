@@ -100,6 +100,8 @@ public class Robot extends TimedRobot {
                              // and 1 means that it is just x. 1 is more sensitive and 0 is less sensitive.
   double rightPrime;
   double leftPrime;
+
+  Subsystem[] subSystems;
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -138,6 +140,9 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    for(Subsystem subSystem :subSystems){
+      subSystem.init();
+    }
   }
   public void accelLimit(double rightInput,double leftInput){
     rightAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
@@ -171,6 +176,9 @@ public class Robot extends TimedRobot {
     // Trigger is shoot on right
 
     // intake/extake button assignments
+    for(Subsystem subSystem:subSystems){
+      subSystem.periodic();
+    }
   }
   private boolean alignToTarget(double desiredDistance,boolean shouldDrive){
     double[] out=new double[2];

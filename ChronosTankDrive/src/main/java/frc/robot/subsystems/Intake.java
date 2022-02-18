@@ -7,8 +7,9 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.command.Subsystem;
 
-public class Intake {
+public class Intake extends Subsystem{
     XboxController joystick;
     VictorSPX intakeMotor;
     DoubleSolenoid deploy;
@@ -18,12 +19,17 @@ public class Intake {
         deploy=new DoubleSolenoid(PneumaticsModuleType.CTREPCM,pistonId1,pistonId2);
     }
     boolean deployed=false;
-    public void intakePeriodic(){
+    public void periodic(){
         intakeMotor.set(VictorSPXControlMode.PercentOutput,joystick.getRightTriggerAxis());
         if(joystick.getRightBumper()!=deployed){
             deployed=joystick.getRightBumper();
             if(deployed) deploy.set(Value.kForward);
             else deploy.set(Value.kReverse);
         }
+    }
+    @Override
+    protected void initDefaultCommand() {
+        // TODO Auto-generated method stub
+        
     }
 }
