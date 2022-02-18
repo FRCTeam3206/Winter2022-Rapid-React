@@ -111,6 +111,8 @@ public class Robot extends TimedRobot {
                              // and 1 means that it is just x. 1 is more sensitive and 0 is less sensitive.
   double rightPrime;
   double leftPrime;
+
+  double tickTock = Timer.getFPGATimestamp();
 /*
   //Intake 
   //values,motors,and motor controller types are subject to change
@@ -204,6 +206,7 @@ public class Robot extends TimedRobot {
       driveSol.set(Value.kOff); // Ensures Pistons are Off
       
     }*/
+    //ANY DRIVE NUMBERS LIKE THE FOLLOWING MUST HAVE THE SECOND VALUE BE NEGATIVE
     chronosDrive.tankDrive(leftStick.getY(), -rightStick.getY());
     
     //make toggle button to switch between automated shooting and manual shooting and have the value for 
@@ -217,6 +220,26 @@ public class Robot extends TimedRobot {
    distanceTraveled = leftEncoder.getPosition() * -1 / 12;
    desiredDistance = distance + distanceTraveled;
     velocityTimer.start();
+    DriveLabel: if (distance > 0) {
+      while (desiredDistance > distanceTraveled) {
+        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+        chronosDrive.tankDrive(-.6, .6);
+        if (velocityTimer.get() >= tLateDrive) {
+          break DriveLabel;
+        }
+      }
+    } else if (distance < 0) {
+      while (desiredDistance < distanceTraveled) {
+        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+        chronosDrive.tankDrive(-.7, .7);
+        if (velocityTimer.get() >= tLateDrive) {
+          break DriveLabel;
+        }
+      }
+    } else {
+      chronosDrive.tankDrive(0, 0);
+    }
+    chronosDrive.tankDrive(0, 0);
    /*
     DriveLabel: if (distance > 0) {
       while (desiredDistance > distanceTraveled) {
@@ -244,7 +267,7 @@ public class Robot extends TimedRobot {
       }
     }
    */
-   chronosDrive.tankDrive(-7, 7);
+  // chronosDrive.tankDrive(-7, 7);
    /*
     if (velocityTimer.get() >= tLateDrive) {
       break DriveLabel;
@@ -321,9 +344,9 @@ public void Shoot(){
      break;   
  
     }*/
- while (Timer.getMatchTime() < 8){
-  chronosDrive.tankDrive(.5, -.5); //left should be negative, right should be positive   
- }
+
+Drive(5);
+
   }
   public void autonomousPeriodic(){
 
