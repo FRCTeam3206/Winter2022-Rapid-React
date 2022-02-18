@@ -217,6 +217,26 @@ public class Robot extends TimedRobot {
    distanceTraveled = leftEncoder.getPosition() * -1 / 12;
    desiredDistance = distance + distanceTraveled;
     velocityTimer.start();
+    DriveLabel: if (distance > 0) {
+      while (desiredDistance > distanceTraveled) {
+        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+        chronosDrive.tankDrive(-.6, .6);
+        if (velocityTimer.get() >= tLateDrive) {
+          break DriveLabel;
+        }
+      }
+    } else if (distance < 0) {
+      while (desiredDistance < distanceTraveled) {
+        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+        chronosDrive.tankDrive(-.7, .7);
+        if (velocityTimer.get() >= tLateDrive) {
+          break DriveLabel;
+        }
+      }
+    } else {
+      chronosDrive.tankDrive(0, 0);
+    }
+    chronosDrive.tankDrive(0, 0);
    /*
     DriveLabel: if (distance > 0) {
       while (desiredDistance > distanceTraveled) {
@@ -244,7 +264,7 @@ public class Robot extends TimedRobot {
       }
     }
    */
-   chronosDrive.tankDrive(-7, 7);
+   //chronosDrive.tankDrive(-7, 7);
    /*
     if (velocityTimer.get() >= tLateDrive) {
       break DriveLabel;
@@ -321,9 +341,7 @@ public void Shoot(){
      break;   
  
     }*/
- while (Timer.getMatchTime() < 8){
-  chronosDrive.tankDrive(.5, -.5); //left should be negative, right should be positive   
- }
+Drive(5);
   }
   public void autonomousPeriodic(){
 
