@@ -6,23 +6,14 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-
-import edu.wpi.first.wpilibj.util.Color;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import frc.robot.subsystems.*;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -94,6 +85,7 @@ public class Robot extends TimedRobot {
   DoubleSolenoid driveSol = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, 0, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
+  Limelight limelight=new Limelight(3, 5, 30);//TODO:Adjust to experimental values
   // DriveTrain Encoders
   RelativeEncoder leftEncoder;
   RelativeEncoder rightEncoder;
@@ -145,18 +137,12 @@ public class Robot extends TimedRobot {
     rightBackDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
-    /*
-     * //this allows the driver to manually move transport forward and backward
-     * backBallTransport.configSelectedFeedbackSensor(FeedbackDevice.
-     * CTRE_MagEncoder_Relative, 0, 30);
-     * backBallTransport.configNominalOutputForward(0, 30);
-     * backBallTransport.configNominalOutputReverse(0, 30);
-     * backBallTransport.configPeakOutputForward(1, 30);
-     * backBallTransport.configPeakOutputReverse(-1, 30);
-     */
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
   }
-
+  public void accelLimit(double rightInput,double leftInput){
+    rightAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
+    leftAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
+  }
   @Override
   public void teleopPeriodic() {
     /*
@@ -171,8 +157,7 @@ public class Robot extends TimedRobot {
      * }
      */
     if(accelerationLimiting){
-      rightAdjusted=(1/accelDriveKonstant)*leftStick.getY()+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
-      leftAdjusted=(1/accelDriveKonstant)*rightStick.getY()+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
+      accelLimit(rightStick.getY(), leftStick.getY());
     }else{
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
@@ -187,7 +172,41 @@ public class Robot extends TimedRobot {
 
     // intake/extake button assignments
   }
-
+  private boolean alignToTarget(double desiredDistance,boolean shouldDrive){
+    double[] out=new double[2];
+    //This is more computationally efficient, and conserves bandwidth
+    if(shouldDrive){
+      out=limelight.getDistanceAndAngleToTarget();
+    }else{
+      out[1]=limelight.getDistanceFromTarget();
+    }
+    double forward=0;
+    boolean adjusted=true;
+    if(shouldDrive){
+      double distAway=out[0]-desiredDistance;
+      if(Math.abs(distAway)>12){
+        if(Math.abs(distAway)>36){
+          forward=.7;
+        }else{
+          forward=.5;
+        }
+        adjusted=false;
+      }
+      if(distAway<0)forward*=-1;
+    }
+    double turn=0;
+    double angleAway=out[1];
+    if(Math.abs(angleAway)>2){
+      if(Math.abs(angleAway)>20){
+        turn=.7;
+      }else{
+        turn=.5;
+      }
+      adjusted=false;
+    }
+    if(angleAway<0)turn*=-1;
+    return adjusted;
+  }
   public void Drive(double distance) {
     distanceTraveled = leftEncoder.getPosition() * -1 / 12;
     desiredDistance = distance + distanceTraveled;
