@@ -140,6 +140,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    subSystems=new Subsystem[]{new Intake(5, 0,1, weaponStick),new Transport(0,8,weaponStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
