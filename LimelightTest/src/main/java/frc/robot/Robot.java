@@ -43,20 +43,20 @@ public class Robot extends TimedRobot {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    m_leftLeadMotor = new CANSparkMax(leftLeadDeviceID, MotorType.kBrushed);
-    m_leftFollowMotor = new CANSparkMax(leftFollowDeviceID, MotorType.kBrushed);
-    m_rightLeadMotor = new CANSparkMax(rightLeadDeviceID, MotorType.kBrushed);
-    m_rightFollowMotor = new CANSparkMax(rightFollowDeviceID, MotorType.kBrushed);
+    // m_leftLeadMotor = new CANSparkMax(leftLeadDeviceID, MotorType.kBrushed);
+    // m_leftFollowMotor = new CANSparkMax(leftFollowDeviceID, MotorType.kBrushed);
+    // m_rightLeadMotor = new CANSparkMax(rightLeadDeviceID, MotorType.kBrushed);
+    // m_rightFollowMotor = new CANSparkMax(rightFollowDeviceID, MotorType.kBrushed);
 
-    m_leftFollowMotor.follow(m_leftLeadMotor);
-    m_rightFollowMotor.follow(m_rightLeadMotor);
+    // m_leftFollowMotor.follow(m_leftLeadMotor);
+    // m_rightFollowMotor.follow(m_rightLeadMotor);
 
-    m_leftLeadMotor.setInverted(true);
+    // m_leftLeadMotor.setInverted(true);
 
-    m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
-    m_joystick = new XboxController(0);
+    // m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
+    // m_joystick = new XboxController(0);
 
-    CameraServer.startAutomaticCapture();
+    // CameraServer.startAutomaticCapture();
 
   }
 
@@ -65,14 +65,14 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    double forward=m_joystick.getLeftY()*.5;
-    double turn=-m_joystick.getLeftX()*.7;
-    if(m_joystick.getAButton()){
-      double[] vals=alignToTarget(72, true, true);
-      forward=vals[0];
-      turn=vals[1];
-    }
-    m_myRobot.arcadeDrive(forward,turn);
+    // double forward=m_joystick.getLeftY()*.5;
+    // double turn=-m_joystick.getLeftX()*.7;
+    // if(m_joystick.getAButton()){
+    //   double[] vals=alignToTarget(72, true, true);
+    //   forward=vals[0];
+    //   turn=vals[1];
+    // }
+    // m_myRobot.arcadeDrive(forward,turn);
   }
   @Override
   public void autonomousPeriodic() {
