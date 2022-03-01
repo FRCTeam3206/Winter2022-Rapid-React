@@ -4,7 +4,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -19,16 +24,17 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-
+  Compressor pcmCompressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
+  DoubleSolenoid sol = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4,3);
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
+  XboxController joystick=new XboxController(0);
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+    pcmCompressor.enableDigital();
+    sol.set(Value.kReverse);
   }
 
   /**
@@ -53,23 +59,17 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
   }
 
   /** This function is called periodically during autonomous. */
+  long numRun=0;
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
+    if(numRun==50){
+      sol.toggle();
+      numRun=-1;
     }
+    numRun++;
   }
 
   /** This function is called once when teleop is enabled. */
@@ -78,7 +78,13 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    if(joystick.getBButton()){
+      sol.set(Value.kForward);
+    }else{
+      sol.set(Value.kReverse);
+    }
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
@@ -86,15 +92,20 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+  }
 
   /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void testInit() {
+    
+  }
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    sol.set(Value.kReverse);
+  }
 
   /** This function is called once when the robot is first started up. */
   @Override
