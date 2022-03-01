@@ -14,6 +14,10 @@ import edu.wpi.first.cameraserver.CameraServer;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 /**
  * This is a demo program showing the use of the DifferentialDrive class, specifically it contains
  * the code necessary to operate a robot with tank drive.
@@ -33,6 +37,10 @@ public class Robot extends TimedRobot {
   private double lastVelocity=0;
   private long lastTime;
 
+  private NetworkTableEntry distance;
+  private double MIN_SPEED=0.45;
+  private double TURN_TOLERANCE=2;
+
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -51,26 +59,46 @@ public class Robot extends TimedRobot {
     m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
     m_joystick = new XboxController(0);
 
-    CameraServer.startAutomaticCapture();
-
     lastTime=System.currentTimeMillis();
+
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    distance = inst.getTable("BallLocator").getEntry("Distance from center");
   }
 
   double currRight=0;
   double currLeft=0;
   
   @Override
-  public void teleopPeriodic() {
+  public void autonomousPeriodic() {
     //for acceleration limiting(uncomplete)
-     double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
-     double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
-     long currTime=System.currentTimeMillis();
-     double rightDiff=rightInput-currRight;
-     double leftDiff=leftInput-currLeft;
-     double timeDiff=currTime-lastTime;
+    //  double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
+    //  double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
+    //  long currTime=System.currentTimeMillis();
+    //  double rightDiff=rightInput-currRight;
+    //  double leftDiff=leftInput-currLeft;
+    //  double timeDiff=currTime-lastTime;
+
+    double d = distance.getDouble(0);
+    System.out.println(d);
+    double rightin = 0, leftin = 0;
+    if (Math.abs(d) > TURN_TOLERANCE) {
+      rightin = (d - (-80)) / (80 + 80) * (-1 - 1) + 1;
+      leftin = (d - (-80)) / (80 + 80) * (-1 - 1) + 1;
+
+      if (rightin < MIN_SPEED) rightin = MIN_SPEED;
+      if (leftin < MIN_SPEED) leftin = MIN_SPEED;
+    }
+    m_myRobot.tankDrive(leftin/1.1, -rightin/1.1);
+  }
+
+  
+
+  @Override
+  public void teleopPeriodic() {
+    double rightin = m_joystick.getRawAxis(1);
+    double leftin = m_joystick.getRawAxis(3);
      
-     
-    m_myRobot.tankDrive(rightInput, leftInput);
+    m_myRobot.tankDrive(rightin/1.35, leftin/1.35);
   }
   
   private double cut(double val){
