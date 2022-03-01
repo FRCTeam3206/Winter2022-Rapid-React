@@ -140,7 +140,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-    subSystems=new Subsystem[]{new Intake(5, 0,1, weaponStick),new Transport(0,8,weaponStick)};
+  subSystems=new Subsystem[]{/*new Intake(5, 0,1, weaponStick),new Transport(0,8,weaponStick)*/};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -223,21 +223,23 @@ public class Robot extends TimedRobot {
     distanceTraveled = leftEncoder.getPosition() * -1 / 12;
     desiredDistance = distance + distanceTraveled;
     velocityTimer.start();
-    /*
-     * DriveLabel: if (distance > 0) {
-     * while (desiredDistance > distanceTraveled) {
-     * distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-     * ballToggleButton = ballSwitch.get();
-     * chronosDrive.tankDrive(-.6, -.6);
-     * // Set Button to Integer Value
-     * if (ballToggleButton == false && ballToggle == 0) { // First Press
-     * ballToggle = 1; // If trigger is pressed and toggle hasn't been set yet/has
-     * cycled through then
-     * // toggle = 1
-     * } else if (ballToggleButton == true && ballToggle == 1) { // First Release
-     * ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
-     * }
-     * // Determine Piston Position Based on Integer Value
+    
+      DriveLabel: if (distance > 0) {
+      while (desiredDistance > distanceTraveled) {
+      distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+     // ballToggleButton = ballSwitch.get();
+      chronosDrive.tankDrive(-.6, -.6);
+      // Set Button to Integer Value
+     // if (ballToggleButton == false && ballToggle == 0) { 
+     // First Press ballToggle = 1; 
+      // If trigger is pressed and toggle hasn't been set yet/has cycled through then
+      // toggle = 1
+      }
+    }
+      /* else if (ballToggleButton == true && ballToggle == 1) { // First Release
+      ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
+      }
+      // Determine Piston Position Based on Integer Value
      * if (ballToggle == 1 || ballToggle == 2) { // Trigger is Pressed
      * if (frontBallTransport.getSelectedSensorPosition() * ballMagScale <
      * ballDesiredDistance) {
@@ -251,8 +253,8 @@ public class Robot extends TimedRobot {
      * frontBallTransport.setSelectedSensorPosition(0);
      * }
      * }
-     */
     chronosDrive.tankDrive(-7, 7);
+    */
     /*
      * if (velocityTimer.get() >= tLateDrive) {
      * break DriveLabel;
@@ -299,25 +301,10 @@ public class Robot extends TimedRobot {
 
     compressor.enableDigital();
     driveSol.set(Value.kReverse);
-    /*
-     * switch (autoSelected) {
-     * case "AutoLine":
-     * Drive(9); //will want to drive at least the length of the robot forward, must
-     * be fully off tarmac to get easy points
-     * break;
-     * case "BallPickup":
-     * BallPickup();
-     * break;
-     * case "Shoot":
-     * Shoot();
-     * break;
-     * 
-     * }
-     */
-    while (Timer.getMatchTime() < 8) {
-      chronosDrive.tankDrive(.5, -.5); // left should be negative, right should be positive
+ 
+    Drive(5); // left should be negative, right should be positive
     }
-  }
+  
 
   public void autonomousPeriodic() {
   }

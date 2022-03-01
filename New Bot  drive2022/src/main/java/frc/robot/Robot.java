@@ -326,7 +326,6 @@ public void Shoot(){
  }
   }
   public void autonomousPeriodic(){
-   
   }
 }
 
