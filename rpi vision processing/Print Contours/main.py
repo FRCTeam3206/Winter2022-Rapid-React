@@ -35,15 +35,15 @@ def main():
             outputStream.notifyError(cvSink.getError())
             # skip the rest of the current iteration
             continue
-    img_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    #red
-    img_threshold = cv2.inRange(img_hsv, (88, 70, 118), (100, 144, 255))
-   #blue
-   #img_threshold = cv2.inRange(img_hsv, (161, 56, 203), (172, 156, 255))
-    contours, _ = cv2.findContours(img_threshold, 
-    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    if len(contours)>0:
-        drawRectangle(img,cv2.boundingRect(contours[0]),(255,255,255))
-        print(cv2.boundingRect(contours[0]))
-    outputStream.putFrame(img)
+        img_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        #red
+        img_threshold = cv2.inRange(img_hsv, (88, 70, 118), (100, 144, 255))
+        #blue
+        #img_threshold = cv2.inRange(img_hsv, (161, 56, 203), (172, 156, 255))
+        contours, _ = cv2.findContours(img_threshold, 
+        cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)
+        if len(contours)>0:
+            drawRectangle(img,cv2.boundingRect(contours[0]),(255,255,255))
+            print(cv2.boundingRect(contours[0]))
+        outputStream.putFrame(img)
