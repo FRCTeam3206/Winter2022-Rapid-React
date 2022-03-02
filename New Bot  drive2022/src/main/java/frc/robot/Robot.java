@@ -138,7 +138,7 @@ public class Robot extends TimedRobot {
  String ball1Color = "";
  String ball2Color = "";
 
- //Subsystem[] subSystems;
+ Subsystem[] subSystems;
 
   @Override
   public void robotInit() {
@@ -176,12 +176,12 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-    /*
+    
     subSystems = new Subsystem[]{//new intake(5, 0, 1, weaponStick), new Transport(0, 8, weaponStick)
       for(Subsystem subSystem :subSystems){
         subSystem.init();
       }
-    }*/
+    }
 
     m_colorMatcher.addColorMatch(kBlueTarget);
     m_colorMatcher.addColorMatch(kRedTarget);
@@ -326,7 +326,7 @@ public void centerBall(){
 
   @Override
   public void autonomousInit() {
-   // autoSelected = autoChoices.getSelected();
+    autoSelected = autoChoices.getSelected();
 
     compressor.enableDigital();
     driveSol.set(Value.kReverse);
