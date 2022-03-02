@@ -54,24 +54,23 @@ import edu.wpi.first.wpilibj.I2C;
  */
 public class Robot extends TimedRobot {
     // Drive Type
-    //boolean XboxDrive = true;
     // Joysticks
     Joystick leftStick;
     Joystick rightStick;
     //XboxController driveStick;  
     //XboxController weaponStick;
 
-  // Sendable Chooser
+  //Sendable Chooser
   SendableChooser<String> autoChoices = new SendableChooser<>();
   String autoSelected;
 
   //the folliwing four lines are part of the original basic code
  /*
-  private final PWMSparkMax m_leftMotor = new PWMSparkMax(0);
-  private final PWMSparkMax m_rightMotor = new PWMSparkMax(1);
-  private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
+  private final PWMSparkMax leftFrontDrive = new PWMSparkMax(0);
+  private final PWMSparkMax rightFrontDrive = new PWMSparkMax(1);
+  private final DifferentialDrive m_robotDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
   private final Joystick m_stick = new Joystick(0);
-*/
+*/  
  // Acceleration Limiting Variables
  boolean accelerationLimiting = true;
  double accelLimitedLeftGetY;
@@ -86,10 +85,10 @@ public class Robot extends TimedRobot {
  double rightAdjusted;
 
   // DriveTrain
-  DifferentialDrive morpheusDrive;
+  DifferentialDrive chronosDrive;
   // Drivetrain Motors
-  CANSparkMax leftFrontDrive;
   CANSparkMax rightFrontDrive;
+  CANSparkMax leftFrontDrive;
   CANSparkMax leftBackDrive;
   CANSparkMax rightBackDrive;
 
@@ -120,22 +119,10 @@ public class Robot extends TimedRobot {
   double rightPrime;
   double leftPrime;
 
-  //Intake 
-  //values,motors,and motor controller types are subject to change
-  WPI_VictorSPX intakeMotor = new WPI_VictorSPX(5);
-  DoubleSolenoid intakeSol = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, 3, 4);
-  Timer intakeTimer = new Timer();
-  // Intake Toggle Variables
-  int intakeToggle = 0;
-  boolean intakeToggleStick;
-  boolean extakeToggleStick;
-  int extakeToggle = 0;
-  // Motor Speed
-  double intakeSpeed = .65;
+  double tickTock = Timer.getFPGATimestamp();
+
 
   //transport
-  WPI_TalonSRX frontBallTransport = new WPI_TalonSRX(10);
-  WPI_TalonSRX backBallTransport = new WPI_TalonSRX(11);
   DigitalInput ballSwitch = new DigitalInput(3);
   double ballCount = 1; //this is the initial # of balls in transport at the beginning of a match
   double ballMagScale = .00110390625;// (1/4096 * 3.14 * 1.972) scaled to inches instead
@@ -154,6 +141,7 @@ public class Robot extends TimedRobot {
   double shooterSpeed; //manual shooting
   boolean shootingStyle; //automated shooting (limelight) vs. manual shooting (slider value)
 
+
   DriverStation.Alliance allianceColor = DriverStation.getAlliance();
 
   //Color Sensor 
@@ -161,10 +149,10 @@ public class Robot extends TimedRobot {
   ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
   ColorMatch m_colorMatcher = new ColorMatch();
  // Colors
- Color kBlueTarget = new Color(0.2, 0.45, 0.34);
- Color kRedTarget = new Color(0.4, 0.4, 0.2);
- //Color kBlueTarget = new Color(0.143, 0.427, 0.429);
- //Color kRedTarget = new Color(0.561, 0.232, 0.114);
+ Color kBlueTarget = new Color(0.2, 0.45, 0.34); //new color values
+ Color kRedTarget = new Color(0.4, 0.4, 0.2); //new color values
+ //Color kBlueTarget = new Color(0.143, 0.427, 0.429); //old color values
+ //Color kRedTarget = new Color(0.561, 0.232, 0.114); //old color values
  
  String ball1Color = "";
  String ball2Color = "";
@@ -176,7 +164,7 @@ public class Robot extends TimedRobot {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    //chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
       leftStick = new Joystick(0);
       rightStick = new Joystick(1);
 
@@ -184,12 +172,14 @@ public class Robot extends TimedRobot {
     //identify what color balls we have in transport and whether to shoot them or to get rid of them
 
     leftFrontDrive = new CANSparkMax(1, MotorType.kBrushless);
-    rightFrontDrive = new CANSparkMax(3, MotorType.kBrushless);
-    leftBackDrive = new CANSparkMax(2, MotorType.kBrushless);
+    rightFrontDrive = new CANSparkMax(2, MotorType.kBrushless);
+    leftBackDrive = new CANSparkMax(3, MotorType.kBrushless);
     rightBackDrive = new CANSparkMax(4, MotorType.kBrushless);
+
+    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     leftEncoder = leftFrontDrive.getEncoder();
     rightEncoder = rightFrontDrive.getEncoder();
-
+  
     leftFrontDrive.restoreFactoryDefaults();
     rightFrontDrive.restoreFactoryDefaults();
     leftBackDrive.restoreFactoryDefaults();
@@ -206,7 +196,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
 
-    morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
    
     m_colorMatcher.addColorMatch(kBlueTarget);
     m_colorMatcher.addColorMatch(kRedTarget);
@@ -214,6 +204,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+  
     //joystick drive
     if (rightStick.getRawButton(1)) { // Low Speed
       driveSol.set(Value.kForward);
@@ -222,7 +213,7 @@ public class Robot extends TimedRobot {
     } else {
       driveSol.set(Value.kOff); // Ensures Pistons are Off
     }
-    morpheusDrive.tankDrive(leftStick.getY(), rightStick.getY());
+    chronosDrive.tankDrive(leftStick.getY(), rightStick.getY());
 
     //color sensor
     Color detectedColor = m_colorSensor.getColor();
@@ -251,16 +242,36 @@ public class Robot extends TimedRobot {
     
   }
   public void Drive(double distance) {
-    distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-    desiredDistance = distance + distanceTraveled;
+   distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+   desiredDistance = distance + distanceTraveled;
     velocityTimer.start();
     DriveLabel: if (distance > 0) {
       while (desiredDistance > distanceTraveled) {
         distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+        chronosDrive.tankDrive(-.6, .6);
+        if (velocityTimer.get() >= tLateDrive) {
+          break DriveLabel;
+        }
+      }
+    } else if (distance < 0) {
+      while (desiredDistance < distanceTraveled) {
+        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+        chronosDrive.tankDrive(-.7, .7);
+        if (velocityTimer.get() >= tLateDrive) {
+          break DriveLabel;
+        }
+      }
+    } else {
+      chronosDrive.tankDrive(0, 0);
+    }
+    chronosDrive.tankDrive(0, 0);
+   /*
+    DriveLabel: if (distance > 0) {
+      while (desiredDistance > distanceTraveled) {
+        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
         ballToggleButton = ballSwitch.get();
-        morpheusDrive.tankDrive(-.6, -.6);
-    
-        // Set Button to Integer Value
+        chronosDrive.tankDrive(-.6, -.6);
+     // Set Button to Integer Value
      if (ballToggleButton == false && ballToggle == 0) { // First Press
       ballToggle = 1; // If trigger is pressed and toggle hasn't been set yet/has cycled through then
                       // toggle = 1
@@ -280,7 +291,9 @@ public class Robot extends TimedRobot {
         frontBallTransport.setSelectedSensorPosition(0);
       }
     }
-    morpheusDrive.tankDrive(-.7, -.7);
+   */
+  // chronosDrive.tankDrive(-7, 7);
+   /*
     if (velocityTimer.get() >= tLateDrive) {
       break DriveLabel;
     }
@@ -309,12 +322,12 @@ public class Robot extends TimedRobot {
         frontBallTransport.setSelectedSensorPosition(0);
       }
     }
-    morpheusDrive.tankDrive(.8, .8);
+    chronosDrive.tankDrive(.8, .8);
     if (velocityTimer.get() >= tLateDrive) {
       break DriveLabel;
     }
   }
-}
+}*/
 }
 
 
@@ -347,10 +360,11 @@ public void centerBall(){
 
   @Override
   public void autonomousInit() {
-    autoSelected = autoChoices.getSelected();
+   // autoSelected = autoChoices.getSelected();
 
     compressor.enableDigital();
     driveSol.set(Value.kReverse);
+    
     switch (autoSelected) {
     case "AutoLine":
       Drive(9); //will want to drive at least the length of the robot forward, must be fully off tarmac to get easy points
@@ -390,6 +404,6 @@ public void centerBall(){
     SmartDashboard.putNumber("Confidence", match.confidence);
     SmartDashboard.putString("Detected Color", colorString);
   }
-  }
+}
 
 
