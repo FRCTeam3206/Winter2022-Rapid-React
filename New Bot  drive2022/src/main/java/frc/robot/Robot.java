@@ -30,10 +30,18 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.ColorMatch;
+import com.revrobotics.ColorMatchResult;
+import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.I2C;
 //import com.analog.adis16448.frc.ADIS16448_IMU;
 
 //import edu.wpi.first.cameraserver.CameraServer;
@@ -45,7 +53,6 @@ import edu.wpi.first.cscore.UsbCamera;
  * arcade steering.
  */
 public class Robot extends TimedRobot {
-
     // Drive Type
     //boolean XboxDrive = true;
     // Joysticks
@@ -130,7 +137,7 @@ public class Robot extends TimedRobot {
   WPI_TalonSRX frontBallTransport = new WPI_TalonSRX(10);
   WPI_TalonSRX backBallTransport = new WPI_TalonSRX(11);
   DigitalInput ballSwitch = new DigitalInput(3);
-  double ballCount = 0; //this is the initial # of balls in transport at the biginning of a match
+  double ballCount = 1; //this is the initial # of balls in transport at the beginning of a match
   double ballMagScale = .00110390625;// (1/4096 * 3.14 * 1.972) scaled to inches instead
   double ballDesiredDistance = 5.5;
   double ballDistanceTraveled;
@@ -146,6 +153,22 @@ public class Robot extends TimedRobot {
   double hoodAngle; //manual shooting
   double shooterSpeed; //manual shooting
   boolean shootingStyle; //automated shooting (limelight) vs. manual shooting (slider value)
+
+  DriverStation.Alliance allianceColor = DriverStation.getAlliance();
+
+  //Color Sensor 
+  I2C.Port i2cPort = I2C.Port.kOnboard;
+  ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
+  ColorMatch m_colorMatcher = new ColorMatch();
+ // Colors
+ Color kBlueTarget = new Color(0.2, 0.45, 0.34);
+ Color kRedTarget = new Color(0.4, 0.4, 0.2);
+ //Color kBlueTarget = new Color(0.143, 0.427, 0.429);
+ //Color kRedTarget = new Color(0.561, 0.232, 0.114);
+ 
+ String ball1Color = "";
+ String ball2Color = "";
+
 
 
   @Override
@@ -175,24 +198,18 @@ public class Robot extends TimedRobot {
     rightEncoder.setPosition(0);
 
     autoChoices.setDefaultOption("AutoLine", "AutoLine");
-    autoChoices.addOption("BallPickup", "BallPickup");
-    autoChoices.addOption("Shoot", "Shoot");
+    autoChoices.addOption("humanPlayerBall", "humanPlayerBall");
+    autoChoices.addOption("leftBall", "leftBall");
+    autoChoices.addOption("rightBall", "rightBall");
+    autoChoices.addOption("centerBall", "centerBall");
 
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
 
-    //this allows the driver to manually move transport forward and backward
-    backBallTransport.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
-    backBallTransport.configNominalOutputForward(0, 30);
-    backBallTransport.configNominalOutputReverse(0, 30);
-    backBallTransport.configPeakOutputForward(1, 30);
-    backBallTransport.configPeakOutputReverse(-1, 30);
-
     morpheusDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
    
-    //m_rightMotor is part of original code
-   // m_rightMotor.setInverted(true);
-    
+    m_colorMatcher.addColorMatch(kBlueTarget);
+    m_colorMatcher.addColorMatch(kRedTarget);
   }
 
   @Override
@@ -206,13 +223,32 @@ public class Robot extends TimedRobot {
       driveSol.set(Value.kOff); // Ensures Pistons are Off
     }
     morpheusDrive.tankDrive(leftStick.getY(), rightStick.getY());
-    
+
+    //color sensor
+    Color detectedColor = m_colorSensor.getColor();
+    String colorString;
+    ColorMatchResult match = m_colorMatcher.matchClosestColor(detectedColor);
+    if(match.color == kBlueTarget){
+      colorString = "Blue";
+    } else if(match.color == kRedTarget){
+      colorString = "Red";
+    } else{
+      colorString = "Unknown";
+    }
+    SmartDashboard.putNumber("Red", detectedColor.red);
+    SmartDashboard.putNumber("Blue", detectedColor.blue);
+    SmartDashboard.putNumber("Confidence", match.confidence);
+    SmartDashboard.putString("Detected Color", colorString);
+    SmartDashboard.putString("Ball 1 Color", ball1Color);
+    SmartDashboard.putString("Ball 2 Color", ball2Color);
     //make toggle button to switch between automated shooting and manual shooting and have the value for 
     //shooterSpeed only be taken into account when on manual
 
     //Trigger is shoot on right
 
     //intake/extake button assignments
+
+    
   }
   public void Drive(double distance) {
     distanceTraveled = leftEncoder.getPosition() * -1 / 12;
@@ -223,7 +259,8 @@ public class Robot extends TimedRobot {
         distanceTraveled = leftEncoder.getPosition() * -1 / 12;
         ballToggleButton = ballSwitch.get();
         morpheusDrive.tankDrive(-.6, -.6);
-     // Set Button to Integer Value
+    
+        // Set Button to Integer Value
      if (ballToggleButton == false && ballToggle == 0) { // First Press
       ballToggle = 1; // If trigger is pressed and toggle hasn't been set yet/has cycled through then
                       // toggle = 1
@@ -279,18 +316,18 @@ public class Robot extends TimedRobot {
   }
 }
 }
-//have a default shooting setting to fall back on in case of limelight issues
+
 
 
 
 //the following are autonomous only commands
-public void BallPickup(){
+public void humanPlayerBall(){
  //will need to put out intake (requires pneumatic stuffs)
  //run motors to pull balls in
  //run transport to hold balls in bot
 }
 
-public void Shoot(){
+public void leftBall(){
  // THIS IS THE PRIORITY FOR AUTO
  //move balls up to shooter
  //turn on shooter motors
@@ -298,6 +335,14 @@ public void Shoot(){
  //shoot based on location/distance and stuff
  //know how many balls are in transport so it can know whether or not to keep going
  
+}
+
+public void rightBall(){
+
+}
+
+public void centerBall(){
+
 }
 
   @Override
@@ -310,16 +355,40 @@ public void Shoot(){
     case "AutoLine":
       Drive(9); //will want to drive at least the length of the robot forward, must be fully off tarmac to get easy points
       break;
-    case "BallPickup":
-      BallPickup();
+    case "humanPlayerBall":
+      humanPlayerBall();
       break;
-    case "Shoot":
-      Shoot();
+    case "leftBall":
+      leftBall();
       break;   
+    case "rightBall":
+      rightBall();
+      break;
+    case "centerBall":
+      centerBall();
+      break;
     }
   }
   public void autonomousPeriodic(){
+    while (ballCount > 0){
+      
+    }
 
+    //color sensor
+    Color detectedColor = m_colorSensor.getColor();
+    String colorString;
+    ColorMatchResult match = m_colorMatcher.matchClosestColor(detectedColor);
+    if(match.color == kBlueTarget){
+      colorString = "Blue";
+    } else if(match.color == kRedTarget){
+      colorString = "Red";
+    } else{
+      colorString = "Unknown";
+    }
+    SmartDashboard.putNumber("Red", detectedColor.red);
+    SmartDashboard.putNumber("Blue", detectedColor.blue);
+    SmartDashboard.putNumber("Confidence", match.confidence);
+    SmartDashboard.putString("Detected Color", colorString);
   }
   }
 
