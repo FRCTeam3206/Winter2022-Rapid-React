@@ -124,19 +124,20 @@ public class Robot extends TimedRobot {
   boolean ballToggleButton;
 
   DriverStation.Alliance allianceColor = DriverStation.getAlliance();
+  Boolean isRedAlliance;
 
-  //Color Sensor 
-  I2C.Port i2cPort = I2C.Port.kOnboard;
-  ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
-  ColorMatch m_colorMatcher = new ColorMatch();
+ //Color Sensor 
+ I2C.Port i2cPort = I2C.Port.kOnboard;
+ ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
+ ColorMatch m_colorMatcher = new ColorMatch();
  // Colors
  Color kBlueTarget = new Color(0.2, 0.45, 0.34); //new color values
  Color kRedTarget = new Color(0.4, 0.4, 0.2); //new color values
  //Color kBlueTarget = new Color(0.143, 0.427, 0.429); //old color values
  //Color kRedTarget = new Color(0.561, 0.232, 0.114); //old color values
- 
- String ball1Color = "";
- String ball2Color = "";
+
+ String ballColor = "";
+ //String ball2Color = "";
 
  //Subsystem[] subSystems;
 
@@ -185,6 +186,12 @@ public class Robot extends TimedRobot {
 
     m_colorMatcher.addColorMatch(kBlueTarget);
     m_colorMatcher.addColorMatch(kRedTarget);
+
+    while (){
+        if(ballColor = "Red"){
+
+        }
+    }
   }
 
   public void accelLimit(double rightInput, double leftInput){
@@ -220,8 +227,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Blue", detectedColor.blue);
     SmartDashboard.putNumber("Confidence", match.confidence);
     SmartDashboard.putString("Detected Color", colorString);
-    SmartDashboard.putString("Ball 1 Color", ball1Color);
-    SmartDashboard.putString("Ball 2 Color", ball2Color);
+    SmartDashboard.putString("Ball 1 Color", ballColor);
+    //SmartDashboard.putString("Ball 2 Color", ball2Color);
 
     if(accelerationLimiting){
       accelLimit(rightStick.getY(), leftStick.getY());
