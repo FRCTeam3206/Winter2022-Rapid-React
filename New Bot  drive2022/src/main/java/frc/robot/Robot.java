@@ -188,7 +188,7 @@ public class Robot extends TimedRobot {
     m_colorMatcher.addColorMatch(kRedTarget);
 
     while (){
-        if(ballColor = "Red"){
+        if(ballColor == "Red"){
 
         }
     }
