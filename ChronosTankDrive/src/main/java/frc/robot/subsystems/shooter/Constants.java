@@ -15,7 +15,7 @@ public class Constants {
     public static final double hood_kF = 0;
     public static final int hood_kIz = 0;
     public static final double hood_kMaxOut = 1;
-
+	public static final long SHOOT_TIME=2000;
     /**
 	 * Which PID slot to pull gains from. Starting 2018, you can choose from
 	 * 0,1,2 or 3. Only the first two (0,1) are visible in web-based
