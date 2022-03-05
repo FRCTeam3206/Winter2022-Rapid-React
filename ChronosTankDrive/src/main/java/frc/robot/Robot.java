@@ -3,10 +3,10 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.Solenoid;
+
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.shooter.Shooter;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -82,7 +84,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 0, 1);
+  //Solenoid driveSol = new Solenoid(1, PneumaticsModuleType.CTREPCM, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight=new Limelight(3, 5, 30);//TODO:Adjust to experimental values
@@ -102,6 +104,11 @@ public class Robot extends TimedRobot {
   double leftPrime;
 
   Subsystem[] subSystems;
+
+  public static final int SHOOT_PORT=5;
+  public static final int INTAKE_MOTOR_PORT=7;
+  public static final int KICKER_PORT=6;
+  public static final int INTAKE_DEPLOY_PORT=0;
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -140,7 +147,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-  subSystems=new Subsystem[]{new Intake(6, 0, weaponStick)};
+  subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick),new Shooter(SHOOT_PORT, KICKER_PORT, 0, weaponStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -300,7 +307,7 @@ public class Robot extends TimedRobot {
     // autoSelected = autoChoices.getSelected();
 
     compressor.enableDigital();
-    driveSol.set(Value.kReverse);
+    //driveSol.set(Value.kReverse);
  
     Drive(5); // left should be negative, right should be positive
     }
