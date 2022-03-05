@@ -82,7 +82,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  DoubleSolenoid driveSol = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, 0, 1);
+  DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 0, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight=new Limelight(3, 5, 30);//TODO:Adjust to experimental values
@@ -140,7 +140,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-  subSystems=new Subsystem[]{/*new Intake(5, 0,1, weaponStick),new Transport(0,8,weaponStick)*/};
+  subSystems=new Subsystem[]{new Intake(6, 0, weaponStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -168,7 +168,7 @@ public class Robot extends TimedRobot {
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
     }
-    chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
+    //chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for
