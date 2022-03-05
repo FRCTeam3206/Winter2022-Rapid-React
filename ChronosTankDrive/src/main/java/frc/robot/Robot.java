@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  //Solenoid driveSol = new Solenoid(1, PneumaticsModuleType.CTREPCM, 1);
+  Solenoid driveSol = new Solenoid(1, PneumaticsModuleType.CTREPCM, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight=new Limelight(3, 5, 30);//TODO:Adjust to experimental values
@@ -106,8 +106,8 @@ public class Robot extends TimedRobot {
   Subsystem[] subSystems;
 
   public static final int SHOOT_PORT=5;
-  public static final int INTAKE_MOTOR_PORT=7;
-  public static final int KICKER_PORT=6;
+  public static final int INTAKE_MOTOR_PORT=6;
+  public static final int KICKER_PORT=7;
   public static final int INTAKE_DEPLOY_PORT=0;
   @Override
   public void robotInit() {
@@ -116,8 +116,8 @@ public class Robot extends TimedRobot {
     // gearbox is constructed, you might have to invert the left side instead.
     // chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     leftStick = new Joystick(0);
-    rightStick = new Joystick(1);
-    weaponStick=new XboxController(0);
+    rightStick = new Joystick(2);
+    weaponStick=new XboxController(1);
     // For later notes: assign buttons for when we are on red/blue alliance so that
     // we can
     // identify what color balls we have in transport and whether to shoot them or
@@ -143,7 +143,7 @@ public class Robot extends TimedRobot {
      * autoChoices.addOption("BallPickup", "BallPickup");
      * autoChoices.addOption("Shoot", "Shoot");
      */
-    rightBackDrive.setInverted(true);
+    rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
@@ -155,6 +155,7 @@ public class Robot extends TimedRobot {
   public void accelLimit(double rightInput,double leftInput){
     rightAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
     leftAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
+    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
   @Override
   public void teleopPeriodic() {

@@ -87,6 +87,7 @@ public class Shooter extends Subsystem{
     }
     long kickerStartTime=-1;
     boolean canShoot=true;
+    boolean isShooting=false;
     public void periodic() {
         // read PID coefficients from SmartDashboard
         double p = SmartDashboard.getNumber("P Gain", 0);
@@ -125,8 +126,9 @@ public class Shooter extends Subsystem{
         if(m_joystick.getBButtonReleased()){
           canShoot=true;
         }
-        if (m_joystick.getBButton()&&canShoot) {
-          double desiredRPM=500;//To be implemented with LL This is just for Testing
+        if ((m_joystick.getBButton()||isShooting)&&canShoot) {
+          isShooting=true;
+          double desiredRPM=2000;//To be implemented with LL This is just for Testing
           if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<100){
             //Shoot
             if(kickerStartTime<=0){
@@ -139,6 +141,7 @@ public class Shooter extends Subsystem{
               kickerStartTime=-1;
               m_shooter.set(0);
               canShoot=false;
+              isShooting=false;
             }
           }else{
             //Ramp up Wheel
