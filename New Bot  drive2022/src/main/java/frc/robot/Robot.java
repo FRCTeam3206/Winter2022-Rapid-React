@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.lang.Math;
+import java.time.temporal.TemporalAccessor;
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -124,7 +126,7 @@ public class Robot extends TimedRobot {
   boolean ballToggleButton;
 
   DriverStation.Alliance allianceColor = DriverStation.getAlliance();
-  Boolean isRedAlliance;
+  String teamColor;
 
  //Color Sensor 
  I2C.Port i2cPort = I2C.Port.kOnboard;
@@ -223,6 +225,7 @@ public class Robot extends TimedRobot {
     } else{
       colorString = "Unknown";
     }
+    SmartDashboard.putString("Alliance", allianceColor.toString(teamColor));
     SmartDashboard.putNumber("Red", detectedColor.red);
     SmartDashboard.putNumber("Blue", detectedColor.blue);
     SmartDashboard.putNumber("Confidence", match.confidence);

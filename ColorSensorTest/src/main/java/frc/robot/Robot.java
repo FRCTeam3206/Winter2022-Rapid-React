@@ -12,6 +12,7 @@ import com.revrobotics.ColorSensorV3.ColorSensorResolution;
 import com.revrobotics.ColorSensorV3.GainFactor;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,15 +24,16 @@ import edu.wpi.first.wpilibj.util.Color;
  * project.
  */
 public class Robot extends TimedRobot {
-  ColorSensorV3 colorSensor=new ColorSensorV3(Port.kOnboard);
+  I2C.Port i2cPort = I2C.Port.kOnboard;
+  ColorSensorV3 colorSensor = new ColorSensorV3(i2cPort);
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-  private static final Color redBall=new Color(.54,.34,.12);
-  private static final Color blueBall=new Color(.16,.40,.47);
-  private ColorMatch colorMatch=new ColorMatch();
+  private static final Color redBall = new Color(.54,.34,.12);
+  private static final Color blueBall = new Color(.16,.40,.47);
+  private ColorMatch colorMatch = new ColorMatch();
   @Override
   public void robotInit() {
     colorMatch.addColorMatch(redBall);
