@@ -126,27 +126,17 @@ public class Shooter extends Subsystem{
         if(m_joystick.getBButtonReleased()){
           canShoot=true;
         }
-        if ((m_joystick.getBButton()||isShooting)&&canShoot) {
+        if (m_joystick.getBButton()) {
           isShooting=true;
-          double desiredRPM=2000;//To be implemented with LL This is just for Testing
-          if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<100){
+          double desiredRPM=2650;
+          setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
+          if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<25){
             //Shoot
-            if(kickerStartTime<=0){
-              //We have just started to shoot
-              kickerStartTime=System.currentTimeMillis();
-              kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
-            }else if(System.currentTimeMillis()-kickerStartTime>Constants.SHOOT_TIME){
-              //We have been kicking for SHOOT_TIME miliseconds, turn off
-              kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
-              kickerStartTime=-1;
-              m_shooter.set(0);
-              canShoot=false;
-              isShooting=false;
-            }
-          }else{
-            //Ramp up Wheel
-            setSpeed(desiredRPM);
+            kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
           }
+        }else{
+          m_shooter.set(0);
+          kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
         }
         
         
