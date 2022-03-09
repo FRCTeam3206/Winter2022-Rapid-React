@@ -53,7 +53,7 @@ public class Shooter extends Subsystem{
 
         // set PID coefficients
         m_pidController.setP(kP);
-        m_pidController.setI(kI);
+        m_pidController.setI(kI)
         m_pidController.setD(kD);
         m_pidController.setIZone(kIz);
         m_pidController.setFF(kFF);
