@@ -7,15 +7,16 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Subsystem;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import static frc.robot.subsystems.Buttons.*;
 public class Shooter extends Subsystem{
 
-    private XboxController m_joystick;
+    private GenericHID m_joystick;
 
     private CANSparkMax m_shooter;
     private VictorSPX kickerWheel;
@@ -27,7 +28,7 @@ public class Shooter extends Subsystem{
     private double inc;
     private boolean shooterRunning = false;
 
-    public Shooter(int kShooterPort, int kickerPort, double increment, XboxController joystick) {
+    public Shooter(int kShooterPort, int kickerPort, double increment, GenericHID joystick) {
         m_shooter = new CANSparkMax(kShooterPort, MotorType.kBrushless);
         //m_shooter.setInverted(true);
         m_joystick = joystick;
@@ -123,30 +124,20 @@ public class Shooter extends Subsystem{
          *  com.revrobotics.CANSparkMax.ControlType.kVelocity
          *  com.revrobotics.CANSparkMax.ControlType.kVoltage
          */
-        if(m_joystick.getBButtonReleased()){
+        if(m_joystick.getRawButton(B_SHOOT)){
           canShoot=true;
         }
-        if ((m_joystick.getBButton()||isShooting)&&canShoot) {
+        if (m_joystick.getRawButton(B_SHOOT)) {
           isShooting=true;
-          double desiredRPM=2000;//To be implemented with LL This is just for Testing
-          if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<100){
+          double desiredRPM=2650;
+          setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
+          if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<25){
             //Shoot
-            if(kickerStartTime<=0){
-              //We have just started to shoot
-              kickerStartTime=System.currentTimeMillis();
-              kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
-            }else if(System.currentTimeMillis()-kickerStartTime>Constants.SHOOT_TIME){
-              //We have been kicking for SHOOT_TIME miliseconds, turn off
-              kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
-              kickerStartTime=-1;
-              m_shooter.set(0);
-              canShoot=false;
-              isShooting=false;
-            }
-          }else{
-            //Ramp up Wheel
-            setSpeed(desiredRPM);
+            kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
           }
+        }else{
+          m_shooter.set(0);
+          kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
         }
         
         

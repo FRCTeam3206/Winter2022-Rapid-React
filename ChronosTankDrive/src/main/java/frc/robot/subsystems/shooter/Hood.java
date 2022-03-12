@@ -6,20 +6,21 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Subsystem;
 
 public class Hood extends Subsystem {
   private WPI_TalonSRX m_hoodMotor;
-  private XboxController m_joystick;
+  private GenericHID m_joystick;
 
   private double angle = ZERO_POS;
   private double inc = .25;
   private static final double ZERO_POS = 27.5;
   public double kP, kI, kD, kIz, kFF;
 
-  public Hood(int port, XboxController joystick) {
+  public Hood(int port, GenericHID joystick) {
     m_joystick = joystick;
 
     m_hoodMotor = new WPI_TalonSRX(port);
