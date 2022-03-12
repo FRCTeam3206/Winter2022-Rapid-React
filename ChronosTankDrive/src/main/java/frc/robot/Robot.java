@@ -38,8 +38,8 @@ public class Robot extends TimedRobot {
 
   // Drive Type
   // Joysticks
-  Joystick leftStick;
   Joystick rightStick;
+  Joystick leftStick;
   XboxController weaponStick;
 
   // Sendable Chooser
@@ -115,8 +115,8 @@ public class Robot extends TimedRobot {
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
     // chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-    leftStick = new Joystick(0);
-    rightStick = new Joystick(2);
+    rightStick = new Joystick(0);
+    leftStick = new Joystick(2);
     weaponStick=new XboxController(1);
     // For later notes: assign buttons for when we are on red/blue alliance so that
     // we can
@@ -171,10 +171,10 @@ public class Robot extends TimedRobot {
      * }
      */
     if(accelerationLimiting){
-      accelLimit(rightStick.getY(), leftStick.getY());
+      accelLimit(leftStick.getY(), rightStick.getY());
     }else{
-      rightAdjusted=rightStick.getY();
-      leftAdjusted=leftStick.getY();
+      rightAdjusted=leftStick.getY();
+      leftAdjusted=rightStick.getY();
     }
     //chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
 

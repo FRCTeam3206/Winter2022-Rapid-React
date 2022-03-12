@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -24,8 +25,14 @@ public class Intake extends Subsystem{
     }
     boolean deployed=false;
     public void periodic(){
-        intakeMotor.set(VictorSPXControlMode.PercentOutput, -((joystick.getRawButton(B_INTAKE))?1:0));
-        if(joystick.getRawButton(B_DEPLOY)){
+        if(joystick.getRawButton(B_INTAKE)){
+            intakeMotor.set(ControlMode.PercentOutput, -1);
+        }else if(joystick.getRawButton(B_REVERSE_INTAKE)){
+            intakeMotor.set(ControlMode.PercentOutput, 1);
+        }else{
+            intakeMotor.set(ControlMode.PercentOutput, 0);
+        }
+        if(joystick.getRawButtonPressed(B_DEPLOY)){
             deploy.toggle();
         }
         

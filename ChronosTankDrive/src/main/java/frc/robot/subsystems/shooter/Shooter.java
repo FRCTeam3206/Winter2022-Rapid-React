@@ -124,7 +124,7 @@ public class Shooter extends Subsystem{
          *  com.revrobotics.CANSparkMax.ControlType.kVelocity
          *  com.revrobotics.CANSparkMax.ControlType.kVoltage
          */
-        if(m_joystick.getRawButton(B_SHOOT)){
+        if(m_joystick.getRawButtonReleased(B_SHOOT)){
           canShoot=true;
         }
         if (m_joystick.getRawButton(B_SHOOT)) {
