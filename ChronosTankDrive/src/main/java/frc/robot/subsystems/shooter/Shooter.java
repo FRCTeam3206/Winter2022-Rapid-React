@@ -8,12 +8,12 @@ import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import frc.robot.subsystems.Subsystem;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import static frc.robot.subsystems.Buttons.*;
+import static frc.robot.Constants.Buttons.*;
 public class Shooter extends Subsystem{
 
     private GenericHID m_joystick;
@@ -24,9 +24,6 @@ public class Shooter extends Subsystem{
     private RelativeEncoder m_encoder;
     public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
     private double shooterSetPoint = 0;
-
-    private double inc;
-    private boolean shooterRunning = false;
 
     public Shooter(int kShooterPort, int kickerPort, double increment, GenericHID joystick) {
         m_shooter = new CANSparkMax(kShooterPort, MotorType.kBrushless);
@@ -43,13 +40,13 @@ public class Shooter extends Subsystem{
         // Use SetDistancePerPulse to set the multiplier for GetDistance
         // This is set up assuming a 6 inch wheel with a 360 CPR encoder.
         // m_encoder.setDistancePerPulse((Math.PI * 6) / 360.0);
-        kP = Constants.sparkmax_kP;
-        kI = Constants.sparkmax_kI;
-        kD = Constants.sparkmax_kD;
-        kIz = Constants.sparkmax_kIz;
-        kFF = Constants.sparkmax_kFF;
-        kMaxOutput = Constants.sparkmax_kMaxOut;
-        kMinOutput = Constants.sparkmax_kMinOut;
+        kP = Constants.Shooter.sparkmax_kP;
+        kI = Constants.Shooter.sparkmax_kI;
+        kD = Constants.Shooter.sparkmax_kD;
+        kIz = Constants.Shooter.sparkmax_kIz;
+        kFF = Constants.Shooter.sparkmax_kFF;
+        kMaxOutput = Constants.Shooter.sparkmax_kMaxOut;
+        kMinOutput = Constants.Shooter.sparkmax_kMinOut;
         maxRPM = 5700;
 
         // set PID coefficients
@@ -68,8 +65,6 @@ public class Shooter extends Subsystem{
         SmartDashboard.putNumber("Feed Forward", kFF);
         SmartDashboard.putNumber("Max Output", kMaxOutput);
         SmartDashboard.putNumber("Min Output", kMinOutput);
-
-        inc = increment;
 
         kickerWheel=new VictorSPX(kickerPort);
     }
@@ -128,7 +123,6 @@ public class Shooter extends Subsystem{
           canShoot=true;
         }
         if (m_joystick.getRawButton(B_SHOOT)) {
-          isShooting=true;
           double desiredRPM=2650;
           setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
           if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<25){
