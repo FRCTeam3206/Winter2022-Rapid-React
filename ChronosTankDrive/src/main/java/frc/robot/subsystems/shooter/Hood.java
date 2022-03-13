@@ -13,9 +13,8 @@ public class Hood extends Subsystem {
   private WPI_TalonSRX m_hoodMotor;
   private GenericHID m_joystick;
 
-  private double angle = ZERO_POS;
+  private double angle = Constants.Shooter.HOOD_ZERO_POS;
   private double inc = .25;
-  private static final double ZERO_POS = 27.5;
   public double kP, kI, kD, kIz, kFF;
 
   public Hood(int port, GenericHID joystick) {
@@ -100,27 +99,29 @@ public class Hood extends Subsystem {
   public void init(){}
   public void periodic() {
     if (m_joystick.getPOV() == 90) {
-      angle = ZERO_POS;
+      angle = Constants.Shooter.HOOD_ZERO_POS;
     } else if (m_joystick.getPOV() == 0) {
       angle += inc;
     } else if (m_joystick.getPOV() == 180) {
       angle -= inc;
     } else if (m_joystick.getPOV() == 270) {
-      angle = ZERO_POS;
+      angle = Constants.Shooter.HOOD_ZERO_POS;
       m_hoodMotor.setSelectedSensorPosition(0);
     }
 
     // System.out.println(pos);
     // setPos(60.0);
-    double targetPositionRotations = (angle - ZERO_POS) / 3.07 * 40960;
+    double targetPositionRotations = (angle - Constants.Shooter.HOOD_ZERO_POS) / Constants.Shooter.DEGREES_PER_ROTATION*Constants.Shooter.HOOD_TICKS_PER_ROTATION;
     m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
 
     this.updateSmartDashboard();
     SmartDashboard.putNumber("Target Position Rotations", targetPositionRotations);
     SmartDashboard.putNumber("Current Position", m_hoodMotor.getSelectedSensorPosition());
   }
-
+  public void setAngle(double angle){
+    this.angle=angle;
+  }
   public double getAngle() {
-    return angle;
+    return m_hoodMotor.getSelectedSensorPosition()*Constants.Shooter.DEGREES_PER_ROTATION/Constants.Shooter.HOOD_TICKS_PER_ROTATION+Constants.Shooter.HOOD_ZERO_POS;
   }
 }

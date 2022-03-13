@@ -44,12 +44,18 @@ public class Constants {
          * this does not affect motor invert. 
          */
         public static boolean kMotorInvert = false;
+
+        public static double HOOD_ZERO_POS=27.5;
+
+        public static double DEGREES_PER_ROTATION=3.07;
+
+        public static double HOOD_TICKS_PER_ROTATION=40960;
     }
     public static class Buttons{
         public static final int B_INTAKE=1;
         public static final int B_DEPLOY=5;
-        public static final int B_ALIGN=3;
-        public static final int B_SHOOT=2;
+        public static final int B_ALIGN=2;
+        public static final int B_SHOOT=3;
         public static final int B_REVERSE_INTAKE=4;
     }
 }

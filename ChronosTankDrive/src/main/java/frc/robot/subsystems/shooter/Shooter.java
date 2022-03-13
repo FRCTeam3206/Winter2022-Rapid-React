@@ -119,19 +119,10 @@ public class Shooter extends Subsystem{
          *  com.revrobotics.CANSparkMax.ControlType.kVelocity
          *  com.revrobotics.CANSparkMax.ControlType.kVoltage
          */
-        if(m_joystick.getRawButtonReleased(B_SHOOT)){
-          canShoot=true;
-        }
         if (m_joystick.getRawButton(B_SHOOT)) {
-          double desiredRPM=2650;
-          setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
-          if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<25){
-            //Shoot
-            kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
-          }
+          shoot(2650);
         }else{
-          m_shooter.set(0);
-          kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
+          stop();
         }
         
         
@@ -139,7 +130,17 @@ public class Shooter extends Subsystem{
             // double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
             // m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
       }
-
+    public void shoot(double desiredRPM){
+      setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
+      if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<25){
+        //Shoot
+        kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
+      }
+    }
+    public void stop(){
+      m_shooter.set(0);
+          kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
+    }
     @Override
     public void init() {
       // TODO Auto-generated method stub

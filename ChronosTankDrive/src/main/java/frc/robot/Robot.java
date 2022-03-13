@@ -59,7 +59,7 @@ public class Robot extends TimedRobot {
   double accelLimitedLeftGetY;
   double accelLimitedRightGetY;
   double accelLimitedSlideDrive;
-  double accelDriveKonstant = 6; // Change from 2-32. 32 is super slow to react, 2 is little improvement
+  double accelDriveKonstant = 9; // Change from 2-32. 32 is super slow to react, 2 is little improvement
   double leftDriveCoef = .7;
   double rightDriveCoef = .7;
   double rightStickDeadband = .1;
@@ -147,7 +147,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
-  subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick)};
+    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
