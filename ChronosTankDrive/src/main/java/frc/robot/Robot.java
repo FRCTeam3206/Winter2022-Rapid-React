@@ -152,9 +152,9 @@ public class Robot extends TimedRobot {
       subSystem.init();
     }
   }
-  public void accelLimit(double rightInput,double leftInput){
-    rightAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
-    leftAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
+  public void accelLimit(double leftInput,double rightInput){
+    rightAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
+    leftAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
     chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
   @Override
