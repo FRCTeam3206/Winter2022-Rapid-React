@@ -38,8 +38,8 @@ public class Robot extends TimedRobot {
 
   // Drive Type
   // Joysticks
-  Joystick leftStick;
   Joystick rightStick;
+  Joystick leftStick;
   XboxController weaponStick;
 
   // Sendable Chooser
@@ -115,8 +115,8 @@ public class Robot extends TimedRobot {
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
     // chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-    leftStick = new Joystick(0);
-    rightStick = new Joystick(2);
+    rightStick = new Joystick(0);
+    leftStick = new Joystick(2);
     weaponStick=new XboxController(1);
     // For later notes: assign buttons for when we are on red/blue alliance so that
     // we can
@@ -146,18 +146,15 @@ public class Robot extends TimedRobot {
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
-    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-    subSystems = new Subsystem[] {
-      new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick),
-      new Shooter(SHOOT_PORT, KICKER_PORT, 0, weaponStick)
-    };
+    chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
+  subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
   }
-  public void accelLimit(double rightInput,double leftInput){
-    rightAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
-    leftAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
+  public void accelLimit(double leftInput,double rightInput){
+    rightAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
+    leftAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
     chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
   @Override
@@ -174,7 +171,7 @@ public class Robot extends TimedRobot {
      * }
      */
     if(accelerationLimiting){
-      accelLimit(rightStick.getY(), leftStick.getY());
+      accelLimit(leftStick.getY(), rightStick.getY());
     }else{
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
