@@ -5,7 +5,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
@@ -78,10 +79,10 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  Solenoid driveSol = new Solenoid(1, PneumaticsModuleType.CTREPCM, 1);
+  DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-  Limelight limelight=new Limelight(3, 5, 30);//TODO:Adjust to experimental values
+  Limelight limelight = new Limelight(3, 5, 30);//TODO:Adjust to experimental values
   // DriveTrain Encoders
   RelativeEncoder leftEncoder;
   RelativeEncoder rightEncoder;
@@ -153,7 +154,7 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void teleopPeriodic() {
-    
+    //TODO: figure out can values for drive train pneumatics
      //joystick drive
       if (rightStick.getRawButton(1)) { // Low Speed
       driveSol.set(Value.kForward);
