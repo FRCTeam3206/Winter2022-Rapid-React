@@ -79,7 +79,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 1);
+  DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 1);  // TODO: fix this call!
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight = new Limelight(3, 5, 30);//TODO:Adjust to experimental values

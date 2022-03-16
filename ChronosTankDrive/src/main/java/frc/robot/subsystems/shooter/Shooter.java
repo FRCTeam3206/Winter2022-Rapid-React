@@ -48,7 +48,7 @@ public class Shooter extends Subsystem{
         kFF = Constants.Shooter.sparkmax_kFF;
         kMaxOutput = Constants.Shooter.sparkmax_kMaxOut;
         kMinOutput = Constants.Shooter.sparkmax_kMinOut;
-        maxRPM = 2300;
+        maxRPM = 5700;  // max free rpm for NEO motor
 
         // set PID coefficients
         m_pidController.setP(kP);
