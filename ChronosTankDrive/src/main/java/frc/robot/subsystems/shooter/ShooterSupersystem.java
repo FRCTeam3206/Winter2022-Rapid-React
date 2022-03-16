@@ -33,8 +33,9 @@ public class ShooterSupersystem extends Subsystem {
     public void periodic() {
         boolean shooting=false;
         if (joystick.getRawButton(B_SHOOTER_FAILSAFE)) {
-            hood.setAngle(15);
-            shooter.shoot(2500);
+            // assumes driver has parked robot against dasher board under hub
+            hood.setAngle(12);  // launch angle of 78 deg, found by limited testing tonight
+            shooter.shoot(2300); // found by limited testing tonight
             shooting=true;
         } else {
             double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
