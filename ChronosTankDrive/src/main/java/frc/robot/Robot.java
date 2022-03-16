@@ -14,7 +14,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterSupersystem;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax;
@@ -46,14 +48,6 @@ public class Robot extends TimedRobot {
   // SendableChooser<String> autoChoices = new SendableChooser<>();
   String autoSelected;
 
-  // the folliwing four lines are part of the original basic code
-  /*
-   * private final PWMSparkMax leftFrontDrive = new PWMSparkMax(0);
-   * private final PWMSparkMax rightFrontDrive = new PWMSparkMax(1);
-   * private final DifferentialDrive m_robotDrive = new
-   * DifferentialDrive(leftFrontDrive, rightFrontDrive);
-   * private final Joystick m_stick = new Joystick(0);
-   */
   // Acceleration Limiting Variables
   boolean accelerationLimiting = true;
   double accelLimitedLeftGetY;
@@ -114,7 +108,6 @@ public class Robot extends TimedRobot {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    // chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     rightStick = new Joystick(0);
     leftStick = new Joystick(2);
     weaponStick=new XboxController(1);
@@ -128,7 +121,6 @@ public class Robot extends TimedRobot {
     leftBackDrive = new CANSparkMax(3, MotorType.kBrushless);
     rightBackDrive = new CANSparkMax(4, MotorType.kBrushless);
 
-    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     leftEncoder = leftFrontDrive.getEncoder();
     rightEncoder = rightFrontDrive.getEncoder();
 
@@ -146,8 +138,15 @@ public class Robot extends TimedRobot {
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
+<<<<<<< Updated upstream
     chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
   subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick)};
+=======
+    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    Shooter shooter=new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick);
+    Hood hood=new Hood(9, rightStick);
+    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(shooter, hood, limelight,chronosDrive,leftStick)};
+>>>>>>> Stashed changes
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -155,28 +154,30 @@ public class Robot extends TimedRobot {
   public void accelLimit(double leftInput,double rightInput){
     rightAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
     leftAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
-    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+    //chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
   @Override
   public void teleopPeriodic() {
     /*
-     * //joystick drive
-     * if (rightStick.getRawButton(1)) { // Low Speed
-     * driveSol.set(Value.kForward);
-     * } else if (rightStick.getRawButton(2)) { // High Speed
-     * driveSol.set(Value.kReverse);
-     * } else {
-     * driveSol.set(Value.kOff); // Ensures Pistons are Off
-     * 
-     * }
-     */
+     //joystick drive
+      if (rightStick.getRawButton(1)) { // Low Speed
+      driveSol.set(Value.kForward);
+      } else if (rightStick.getRawButton(2)) { // High Speed
+      driveSol.set(Value.kReverse);
+      } else {
+      driveSol.set(Value.kOff); // Ensures Pistons are Off
+      
+      }*/
+     
     if(accelerationLimiting){
       accelLimit(leftStick.getY(), rightStick.getY());
     }else{
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
     }
-    //chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
+    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+
+
 
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for
