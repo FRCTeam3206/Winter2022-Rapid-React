@@ -48,7 +48,7 @@ public class Shooter extends Subsystem{
         kFF = Constants.Shooter.sparkmax_kFF;
         kMaxOutput = Constants.Shooter.sparkmax_kMaxOut;
         kMinOutput = Constants.Shooter.sparkmax_kMinOut;
-        maxRPM = 5700;
+        maxRPM = 2300;
 
         // set PID coefficients
         m_pidController.setP(kP);
@@ -157,25 +157,8 @@ public class Shooter extends Subsystem{
             // double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
             // m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
       }
-<<<<<<< Updated upstream
-
-=======
-  /*  public void shoot(double desiredRPM){
-      desiredRPM=-desiredRPM;
-      setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
-      //if(Math.abs(m_encoder.getVelocity()-desiredRPM)<25){
-        //Shoot
-        kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
-      //}
-    }
-    public void stop(){
-      m_shooter.set(0);
-      kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
-    }
->>>>>>> Stashed changes
     @Override
     public void init() {
       // TODO Auto-generated method stub
-      
-    }*/
+}
 }

@@ -138,15 +138,10 @@ public class Robot extends TimedRobot {
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
-<<<<<<< Updated upstream
-    chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
-  subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick)};
-=======
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     Shooter shooter=new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick);
     Hood hood=new Hood(9, rightStick);
     subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(shooter, hood, limelight,chronosDrive,leftStick)};
->>>>>>> Stashed changes
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -158,7 +153,7 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void teleopPeriodic() {
-    /*
+    
      //joystick drive
       if (rightStick.getRawButton(1)) { // Low Speed
       driveSol.set(Value.kForward);
@@ -166,8 +161,7 @@ public class Robot extends TimedRobot {
       driveSol.set(Value.kReverse);
       } else {
       driveSol.set(Value.kOff); // Ensures Pistons are Off
-      
-      }*/
+      }
      
     if(accelerationLimiting){
       accelLimit(leftStick.getY(), rightStick.getY());

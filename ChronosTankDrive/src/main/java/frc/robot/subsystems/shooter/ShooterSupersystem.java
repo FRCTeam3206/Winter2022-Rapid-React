@@ -65,3 +65,5 @@ public class ShooterSupersystem extends Subsystem {
         }
     }
 }
+
+//when bumper is against the hub to shoot, hood angle should be 78 degrees, and rpm should be 2300
