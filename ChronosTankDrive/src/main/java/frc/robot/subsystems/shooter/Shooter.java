@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.revrobotics.CANSparkMax;
@@ -47,7 +48,7 @@ public class Shooter extends Subsystem{
         kFF = Constants.Shooter.sparkmax_kFF;
         kMaxOutput = Constants.Shooter.sparkmax_kMaxOut;
         kMinOutput = Constants.Shooter.sparkmax_kMinOut;
-        maxRPM = 5700;
+        maxRPM = 2300;
 
         // set PID coefficients
         m_pidController.setP(kP);
@@ -76,7 +77,7 @@ public class Shooter extends Subsystem{
       shooterSetPoint=rpm_target/maxRPM;
       shooterSetPoint = MathUtil.clamp(shooterSetPoint, kMinOutput, kMaxOutput);
       rpm_target=shooterSetPoint*maxRPM;
-      m_pidController.setReference(-rpm_target, CANSparkMax.ControlType.kVelocity);
+      m_pidController.setReference(rpm_target, CANSparkMax.ControlType.kVelocity);
       SmartDashboard.putNumber("SetPoint", shooterSetPoint);
       SmartDashboard.putNumber("RPM_Target", rpm_target);
       SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
@@ -84,6 +85,23 @@ public class Shooter extends Subsystem{
     long kickerStartTime=-1;
     boolean canShoot=true;
     boolean isShooting=false;
+    public void shoot(double desiredRPM){
+      desiredRPM=-desiredRPM;
+      setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
+      if(Math.abs(m_encoder.getVelocity()-desiredRPM)<25){
+        //Shoot
+        kickerWheel.set(VictorSPXControlMode.PercentOutput, -1);
+     }
+    }
+    public void stop(){
+      m_shooter.set(0);
+      kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
+    }
+    @Override
+    public void init() {
+      // TODO Auto-generated method stub
+      
+    }
     public void periodic() {
         // read PID coefficients from SmartDashboard
         double p = SmartDashboard.getNumber("P Gain", 0);
@@ -139,10 +157,8 @@ public class Shooter extends Subsystem{
             // double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
             // m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
       }
-
     @Override
     public void init() {
       // TODO Auto-generated method stub
-      
-    }
+}
 }
