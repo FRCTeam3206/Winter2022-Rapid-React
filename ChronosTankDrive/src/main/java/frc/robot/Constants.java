@@ -45,11 +45,15 @@ public class Constants {
          */
         public static boolean kMotorInvert = false;
 
-        public static double HOOD_ZERO_POS=27.5;
-
-        public static double DEGREES_PER_ROTATION=3.07;
+        public static double HOOD_ZERO_POS=0;
 
         public static double HOOD_TICKS_PER_ROTATION=40960;
+
+        public static double HOOD_TEETH_ANGLE_RAT=48/41.233;
+
+        public static double HOOD_SPOOL_TEETH=24;
+
+
     }
     public static class Buttons{
         public static final int B_INTAKE=1;

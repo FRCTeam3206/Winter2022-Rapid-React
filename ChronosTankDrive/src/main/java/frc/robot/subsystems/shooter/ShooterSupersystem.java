@@ -30,8 +30,10 @@ public class ShooterSupersystem extends Subsystem{
         double distance=distanceAndAngle[0];
         double angle=distanceAndAngle[1];
         boolean aligned=false;
+        double distAway=distance-8*12;
         if(joystick.getRawButton(B_ALIGN)){
             double turn=0;
+            double forward=0;
             if(Math.abs(angle)>10){
                 turn=.7;
             }else if(Math.abs(angle)<3){
@@ -42,11 +44,13 @@ public class ShooterSupersystem extends Subsystem{
             if(angle>0){
                 turn*=-1;
             }
-        hood.setAngle(60);//There will be a function based on ll to find this
+            
+        hood.setAngle(20);//There will be a function based on ll to find this
         }
         if(joystick.getRawButton(B_SHOOT)){
             shooter.shoot(2650);//There will be a function based on ll to find this
             
         }
+        hood.update();
     }
 }

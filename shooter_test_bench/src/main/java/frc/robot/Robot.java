@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.motors.Hood;
@@ -27,17 +30,18 @@ public class Robot extends TimedRobot {
 
   private XboxController m_joystick;
 
-  private static final int kShooterPort = 1;
-  private static final int kJoystickPort = 0;
+  private static final int kShooterPort = 5;
+  private static final int kJoystickPort = 1;
   private static final double increment = 0.01;
 
-  private static final int kHoodPort = 2;
-
+  private static final int kHoodPort = 9;
+  private VictorSPX kicker;
   @Override
   public void robotInit() {
     m_joystick = new XboxController(kJoystickPort);
     shooter = new Shooter(kShooterPort, increment, m_joystick);
     hood = new Hood(kHoodPort, m_joystick);
+    kicker=new VictorSPX(7);
   }
 
   
@@ -55,7 +59,11 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     shooter.shooterPeriodic();
     hood.hoodPeriodic();
-
+    if(m_joystick.getLeftBumper()){
+      kicker.set(ControlMode.PercentOutput, -1);
+    }else{
+      kicker.set(ControlMode.PercentOutput, 0);
+    }
 		// double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
 		// m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
   }

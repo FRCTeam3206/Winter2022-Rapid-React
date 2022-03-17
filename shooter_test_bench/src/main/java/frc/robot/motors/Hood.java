@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 public class Hood {
@@ -87,7 +88,8 @@ public class Hood {
               m_hoodMotor.setSelectedSensorPosition(0);
           }
         double targetPositionRotations =  pos * 10.0 * 4096;
-        System.out.println(targetPositionRotations);
-		    m_hoodMotor.set(ControlMode.Position, -targetPositionRotations);
+		    //System.out.println(targetPositionRotations);
+        m_hoodMotor.set(ControlMode.Position, -targetPositionRotations);
+        SmartDashboard.putNumber("Hood Position", targetPositionRotations);
     }
 }

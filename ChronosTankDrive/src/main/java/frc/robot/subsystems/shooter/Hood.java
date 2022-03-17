@@ -111,9 +111,13 @@ public class Hood extends Subsystem {
 
     // System.out.println(pos);
     // setPos(60.0);
-    double targetPositionRotations = (angle - Constants.Shooter.HOOD_ZERO_POS) / Constants.Shooter.DEGREES_PER_ROTATION*Constants.Shooter.HOOD_TICKS_PER_ROTATION;
+    
+    update();
+    
+  }
+  public void update(){
+    double targetPositionRotations = (angle - Constants.Shooter.HOOD_ZERO_POS) *Constants.Shooter.HOOD_TEETH_ANGLE_RAT/Constants.Shooter.HOOD_SPOOL_TEETH*Constants.Shooter.HOOD_TICKS_PER_ROTATION;
     m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
-
     this.updateSmartDashboard();
     SmartDashboard.putNumber("Target Position Rotations", targetPositionRotations);
     SmartDashboard.putNumber("Current Position", m_hoodMotor.getSelectedSensorPosition());
@@ -122,6 +126,7 @@ public class Hood extends Subsystem {
     this.angle=angle;
   }
   public double getAngle() {
-    return m_hoodMotor.getSelectedSensorPosition()*Constants.Shooter.DEGREES_PER_ROTATION/Constants.Shooter.HOOD_TICKS_PER_ROTATION+Constants.Shooter.HOOD_ZERO_POS;
+    return m_hoodMotor.getSelectedSensorPosition()/Constants.Shooter.HOOD_TICKS_PER_ROTATION*Constants.Shooter.HOOD_SPOOL_TEETH/Constants.Shooter.HOOD_TEETH_ANGLE_RAT+Constants.Shooter.HOOD_ZERO_POS;
   }
+  
 }
