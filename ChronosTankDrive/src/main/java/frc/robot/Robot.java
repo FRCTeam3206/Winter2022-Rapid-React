@@ -89,7 +89,7 @@ public class Robot extends TimedRobot {
   Solenoid driveSol = new Solenoid(1, PneumaticsModuleType.CTREPCM, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-  Limelight limelight=new Limelight(3, 5, 30);//TODO:Adjust to experimental values
+  Limelight limelight=new Limelight(24,30,9.5,16.5);
   // DriveTrain Encoders
   RelativeEncoder leftEncoder;
   RelativeEncoder rightEncoder;
