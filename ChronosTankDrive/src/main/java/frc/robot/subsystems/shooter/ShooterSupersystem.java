@@ -45,11 +45,13 @@ public class ShooterSupersystem extends Subsystem{
                 turn*=-1;
             }
             
-        hood.setAngle(20);//There will be a function based on ll to find this
+        hood.setAngle(8.8);//There will be a function based on ll to find this
         }
         if(joystick.getRawButton(B_SHOOT)){
             shooter.shoot(2650);//There will be a function based on ll to find this
             
+        }else{
+            shooter.stop();
         }
         hood.update();
     }

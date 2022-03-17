@@ -47,7 +47,7 @@ public class Constants {
 
         public static double HOOD_ZERO_POS=0;
 
-        public static double HOOD_TICKS_PER_ROTATION=40960;
+        public static double HOOD_TICKS_PER_ROTATION=409600;
 
         public static double HOOD_TEETH_ANGLE_RAT=48/41.233;
 
