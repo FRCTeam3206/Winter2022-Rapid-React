@@ -6,7 +6,7 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Subsystem;
 import static frc.robot.Constants.Buttons.*;
 
-public class ShooterSupersystem extends Subsystem{
+public class ShooterSupersystem extends Subsystem {
     private Shooter shooter;
     private Hood hood;
     private Limelight limelight;
@@ -36,35 +36,35 @@ public class ShooterSupersystem extends Subsystem{
             shooter.shoot(2300); // found by limited testing tonight
             // shooting=true;
         } else {
-          double[] distanceAndAngle=limelight.getAdjustedDistanceAndAngleToTarget();
-          double distance=distanceAndAngle[0];
-          double angle=distanceAndAngle[1];
-          boolean aligned=false;
-          double distAway=distance-8*12;
-          if(joystick.getRawButton(B_ALIGN)){
-              double turn=0;
-              double forward=0;
-              if(Math.abs(angle)>10){
-                  turn=.7;
-              }else if(Math.abs(angle)<3){
-                  turn=.5;
-              }else{
-                  aligned=true;
-              }
-              if(angle>0){
-                  turn*=-1;
-              }
-              hood.setAngle(8.8);//There will be a function based on ll to find this
+            double[] distanceAndAngle=limelight.getAdjustedDistanceAndAngleToTarget();
+            double distance=distanceAndAngle[0];
+            double angle=distanceAndAngle[1];
+            boolean aligned=false;
+            double distAway=distance-8*12;
+            if(joystick.getRawButton(B_ALIGN)){
+                double turn=0;
+                double forward=0;
+                if(Math.abs(angle)>10){
+                    turn=.7;
+                }else if(Math.abs(angle)<3){
+                    turn=.5;
+                }else{
+                    aligned=true;
+                }
+                
+                if(angle>0){
+                    turn*=-1;
+                }
+                hood.setAngle(8.8);//There will be a function based on ll to find this
             }
             if(joystick.getRawButton(B_SHOOT)){
-              shooter.shoot(2650);//There will be a function based on ll to find this
-              
+                shooter.shoot(2650);//There will be a function based on ll to find this  
             }else{
               shooter.stop();
             }
-          hood.update();
-          }
+        hood.update();
         }
     }
 }
+
 //when bumper is against the hub to shoot, hood angle should be 78 degrees, and rpm should be 2300
