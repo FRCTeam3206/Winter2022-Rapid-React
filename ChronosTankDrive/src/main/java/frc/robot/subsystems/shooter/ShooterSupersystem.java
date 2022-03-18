@@ -44,8 +44,14 @@ public class ShooterSupersystem extends Subsystem{
             if(angle>0){
                 turn*=-1;
             }
-            
-        hood.setAngle(20);//There will be a function based on ll to find this
+            if(Math.abs(distAway)>24){
+                forward=.7;
+            }else if(Math.abs(distAway)>3){
+                forward=.5;
+            }
+            if(distAway<0)forward*=-1;
+            driveTrain.arcadeDrive(forward, turn);
+        //hood.setAngle(20);//There will be a function based on ll to find this
         }
         if(joystick.getRawButton(B_SHOOT)){
             shooter.shoot(2650);//There will be a function based on ll to find this

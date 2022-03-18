@@ -172,6 +172,7 @@ public class Robot extends TimedRobot {
      * 
      * }
      */
+    if(!leftStick.getRawButton(Constants.Buttons.B_ALIGN))
     if(accelerationLimiting){
       accelLimit(leftStick.getY(), rightStick.getY());
     }else{
