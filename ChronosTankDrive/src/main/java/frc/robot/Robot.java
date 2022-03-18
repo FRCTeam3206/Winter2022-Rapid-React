@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
   double accelLimitedLeftGetY;
   double accelLimitedRightGetY;
   double accelLimitedSlideDrive;
-  double accelDriveKonstant = 6; // Change from 2-32. 32 is super slow to react, 2 is little improvement
+  double accelDriveKonstant = 9; // Change from 2-32. 32 is super slow to react, 2 is little improvement
   double leftDriveCoef = .7;
   double rightDriveCoef = .7;
   double rightStickDeadband = .1;
@@ -82,7 +82,7 @@ public class Robot extends TimedRobot {
   DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 1);  // TODO: fix this call!
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-  Limelight limelight = new Limelight(3, 5, 30);//TODO:Adjust to experimental values
+  Limelight limelight=new Limelight(24,30,9.5,16.5);
   // DriveTrain Encoders
   RelativeEncoder leftEncoder;
   RelativeEncoder rightEncoder;
@@ -139,10 +139,11 @@ public class Robot extends TimedRobot {
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
-    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
-    Shooter shooter=new Shooter(SHOOT_PORT, KICKER_PORT, 0, leftStick);
-    Hood hood=new Hood(9, rightStick);
-    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(shooter, hood, limelight,chronosDrive,leftStick)};
+    chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
+    subSystems=new Subsystem[] {
+      new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),
+      new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,leftStick), limelight,chronosDrive, leftStick)
+      };
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }

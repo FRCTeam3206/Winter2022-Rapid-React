@@ -92,23 +92,22 @@ public class Hood {
       kFF = ff;
     }
 
-    // display PID coefficients on SmartDashboard
-    SmartDashboard.putNumber("Feed Forward (hood)", kFF);
-    SmartDashboard.putNumber("P Gain (hood)", kP);
-    SmartDashboard.putNumber("I Gain (hood)", kI);
-    SmartDashboard.putNumber("D Gain (hood)", kD);
-  }
+    public void hoodPeriodic() {
 
-  public void hoodPeriodic() {
-    if (m_joystick.getPOV() == 90) {
-      angle = ZERO_POS;
-    } else if (m_joystick.getPOV() == 0) {
-      angle += inc;
-    } else if (m_joystick.getPOV() == 180) {
-      angle -= inc;
-    } else if (m_joystick.getPOV() == 270) {
-      angle = ZERO_POS;
-      m_hoodMotor.setSelectedSensorPosition(0);
+        if (m_joystick.getPOV() == 90) {
+            pos = 0.0;
+          } else if (m_joystick.getPOV() == 0) {
+            pos += inc;
+          } else if (m_joystick.getPOV() == 180) {
+            pos -= inc;
+          } else if (m_joystick.getPOV() == 270) {
+              pos = 0.0;
+              m_hoodMotor.setSelectedSensorPosition(0);
+          }
+        double targetPositionRotations =  pos * 10.0 * 4096;
+		    //System.out.println(targetPositionRotations);
+        m_hoodMotor.set(ControlMode.Position, -targetPositionRotations);
+        SmartDashboard.putNumber("Hood Position", targetPositionRotations);
     }
 
     // System.out.println(pos);

@@ -47,15 +47,19 @@ public class Constants {
 
         public static double HOOD_ZERO_POS=0;
 
-        public static double DEGREES_PER_ROTATION=3.07;
+        public static double HOOD_TICKS_PER_ROTATION=409600;
 
-        public static double HOOD_TICKS_PER_ROTATION=40960;
+        public static double HOOD_TEETH_ANGLE_RAT=48/41.233;
+
+        public static double HOOD_SPOOL_TEETH=24;
+
+
     }
     public static class Buttons{
         public static final int B_INTAKE=1;
         public static final int B_DEPLOY=5;
-        public static final int B_ALIGN=3;
-        public static final int B_SHOOT=2;
+        public static final int B_ALIGN=2;
+        public static final int B_SHOOT=3;
         public static final int B_REVERSE_INTAKE=4;
         public static final int B_SHOOTER_FAILSAFE=7;
     }

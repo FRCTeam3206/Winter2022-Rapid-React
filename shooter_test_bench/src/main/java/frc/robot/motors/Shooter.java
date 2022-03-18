@@ -124,10 +124,10 @@ public class Shooter {
         double rpm_target = shooterSetPoint*maxRPM;
     
         if (shooterRunning) {
-            m_pidController.setReference(rpm_target, CANSparkMax.ControlType.kVelocity);
+            m_pidController.setReference(-rpm_target, CANSparkMax.ControlType.kVelocity);
         } else {
             m_shooter.set(0);
-            shooterSetPoint = m_encoder.getVelocity()/maxRPM;
+            rpm_target=0;
         }
         
         SmartDashboard.putNumber("SetPoint", shooterSetPoint);
