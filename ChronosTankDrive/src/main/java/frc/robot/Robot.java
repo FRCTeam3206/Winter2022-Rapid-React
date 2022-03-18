@@ -5,7 +5,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
@@ -48,14 +49,6 @@ public class Robot extends TimedRobot {
   // SendableChooser<String> autoChoices = new SendableChooser<>();
   String autoSelected;
 
-  // the folliwing four lines are part of the original basic code
-  /*
-   * private final PWMSparkMax leftFrontDrive = new PWMSparkMax(0);
-   * private final PWMSparkMax rightFrontDrive = new PWMSparkMax(1);
-   * private final DifferentialDrive m_robotDrive = new
-   * DifferentialDrive(leftFrontDrive, rightFrontDrive);
-   * private final Joystick m_stick = new Joystick(0);
-   */
   // Acceleration Limiting Variables
   boolean accelerationLimiting = true;
   double accelLimitedLeftGetY;
@@ -86,7 +79,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  Solenoid driveSol = new Solenoid(1, PneumaticsModuleType.CTREPCM, 1);
+  DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 1);  // TODO: fix this call!
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight=new Limelight(24,30,9.5,16.5);
@@ -116,7 +109,6 @@ public class Robot extends TimedRobot {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    // chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     rightStick = new Joystick(0);
     leftStick = new Joystick(2);
     weaponStick=new XboxController(1);
@@ -130,7 +122,6 @@ public class Robot extends TimedRobot {
     leftBackDrive = new CANSparkMax(3, MotorType.kBrushless);
     rightBackDrive = new CANSparkMax(4, MotorType.kBrushless);
 
-    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     leftEncoder = leftFrontDrive.getEncoder();
     rightEncoder = rightFrontDrive.getEncoder();
 
@@ -149,7 +140,10 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
-    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,leftStick), limelight,chronosDrive, leftStick)};
+    subSystems=new Subsystem[] {
+      new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),
+      new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,leftStick), limelight,chronosDrive, leftStick)
+      };
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -157,28 +151,29 @@ public class Robot extends TimedRobot {
   public void accelLimit(double leftInput,double rightInput){
     rightAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
     leftAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
-    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+    //chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
   @Override
   public void teleopPeriodic() {
-    /*
-     * //joystick drive
-     * if (rightStick.getRawButton(1)) { // Low Speed
-     * driveSol.set(Value.kForward);
-     * } else if (rightStick.getRawButton(2)) { // High Speed
-     * driveSol.set(Value.kReverse);
-     * } else {
-     * driveSol.set(Value.kOff); // Ensures Pistons are Off
-     * 
-     * }
-     */
+    //TODO: figure out can values for drive train pneumatics
+     //joystick drive
+      if (rightStick.getRawButton(1)) { // Low Speed
+      driveSol.set(Value.kForward);
+      } else if (rightStick.getRawButton(2)) { // High Speed
+      driveSol.set(Value.kReverse);
+      } else {
+      driveSol.set(Value.kOff); // Ensures Pistons are Off
+      }
+     
     if(accelerationLimiting){
       accelLimit(leftStick.getY(), rightStick.getY());
     }else{
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
     }
-    //chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
+    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+
+
 
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for

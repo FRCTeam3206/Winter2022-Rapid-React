@@ -3,6 +3,7 @@ package frc.robot.motors;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
@@ -65,7 +66,7 @@ public class Shooter {
         SmartDashboard.putNumber("Min Output", kMinOutput);
 
         inc = increment;
-
+        m_shooter.setIdleMode(IdleMode.kBrake);
     }
 
     public void showEncoderValOnSmartDashboard() {
@@ -109,7 +110,7 @@ public class Shooter {
          */
         
         if (m_joystick.getBButtonPressed()) {
-        //   shooterSetPoint = 0.0;
+          shooterSetPoint = 0.0;
           shooterRunning = false;
         } else if (m_joystick.getYButtonPressed()) {
           shooterSetPoint += inc;

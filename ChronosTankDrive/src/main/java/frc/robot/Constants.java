@@ -61,5 +61,6 @@ public class Constants {
         public static final int B_ALIGN=2;
         public static final int B_SHOOT=3;
         public static final int B_REVERSE_INTAKE=4;
+        public static final int B_SHOOTER_FAILSAFE=7;
     }
 }

@@ -76,9 +76,23 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {}
 
+  private ChronosClimber climber = new ChronosClimber(0, 0, 1, new int[]{5, 6, 3, 4}, 0.25);
+    // Make a climber object from ChronosClimber where:
+      // The joystick "port" is 0,
+      // The First Motor's port is 0,
+      // The Second Motor's port is 1,
+      // The Control Scheme for speed control is:
+        // Top left - Increase speed
+        // Top right - Decrease speed
+        // Bottom left - Reset speed to default
+        // Bottom right - Set speed to 0
+      // The default speed is 0.25
+
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    climber.climb(); // Do climber things
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
