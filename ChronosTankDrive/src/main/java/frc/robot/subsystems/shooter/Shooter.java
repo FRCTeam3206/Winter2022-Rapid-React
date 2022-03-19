@@ -80,7 +80,7 @@ public class Shooter extends Subsystem{
       m_pidController.setReference(rpm_target, CANSparkMax.ControlType.kVelocity);
       SmartDashboard.putNumber("SetPoint", shooterSetPoint);
       SmartDashboard.putNumber("RPM_Target", rpm_target);
-      SmartDashboard.putNumber("ProcessVariable", m_encoder.getVelocity());
+      SmartDashboard.putNumber("ProcessVariable", -m_encoder.getVelocity());
     }
     long kickerStartTime=-1;
     boolean canShoot=true;

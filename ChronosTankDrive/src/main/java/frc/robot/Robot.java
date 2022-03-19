@@ -5,9 +5,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
@@ -23,7 +20,8 @@ import frc.robot.subsystems.shooter.ShooterSupersystem;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import static frc.robot.Constants.IDS.*;
+import static frc.robot.Constants.Limelight.*;
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.cscore.UsbCamera;
@@ -83,7 +81,7 @@ public class Robot extends TimedRobot {
   //Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);  // TODO: fix this call!
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-  Limelight limelight=new Limelight(24,30,9.5,16.5);
+  Limelight limelight;
   // DriveTrain Encoders
   RelativeEncoder leftEncoder;
   RelativeEncoder rightEncoder;
@@ -100,11 +98,8 @@ public class Robot extends TimedRobot {
   double leftPrime;
 
   Subsystem[] subSystems;
-
-  public static final int SHOOT_PORT=5;
-  public static final int INTAKE_MOTOR_PORT=6;
-  public static final int KICKER_PORT=7;
-  public static final int INTAKE_DEPLOY_PORT=0;
+  ShooterSupersystem shooter;
+  Intake intake;
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -140,8 +135,11 @@ public class Robot extends TimedRobot {
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
+    limelight=new Limelight(24,32+3,9.5,16.5);
     chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
-    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,1,leftStick), limelight,chronosDrive, leftStick)};
+    intake=new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick);
+    shooter=new ShooterSupersystem(new Shooter(SHOOT_PORT,KICKER_PORT,.01,leftStick), new Hood(HOOD_PORT,HOOD_LIMIT_PORT,leftStick), limelight,chronosDrive, leftStick);
+    subSystems=new Subsystem[]{intake,shooter,new Climber(8, 10, weaponStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -173,7 +171,7 @@ public class Robot extends TimedRobot {
     }
     //if(rightStick.getRawButton(1)) driveSol.set(true);
     //else driveSol.set(false);
-    chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
+    chronosDrive.tankDrive(leftAdjusted,rightAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for

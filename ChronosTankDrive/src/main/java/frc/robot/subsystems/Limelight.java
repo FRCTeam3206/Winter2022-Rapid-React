@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 
 public class Limelight {
     public static final double H2=8*12+8;
@@ -16,7 +17,7 @@ public class Limelight {
         H1=height;
     }
     public Limelight (double height,double angle,double xOffset,double yOffset){
-        T0=angle;
+        T0=angle*Math.PI/180;
         H1=height;
         X_OFF=xOffset;
         Y_OFF=yOffset;
@@ -47,13 +48,14 @@ public class Limelight {
         double rawDist=dist(table.getEntry("ty").getDouble(0.0));
         double rawAngle=table.getEntry("tx").getDouble(0.0)*Math.PI/180;
         double realDist=Math.sqrt(rawDist*rawDist+X_OFF*X_OFF-2*rawDist*X_OFF*Math.sin(rawAngle));
-        double realAngle=Math.acos(rawDist/realDist*Math.cos(rawAngle))*180/Math.PI;
+        double realAngle=(rawAngle+Math.atan(X_OFF/rawDist))*180/Math.PI;
+        SmartDashboard.putNumber("Distance", rawDist+Y_OFF);
         SmartDashboard.putNumber("Adjusted Angle", realAngle);
        // return new double[]{realDist+Y_OFF,realAngle};
-       return new double[]{0,rawAngle*180/Math.PI};
+       return new double[]{rawDist+Y_OFF,realAngle};
     }
     public boolean sees(){
         NetworkTable table=NetworkTableInstance.getDefault().getTable(name);
-        return table.getEntry("tshort").getDouble(0.0)>.1;
+        return table.getEntry("tlong").getDouble(0.0)>.1;
     }
 }

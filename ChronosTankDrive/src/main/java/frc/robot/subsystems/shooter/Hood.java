@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,7 +19,8 @@ public class Hood extends Subsystem {
   private double inc = .25;
   public double kP, kI, kD, kIz, kFF;
   private DigitalInput limit;
-  public Hood(int port,int limitPort, GenericHID joystick) {
+
+  public Hood(int port, int limitPort, GenericHID joystick) {
     m_joystick = joystick;
 
     m_hoodMotor = new WPI_TalonSRX(port);
@@ -65,7 +67,7 @@ public class Hood extends Subsystem {
     /* Set the quadrature (relative) sensor to match absolute */
     m_hoodMotor.setSelectedSensorPosition(0, Constants.Shooter.kPIDLoopIdx, Constants.Shooter.kTimeoutMs);
 
-    //limit=new DigitalInput(limitPort);
+    limit = new DigitalInput(limitPort);
   }
 
   public void updateSmartDashboard() {
@@ -99,21 +101,62 @@ public class Hood extends Subsystem {
     SmartDashboard.putNumber("I Gain (hood)", kI);
     SmartDashboard.putNumber("D Gain (hood)", kD);
   }
-  public void init(){
-    home();
+
+  public void init() {
+    resetHomed();
+    
   }
-  public void setHome(){
+
+  public void setHome() {
     angle = Constants.Shooter.HOOD_ZERO_POS;
     m_hoodMotor.setSelectedSensorPosition(0);
   }
-  public void home(){
-    /*m_hoodMotor.set(.5);
-    while(!limit.get());
+
+  public void home() {
+    SmartDashboard.putNumber("Homing", 1);
+    m_hoodMotor.set(.2);
+    while (limit.get())
+      ;
     m_hoodMotor.set(-.25);
-    while(limit.get());
+    while (!limit.get())
+      ;
     m_hoodMotor.set(0);
-    setHome();*/
+    SmartDashboard.putNumber("Homing", 0);
+    setHome();
   }
+
+  private int homeStatus = 0;
+  public boolean homed = false;
+
+  public void resetHomed() {
+    homed = false;
+    homeStatus = 0;
+  }
+
+  public void homePeriodic() {
+    if (homed)
+      return;
+    switch (homeStatus) {
+      case 0:
+        m_hoodMotor.set(-.4);
+        if (!limit.get()) {
+          m_hoodMotor.set(0);
+          homeStatus = 1;
+          setHome();
+        }
+        break;
+      case 1:
+        m_hoodMotor.set(.2);
+        if (limit.get()) {
+          m_hoodMotor.set(0);
+          setHome();
+          homeStatus = 2;
+          homed = true;
+        }
+        break;
+    }
+  }
+
   public void periodic() {
     if (m_joystick.getPOV() == 90) {
       angle = Constants.Shooter.HOOD_ZERO_POS;
@@ -128,22 +171,31 @@ public class Hood extends Subsystem {
 
     // System.out.println(pos);
     // setPos(60.0);
-    
+
     update();
-    
+
   }
-  public void update(){
-    double targetPositionRotations = (angle - Constants.Shooter.HOOD_ZERO_POS) *Constants.Shooter.HOOD_TEETH_ANGLE_RAT/Constants.Shooter.HOOD_SPOOL_TEETH*Constants.Shooter.HOOD_TICKS_PER_ROTATION;
+
+  public void update() {
+    double targetPositionRotations = (angle - Constants.Shooter.HOOD_ZERO_POS) * Constants.Shooter.HOOD_TEETH_ANGLE_RAT
+        / Constants.Shooter.HOOD_SPOOL_TEETH * Constants.Shooter.HOOD_TICKS_PER_ROTATION;
     m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
     this.updateSmartDashboard();
     SmartDashboard.putNumber("Target Position Rotations", targetPositionRotations);
     SmartDashboard.putNumber("Current Position", m_hoodMotor.getSelectedSensorPosition());
+    SmartDashboard.putBoolean("Switch State", limit.get());
+    SmartDashboard.putBoolean("Homed", homed);
   }
-  public void setAngle(double angle){
-    this.angle=angle;
+
+  public void setAngle(double angle) {
+    angle = MathUtil.clamp(angle, Constants.Shooter.HOOD_ZERO_POS,
+        Constants.Shooter.HOOD_ZERO_POS + Constants.Shooter.HOOD_RANGE);
+    this.angle = angle;
   }
+
   public double getAngle() {
-    return m_hoodMotor.getSelectedSensorPosition()/Constants.Shooter.HOOD_TICKS_PER_ROTATION*Constants.Shooter.HOOD_SPOOL_TEETH/Constants.Shooter.HOOD_TEETH_ANGLE_RAT+Constants.Shooter.HOOD_ZERO_POS;
+    return m_hoodMotor.getSelectedSensorPosition() / Constants.Shooter.HOOD_TICKS_PER_ROTATION
+        * Constants.Shooter.HOOD_SPOOL_TEETH / Constants.Shooter.HOOD_TEETH_ANGLE_RAT + Constants.Shooter.HOOD_ZERO_POS;
   }
-  
+
 }

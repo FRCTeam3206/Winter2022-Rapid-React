@@ -1,6 +1,7 @@
 package frc.robot;
 
 public class Constants {
+    public static final double GOAL_HEIGHT=8+8*12;
     public static class Shooter{
         public static final double sparkmax_kP = 8e-4;
         public static final double sparkmax_kI = 0;
@@ -45,7 +46,9 @@ public class Constants {
          */
         public static boolean kMotorInvert = false;
 
-        public static double HOOD_ZERO_POS=41;
+        public static final double SHOOTER_HEIGHT_DIFF=104-17.25;//Goal height-Shooter height
+
+        public static double HOOD_ZERO_POS=5;
 
         public static double HOOD_TICKS_PER_ROTATION=409600;
 
@@ -53,14 +56,28 @@ public class Constants {
 
         public static double HOOD_SPOOL_TEETH=24;
 
-
+        public static double HOOD_RANGE=41;
     }
     public static class Buttons{
         public static final int B_INTAKE=1;
-        public static final int B_DEPLOY=5;
+        public static final int B_DEPLOY=6;
         public static final int B_ALIGN=2;
         public static final int B_SHOOT=3;
         public static final int B_REVERSE_INTAKE=4;
         public static final int B_SHOOTER_FAILSAFE=7;
+    }
+    public static class IDS{
+        public static final int SHOOT_PORT=5;
+        public static final int INTAKE_MOTOR_PORT=6;
+        public static final int KICKER_PORT=7;
+        public static final int INTAKE_DEPLOY_PORT=0;
+        public static final int HOOD_PORT=9;
+        public static final int HOOD_LIMIT_PORT=0;
+    }
+    public static final class Limelight{
+        public static final double LIME_HEIGHT=24;
+        public static final double LIME_X_OFFSET=9.5;
+        public static final double LIME_ANGLE_OFFSET=32+3;
+        public static final double LIME_Y_OFFSET=5+9.5;
     }
 }

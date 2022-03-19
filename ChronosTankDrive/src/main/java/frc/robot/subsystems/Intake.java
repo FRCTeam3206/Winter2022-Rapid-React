@@ -21,17 +21,23 @@ public class Intake extends Subsystem{
     }
     boolean deployed=false;
     public void periodic(){
-        if(joystick.getRawButton(B_INTAKE)){
+        /*if(joystick.getRawButton(B_INTAKE)){
             intakeMotor.set(ControlMode.PercentOutput, 1);
         }else if(joystick.getRawButton(B_REVERSE_INTAKE)){
             intakeMotor.set(ControlMode.PercentOutput, -1);
         }else{
             intakeMotor.set(ControlMode.PercentOutput, 0);
-        }
+        }*/
         if(joystick.getRawButtonPressed(B_DEPLOY)){
             deploy.toggle();
         }
-        
+        if(joystick.getRawButton(B_REVERSE_INTAKE)){
+            intakeMotor.set(ControlMode.PercentOutput, -1);
+        }else if(deploy.get()){
+            intakeMotor.set(ControlMode.PercentOutput,1);
+        }else{
+            intakeMotor.set(ControlMode.PercentOutput, 0);
+        }
     }
     @Override
     public void init() {
