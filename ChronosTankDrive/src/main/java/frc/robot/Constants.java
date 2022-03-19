@@ -53,11 +53,11 @@ public class Constants {
 
         public static double HOOD_SPOOL_TEETH=24;
 
-
+        public static double HOOD_RANGE=41;
     }
     public static class Buttons{
         public static final int B_INTAKE=1;
-        public static final int B_DEPLOY=5;
+        public static final int B_DEPLOY=6;
         public static final int B_ALIGN=2;
         public static final int B_SHOOT=3;
         public static final int B_REVERSE_INTAKE=4;

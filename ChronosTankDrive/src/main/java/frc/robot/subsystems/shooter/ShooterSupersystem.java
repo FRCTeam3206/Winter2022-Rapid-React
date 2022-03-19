@@ -24,6 +24,7 @@ public class ShooterSupersystem extends Subsystem {
     public void init() {
         shooter.init();
         hood.init();
+        SmartDashboard.putNumber("RPM", 0);
     }
     
     // TODO: Review this method carefully. There was a merge conflict between code written on 3/15 and on 3/16 and I
@@ -68,7 +69,7 @@ public class ShooterSupersystem extends Subsystem {
                 hood.setAngle(8.8);//There will be a function based on ll to find this
             }
             if(joystick.getRawButton(B_SHOOT)){
-                shooter.shoot(2650);//There will be a function based on ll to find this  
+                shooter.shoot(SmartDashboard.getNumber("RPM", 0.0));//There will be a function based on ll to find this  
             }else{
               shooter.stop();
             }
