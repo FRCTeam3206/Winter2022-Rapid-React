@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Subsystem;
 import static frc.robot.Constants.Buttons.*;
@@ -30,31 +31,40 @@ public class ShooterSupersystem extends Subsystem {
     @Override
     public void periodic() {
         // boolean shooting=false;  // I don't think this is used
+        double[] distanceAndAngle;
+        double distance;
+        double angle;
+        double distAway;
+        boolean aligned=false;
+        double turn;
+        double forward;
         if (joystick.getRawButton(B_SHOOTER_FAILSAFE)) {
             // assumes driver has parked robot against dasher board under hub
             hood.setAngle(12);  // launch angle of 78 deg, found by limited testing tonight
             shooter.shoot(2300); // found by limited testing tonight
             // shooting=true;
         } else {
-            double[] distanceAndAngle=limelight.getAdjustedDistanceAndAngleToTarget();
-            double distance=distanceAndAngle[0];
-            double angle=distanceAndAngle[1];
-            boolean aligned=false;
-            double distAway=distance-8*12;
-            if(joystick.getRawButton(B_ALIGN)){
-                double turn=0;
-                double forward=0;
-                if(Math.abs(angle)>10){
-                    turn=.7;
-                }else if(Math.abs(angle)<3){
-                    turn=.5;
-                }else{
-                    aligned=true;
+            distanceAndAngle=limelight.getAdjustedDistanceAndAngleToTarget();
+            distance=distanceAndAngle[0];
+            angle=distanceAndAngle[1];
+            aligned=false;
+            distAway=distance-8*12;
+            turn=0;
+            forward=0;
+            if(joystick.getRawButton(B_ALIGN)&&limelight.sees()){
+                SmartDashboard.putNumber("Horz Angle", angle);
+                turn=-angle/25;
+                if(Math.abs(turn)<.03){
+                    turn=0;
                 }
-                
-                if(angle>0){
-                    turn*=-1;
+                if(Math.abs(distAway)>24){
+                    forward=.7;
+                }else if(Math.abs(distAway)>3){
+                    forward=.5;
                 }
+                if(distAway>0)forward*=-1;
+                forward=0;
+                driveTrain.arcadeDrive(forward, turn);
                 hood.setAngle(8.8);//There will be a function based on ll to find this
             }
             if(joystick.getRawButton(B_SHOOT)){
@@ -62,8 +72,17 @@ public class ShooterSupersystem extends Subsystem {
             }else{
               shooter.stop();
             }
-        hood.update();
+            if(angle>0){
+                turn*=-1;
+            }
+        //hood.setAngle(20);//There will be a function based on ll to find this
         }
+        SmartDashboard.putString("Aligned", aligned?"■■■■■■■■■■■■■■■":"");
+        if(joystick.getRawButton(B_SHOOT)){
+            shooter.shoot(2650);//There will be a function based on ll to find this
+            
+        }
+        hood.update();
     }
 }
 

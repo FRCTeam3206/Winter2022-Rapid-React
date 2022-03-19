@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
@@ -16,8 +17,8 @@ public class Hood extends Subsystem {
   private double angle = Constants.Shooter.HOOD_ZERO_POS;
   private double inc = .25;
   public double kP, kI, kD, kIz, kFF;
-
-  public Hood(int port, GenericHID joystick) {
+  private DigitalInput limit;
+  public Hood(int port,int limitPort, GenericHID joystick) {
     m_joystick = joystick;
 
     m_hoodMotor = new WPI_TalonSRX(port);
@@ -63,6 +64,8 @@ public class Hood extends Subsystem {
 
     /* Set the quadrature (relative) sensor to match absolute */
     m_hoodMotor.setSelectedSensorPosition(0, Constants.Shooter.kPIDLoopIdx, Constants.Shooter.kTimeoutMs);
+
+    //limit=new DigitalInput(limitPort);
   }
 
   public void updateSmartDashboard() {
@@ -96,7 +99,21 @@ public class Hood extends Subsystem {
     SmartDashboard.putNumber("I Gain (hood)", kI);
     SmartDashboard.putNumber("D Gain (hood)", kD);
   }
-  public void init(){}
+  public void init(){
+    home();
+  }
+  public void setHome(){
+    angle = Constants.Shooter.HOOD_ZERO_POS;
+    m_hoodMotor.setSelectedSensorPosition(0);
+  }
+  public void home(){
+    /*m_hoodMotor.set(.5);
+    while(!limit.get());
+    m_hoodMotor.set(-.25);
+    while(limit.get());
+    m_hoodMotor.set(0);
+    setHome();*/
+  }
   public void periodic() {
     if (m_joystick.getPOV() == 90) {
       angle = Constants.Shooter.HOOD_ZERO_POS;

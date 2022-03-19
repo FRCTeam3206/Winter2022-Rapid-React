@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
@@ -79,7 +80,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  DoubleSolenoid driveSol = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 1);  // TODO: fix this call!
+  //Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);  // TODO: fix this call!
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight=new Limelight(24,30,9.5,16.5);
@@ -140,10 +141,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
-    subSystems=new Subsystem[] {
-      new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),
-      new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,leftStick), limelight,chronosDrive, leftStick)
-      };
+    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,1,leftStick), limelight,chronosDrive, leftStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -155,25 +153,27 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void teleopPeriodic() {
-    //TODO: figure out can values for drive train pneumatics
-     //joystick drive
-      if (rightStick.getRawButton(1)) { // Low Speed
-      driveSol.set(Value.kForward);
-      } else if (rightStick.getRawButton(2)) { // High Speed
-      driveSol.set(Value.kReverse);
-      } else {
-      driveSol.set(Value.kOff); // Ensures Pistons are Off
-      }
-     
+    /*
+     * //joystick drive
+     * if (rightStick.getRawButton(1)) { // Low Speed
+     * driveSol.set(Value.kForward);
+     * } else if (rightStick.getRawButton(2)) { // High Speed
+     * driveSol.set(Value.kReverse);
+     * } else {
+     * driveSol.set(Value.kOff); // Ensures Pistons are Off
+     * 
+     * }
+     */
+    if(!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) 
     if(accelerationLimiting){
       accelLimit(leftStick.getY(), rightStick.getY());
     }else{
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
     }
-    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
-
-
+    //if(rightStick.getRawButton(1)) driveSol.set(true);
+    //else driveSol.set(false);
+    chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for
