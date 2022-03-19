@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Subsystem;
 import static frc.robot.Constants.Buttons.*;
@@ -31,7 +32,7 @@ public class ShooterSupersystem extends Subsystem{
         double angle=distanceAndAngle[1];
         boolean aligned=false;
         double distAway=distance-8*12;
-        if(joystick.getRawButton(B_ALIGN)){
+        if(joystick.getRawButton(B_ALIGN)&&limelight.sees()){
             double turn=0;
             double forward=0;
             if(Math.abs(angle)>10){
@@ -49,10 +50,11 @@ public class ShooterSupersystem extends Subsystem{
             }else if(Math.abs(distAway)>3){
                 forward=.5;
             }
-            if(distAway<0)forward*=-1;
+            if(distAway>0)forward*=-1;
             driveTrain.arcadeDrive(forward, turn);
         //hood.setAngle(20);//There will be a function based on ll to find this
         }
+        SmartDashboard.putString("Aligned", aligned?"■■■■■■■■■■■■■■■":"");
         if(joystick.getRawButton(B_SHOOT)){
             shooter.shoot(2650);//There will be a function based on ll to find this
             

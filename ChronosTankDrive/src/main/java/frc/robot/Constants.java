@@ -45,7 +45,7 @@ public class Constants {
          */
         public static boolean kMotorInvert = false;
 
-        public static double HOOD_ZERO_POS=0;
+        public static double HOOD_ZERO_POS=41;
 
         public static double HOOD_TICKS_PER_ROTATION=40960;
 

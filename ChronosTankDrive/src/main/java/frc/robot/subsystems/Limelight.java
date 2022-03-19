@@ -47,6 +47,10 @@ public class Limelight {
         double rawAngle=table.getEntry("tx").getDouble(0.0)*Math.PI/180;
         double realDist=Math.sqrt(rawDist*rawDist+X_OFF*X_OFF-2*rawDist*X_OFF*Math.sin(rawAngle));
         double realAngle=Math.acos(rawDist/realDist*Math.cos(rawAngle))*180/Math.PI;
-        return new double[]{realDist-Y_OFF,realAngle};
+        return new double[]{realDist+Y_OFF,realAngle};
+    }
+    public boolean sees(){
+        NetworkTable table=NetworkTableInstance.getDefault().getTable(name);
+        return table.getEntry("tshort").getDouble(0.0)>.1;
     }
 }

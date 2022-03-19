@@ -149,7 +149,7 @@ public class Robot extends TimedRobot {
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
     chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
-    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,leftStick), limelight,chronosDrive, leftStick)};
+    subSystems=new Subsystem[]{new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, leftStick),new ShooterSupersystem(new Shooter(5,6,0,leftStick), new Hood(9,1,leftStick), limelight,chronosDrive, leftStick)};
     for(Subsystem subSystem :subSystems){
       subSystem.init();
     }
@@ -179,6 +179,8 @@ public class Robot extends TimedRobot {
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
     }
+    if(rightStick.getRawButton(1))driveSol.set(true);
+    else driveSol.set(false);
     //chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
