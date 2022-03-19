@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);  // TODO: fix this call!
+  //Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);  // TODO: fix this call!
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight=new Limelight(24,30,9.5,16.5);
@@ -171,8 +171,8 @@ public class Robot extends TimedRobot {
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
     }
-    if(rightStick.getRawButton(1)) driveSol.set(true);
-    else driveSol.set(false);
+    //if(rightStick.getRawButton(1)) driveSol.set(true);
+    //else driveSol.set(false);
     chronosDrive.tankDrive(rightAdjusted,leftAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
