@@ -52,8 +52,8 @@ public class ShooterSupersystem extends Subsystem {
             turn=0;
             forward=0;
             if(joystick.getRawButton(B_ALIGN)&&limelight.sees()){
-                SmartDashboard.putNumber("Horz Angle", angle);
                 turn=-angle/25;
+                SmartDashboard.putNumber("Turn", turn);
                 if(Math.abs(turn)<.03){
                     turn=0;
                 }
