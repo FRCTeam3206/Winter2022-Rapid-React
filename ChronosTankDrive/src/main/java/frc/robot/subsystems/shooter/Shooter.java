@@ -148,19 +148,4 @@ public class Shooter extends Subsystem{
             // double targetPositionRotations = m_joystick.getLeftY() * 10.0 * 4096;
             // m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
       }
-    public void shoot(double desiredRPM){
-      setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
-      if(Math.abs(-m_encoder.getVelocity()-desiredRPM)<25){
-        //Shoot
-        kickerWheel.set(VictorSPXControlMode.PercentOutput, 1);
-      }
-    }
-    public void stop(){
-      m_shooter.set(0);
-          kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
-    }
-    @Override
-    public void init() {
-      // TODO Auto-generated method stub
-}
 }
