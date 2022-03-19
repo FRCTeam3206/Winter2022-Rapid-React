@@ -84,6 +84,7 @@ public class ShooterSupersystem extends Subsystem {
             
         }
         hood.update();
+        if(joystick.getRawButtonPressed(7))hood.home();
     }
 }
 

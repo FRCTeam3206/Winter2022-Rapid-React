@@ -63,4 +63,18 @@ public class Constants {
         public static final int B_REVERSE_INTAKE=4;
         public static final int B_SHOOTER_FAILSAFE=7;
     }
+    public static class IDS{
+        public static final int SHOOT_PORT=5;
+        public static final int INTAKE_MOTOR_PORT=6;
+        public static final int KICKER_PORT=7;
+        public static final int INTAKE_DEPLOY_PORT=0;
+        public static final int HOOD_PORT=9;
+        public static final int HOOD_LIMIT_PORT=0;
+    }
+    public static final class Limelight{
+        public static final double LIME_HEIGHT=24;
+        public static final double LIME_X_OFFSET=9.5;
+        public static final double LIME_ANGLE_OFFSET=32+3;
+        public static final double LIME_Y_OFFSET=6;
+    }
 }

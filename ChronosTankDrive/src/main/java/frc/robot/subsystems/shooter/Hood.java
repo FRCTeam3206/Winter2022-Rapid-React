@@ -112,14 +112,13 @@ public class Hood extends Subsystem {
   }
 
   public void home() {
-    /*
-     * m_hoodMotor.set(.5);
-     * while(!limit.get());
-     * m_hoodMotor.set(-.25);
-     * while(limit.get());
-     * m_hoodMotor.set(0);
-     * setHome();
-     */
+    
+     /*m_hoodMotor.set(.5);
+     while(limit.get());
+     m_hoodMotor.set(-.25);
+     while(!limit.get());
+     m_hoodMotor.set(0);
+     setHome();*/
   }
 
   public void periodic() {
