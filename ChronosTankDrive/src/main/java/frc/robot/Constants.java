@@ -47,7 +47,7 @@ public class Constants {
 
         public static double HOOD_ZERO_POS=41;
 
-        public static double HOOD_TICKS_PER_ROTATION=40960;
+        public static double HOOD_TICKS_PER_ROTATION=409600;
 
         public static double HOOD_TEETH_ANGLE_RAT=48/41.233;
 
@@ -61,5 +61,6 @@ public class Constants {
         public static final int B_ALIGN=2;
         public static final int B_SHOOT=3;
         public static final int B_REVERSE_INTAKE=4;
+        public static final int B_SHOOTER_FAILSAFE=7;
     }
 }

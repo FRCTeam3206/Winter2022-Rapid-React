@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
-class chronosClimber {
+class ChronosClimber {
     // Port / channel definitions
     private final int JOY_PORT;
     private final int MOTOR1_PORT, MOTOR2_PORT;
@@ -33,7 +33,7 @@ class chronosClimber {
     private final double DEFAULT_CLIMBSPEED;
 
     // Initialize values, create objects, and get a default climber speed
-    public chronosClimber(int joystickPort, int motorPort1, int motorPort2, int buttons[], double speed) {
+    public ChronosClimber(int joystickPort, int motorPort1, int motorPort2, int buttons[], double speed) {
         // Constructor breakdown:
             // int joystickPort - The port/channel the joystick is connected to
             // int motorPort1 - The port for 1 of 2 motors
