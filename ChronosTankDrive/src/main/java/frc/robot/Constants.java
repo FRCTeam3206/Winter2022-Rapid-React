@@ -1,6 +1,7 @@
 package frc.robot;
 
 public class Constants {
+    public static final double GOAL_HEIGHT=8+8*12;
     public static class Shooter{
         public static final double sparkmax_kP = 8e-4;
         public static final double sparkmax_kI = 0;
@@ -45,7 +46,9 @@ public class Constants {
          */
         public static boolean kMotorInvert = false;
 
-        public static double HOOD_ZERO_POS=41;
+        public static final double SHOOTER_HEIGHT_DIFF=104-17.25;//Goal height-Shooter height
+
+        public static double HOOD_ZERO_POS=5;
 
         public static double HOOD_TICKS_PER_ROTATION=409600;
 
@@ -75,6 +78,6 @@ public class Constants {
         public static final double LIME_HEIGHT=24;
         public static final double LIME_X_OFFSET=9.5;
         public static final double LIME_ANGLE_OFFSET=32+3;
-        public static final double LIME_Y_OFFSET=6;
+        public static final double LIME_Y_OFFSET=5+9.5;
     }
 }

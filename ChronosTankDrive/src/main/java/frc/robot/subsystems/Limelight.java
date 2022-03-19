@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 
 public class Limelight {
     public static final double H2=8*12+8;
@@ -48,10 +49,10 @@ public class Limelight {
         double rawAngle=table.getEntry("tx").getDouble(0.0)*Math.PI/180;
         double realDist=Math.sqrt(rawDist*rawDist+X_OFF*X_OFF-2*rawDist*X_OFF*Math.sin(rawAngle));
         double realAngle=(rawAngle+Math.atan(X_OFF/rawDist))*180/Math.PI;
-        SmartDashboard.putNumber("Distance", rawDist);
+        SmartDashboard.putNumber("Distance", rawDist+Y_OFF);
         SmartDashboard.putNumber("Adjusted Angle", realAngle);
        // return new double[]{realDist+Y_OFF,realAngle};
-       return new double[]{rawDist,realAngle};
+       return new double[]{rawDist+Y_OFF,realAngle};
     }
     public boolean sees(){
         NetworkTable table=NetworkTableInstance.getDefault().getTable(name);
