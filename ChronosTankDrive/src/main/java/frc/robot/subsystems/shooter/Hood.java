@@ -65,7 +65,7 @@ public class Hood extends Subsystem {
     /* Set the quadrature (relative) sensor to match absolute */
     m_hoodMotor.setSelectedSensorPosition(0, Constants.Shooter.kPIDLoopIdx, Constants.Shooter.kTimeoutMs);
 
-    limit=new DigitalInput(limitPort);
+    //limit=new DigitalInput(limitPort);
   }
 
   public void updateSmartDashboard() {
@@ -107,12 +107,12 @@ public class Hood extends Subsystem {
     m_hoodMotor.setSelectedSensorPosition(0);
   }
   public void home(){
-    m_hoodMotor.set(.5);
+    /*m_hoodMotor.set(.5);
     while(!limit.get());
     m_hoodMotor.set(-.25);
     while(limit.get());
     m_hoodMotor.set(0);
-    setHome();
+    setHome();*/
   }
   public void periodic() {
     if (m_joystick.getPOV() == 90) {

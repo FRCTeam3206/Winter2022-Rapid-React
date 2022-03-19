@@ -52,17 +52,19 @@ public class ShooterSupersystem extends Subsystem {
             turn=0;
             forward=0;
             if(joystick.getRawButton(B_ALIGN)&&limelight.sees()){
-                if(Math.abs(angle)>10){
-                    turn=.7;
-                }else if(Math.abs(angle)<3){
-                    turn=.5;
-                }else{
-                    aligned=true;
+                SmartDashboard.putNumber("Horz Angle", angle);
+                turn=-angle/25;
+                if(Math.abs(turn)<.03){
+                    turn=0;
                 }
-                
-                if(angle>0){
-                    turn*=-1;
+                if(Math.abs(distAway)>24){
+                    forward=.7;
+                }else if(Math.abs(distAway)>3){
+                    forward=.5;
                 }
+                if(distAway>0)forward*=-1;
+                forward=0;
+                driveTrain.arcadeDrive(forward, turn);
                 hood.setAngle(8.8);//There will be a function based on ll to find this
             }
             if(joystick.getRawButton(B_SHOOT)){
@@ -73,13 +75,6 @@ public class ShooterSupersystem extends Subsystem {
             if(angle>0){
                 turn*=-1;
             }
-            if(Math.abs(distAway)>24){
-                forward=.7;
-            }else if(Math.abs(distAway)>3){
-                forward=.5;
-            }
-            if(distAway>0)forward*=-1;
-            driveTrain.arcadeDrive(forward, turn);
         //hood.setAngle(20);//There will be a function based on ll to find this
         }
         SmartDashboard.putString("Aligned", aligned?"■■■■■■■■■■■■■■■":"");
