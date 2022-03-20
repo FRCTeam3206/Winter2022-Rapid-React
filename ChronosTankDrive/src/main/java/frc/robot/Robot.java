@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.Solenoid;
 
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
@@ -78,7 +79,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  //Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);  // TODO: fix this call!
+  Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight;
@@ -138,9 +139,9 @@ public class Robot extends TimedRobot {
     limelight=new Limelight(24,32+3,9.5,16.5);
     chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
     intake=new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick);
-    shooter=new ShooterSupersystem(new Shooter(SHOOT_PORT,KICKER_PORT,.01,leftStick), new Hood(HOOD_PORT,HOOD_LIMIT_PORT,leftStick), limelight,chronosDrive, leftStick);
+    shooter=new ShooterSupersystem(new Shooter(SHOOT_PORT,KICKER_PORT,.01,leftStick), new Hood(HOOD_PORT,HOOD_LIMIT_PORT,leftStick), limelight,chronosDrive, leftStick,weaponStick);
     subSystems=new Subsystem[]{intake,shooter,new Climber(8, 10, weaponStick)};
-    for(Subsystem subSystem :subSystems){
+    for(Subsystem subSystem:subSystems){
       subSystem.init();
     }
   }
@@ -149,6 +150,12 @@ public class Robot extends TimedRobot {
     leftAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
     //chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
+  public void teleopInit(){
+    shooter.getHood().home();
+  }
+  /*public void autonomousInit(){
+    shooter.getHood().init();
+  }*/
   @Override
   public void teleopPeriodic() {
     /*
@@ -169,8 +176,8 @@ public class Robot extends TimedRobot {
       rightAdjusted=rightStick.getY();
       leftAdjusted=leftStick.getY();
     }
-    //if(rightStick.getRawButton(1)) driveSol.set(true);
-    //else driveSol.set(false);
+    if(rightStick.getRawButton(1)) driveSol.set(true);
+    else driveSol.set(false);
     chronosDrive.tankDrive(leftAdjusted,rightAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
