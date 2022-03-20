@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -19,6 +20,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterSupersystem;
 
 import com.revrobotics.RelativeEncoder;
+import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.IDS.*;
@@ -46,7 +48,7 @@ public class Robot extends TimedRobot {
   XboxController weaponStick;
 
   // Sendable Chooser
-  // SendableChooser<String> autoChoices = new SendableChooser<>();
+  SendableChooser<String> autoChoices = new SendableChooser<>();
   String autoSelected;
 
   // Acceleration Limiting Variables
@@ -128,11 +130,8 @@ public class Robot extends TimedRobot {
     rightBackDrive.restoreFactoryDefaults();
     leftEncoder.setPosition(0);
     rightEncoder.setPosition(0);
-    /*
-     * autoChoices.setDefaultOption("AutoLine", "AutoLine");
-     * autoChoices.addOption("BallPickup", "BallPickup");
-     * autoChoices.addOption("Shoot", "Shoot");
-     */
+    autoChoices.setDefaultOption("Shoot1", "Shoot1");
+    autoChoices.addOption("Shoot2", "Shoot2");
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
@@ -307,15 +306,37 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    // autoSelected = autoChoices.getSelected();
+    autoSelected = autoChoices.getSelected();
 
     compressor.enableDigital();
-    //driveSol.set(Value.kReverse);
- 
-    Drive(5); // left should be negative, right should be positive
+    shooter.getHood().home();
+    switch(autoSelected){
+      case "Shoot1":
+        Drive(-5);
+        while(!shooter.align());
+        shooter.shoot();
+      break;
+      case "Shoot2":
+        intake.getDeploy().set(true);
+        intake.getMotor().set(VictorSPXControlMode.PercentOutput, 1);
+        Drive(5);
+        intake.getDeploy().set(false);
+        chronosDrive.tankDrive(.5, -.5);
+        delay(1000);
+        while(!limelight.sees());
+        long start=System.currentTimeMillis();
+        while(!shooter.align()||start+3000>System.currentTimeMillis());
+        shooter.shoot();
+      break;
     }
-  
+    
+    }
+    public void delay(long time){
+      long start=System.currentTimeMillis();
+      while(start+time>=System.currentTimeMillis());
+    }
 
   public void autonomousPeriodic() {
+
   }
 }

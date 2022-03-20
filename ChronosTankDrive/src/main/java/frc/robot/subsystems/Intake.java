@@ -12,7 +12,12 @@ public class Intake extends Subsystem{
     VictorSPX intakeMotor;
     Solenoid deploy;
     boolean on = false;
-
+    public Solenoid getDeploy(){
+        return deploy;
+    }
+    public VictorSPX getMotor(){
+        return intakeMotor;
+    }
     public Intake(int motorId,int pistonId1,GenericHID joystick){
         this.joystick=joystick;
         intakeMotor=new VictorSPX(motorId);

@@ -52,8 +52,19 @@ public class ShooterSupersystem extends Subsystem {
         hood.setAngle(hoodAngle);
         return turn<.1&&Math.abs(hood.getAngle()-hoodAngle)<2;
     }
+    public boolean align(){
+        double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
+        double distance = distanceAndAngle[0];
+        double angle=distanceAndAngle[1];
+        return alignTo(angle, distance);
+    }
     public void shoot(double distance){
         shooter.shoot(4.045*distance+2374.7);
+    }
+    public void shoot(){
+        double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
+        double distance=distanceAndAngle[0];
+        shoot(distance);
     }
     @Override
     public void periodic() {
