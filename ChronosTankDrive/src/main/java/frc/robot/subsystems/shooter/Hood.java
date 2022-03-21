@@ -103,7 +103,6 @@ public class Hood extends Subsystem {
   }
 
   public void init() {
-    resetHomed();
     
   }
 
@@ -113,16 +112,11 @@ public class Hood extends Subsystem {
   }
 
   public void home() {
-    SmartDashboard.putNumber("Homing", 1);
-    m_hoodMotor.set(.2);
-    while (limit.get())
-      ;
-    m_hoodMotor.set(-.25);
-    while (!limit.get())
-      ;
-    m_hoodMotor.set(0);
-    SmartDashboard.putNumber("Homing", 0);
-    setHome();
+    resetHomed();
+    long start=System.currentTimeMillis();
+    while(start+10000>System.currentTimeMillis()&&!homed){
+      homePeriodic();
+    }
   }
 
   private int homeStatus = 0;

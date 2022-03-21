@@ -13,29 +13,57 @@ public class ShooterSupersystem extends Subsystem {
     private Hood hood;
     private Limelight limelight;
     private DifferentialDrive driveTrain;
-    private GenericHID joystick;
-
+    private GenericHID joystick1,joystick2;
+    public Hood getHood(){
+        return hood;
+    }
     public ShooterSupersystem(Shooter shooter, Hood hood, Limelight limelight, DifferentialDrive driveTrain,
-            GenericHID joystick) {
+            GenericHID joystick1,GenericHID joystick2) {
         this.shooter = shooter;
         this.hood = hood;
         this.limelight = limelight;
         this.driveTrain = driveTrain;
-        this.joystick = joystick;
+        this.joystick1 = joystick1;
+        this.joystick2=joystick2;
     }
 
     @Override
     public void init() {
         shooter.init();
-        hood.init();
+        //hood.init();
         SmartDashboard.putNumber("RPM", 0);
     }
-
-    // TODO: Review this method carefully. There was a merge conflict between code
-    // written on 3/15 and on 3/16 and I
-    // tried to merge them together to maintain both contributions. -CRS
     public double hoodAngle(double distance){
         return 90-Math.atan((Constants.Shooter.SHOOTER_HEIGHT_DIFF+Math.sqrt(Math.pow(Constants.Shooter.SHOOTER_HEIGHT_DIFF,2)+Math.pow(distance,2)))/distance)*180/Math.PI;
+    }
+    public boolean alignTo(double angle,double distance){
+        double turn = -angle / 25;
+        SmartDashboard.putNumber("Turn", turn);
+        if (Math.abs(turn) < .03) {
+            turn = 0;
+        }
+        driveTrain.arcadeDrive(0, turn);
+        double hoodAngle=hoodAngle(distance);
+        SmartDashboard.putNumber("Hood Angle", hoodAngle);
+        hood.setAngle(hoodAngle);
+        return turn<.2&&Math.abs(hood.getAngle()-hoodAngle)<2;
+    }
+    public boolean align(){
+        double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
+        double distance = distanceAndAngle[0];
+        double angle=distanceAndAngle[1];
+        return alignTo(angle, distance);
+    }
+    public void shoot(double distance){
+        shooter.shoot(4.045*distance+2374.7);
+    }
+    public void shoot(){
+        double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
+        double distance=distanceAndAngle[0];
+        shoot(distance);
+    }
+    public void stop(){
+        shooter.stop();
     }
     @Override
     public void periodic() {
@@ -47,7 +75,7 @@ public class ShooterSupersystem extends Subsystem {
         boolean aligned = false;
         double turn;
         double forward;
-        if (joystick.getRawButton(B_SHOOTER_FAILSAFE)) {
+        if (joystick2.getRawButton(B_SHOOTER_FAILSAFE)) {
             // assumes driver has parked robot against dasher board under hub
             hood.setAngle(12); // launch angle of 78 deg, found by limited testing tonight
             shooter.shoot(2300); // found by limited testing tonight
@@ -59,18 +87,12 @@ public class ShooterSupersystem extends Subsystem {
             aligned = false;
             turn = 0;
             forward = 0;
-            if (joystick.getRawButton(B_ALIGN) && limelight.sees()) {
-                turn = -angle / 25;
-                SmartDashboard.putNumber("Turn", turn);
-                if (Math.abs(turn) < .03) {
-                    turn = 0;
-                }
-                driveTrain.arcadeDrive(0, turn);
-                SmartDashboard.putNumber("Hood Angle", hoodAngle(distance));
-                hood.setAngle(hoodAngle(distance));// There will be a function based on ll to find this
+            if (joystick1.getRawButton(B_ALIGN) && limelight.sees()) {
+                //aligned=alignTo(angle, distance);
+                aligned=align();
             }
-            if (joystick.getRawButton(B_SHOOT)) {
-                shooter.shoot(SmartDashboard.getNumber("RPM", 0.0));// There will be a function based on ll to find this
+            if (joystick2.getRawButton(B_SHOOT)) {
+                shoot(distance);// There will be a function based on ll to find this
             } else {
                 shooter.stop();
             }
@@ -82,9 +104,9 @@ public class ShooterSupersystem extends Subsystem {
         SmartDashboard.putBoolean("Aligned", aligned);
         hood.update();
         shooter.showEncoderValOnSmartDashboard();
-        if (joystick.getRawButtonPressed(10))
+        if (joystick2.getRawButtonPressed(B_HOME))
             hood.resetHomed();
-        if (joystick.getRawButton(10))
+        if (joystick2.getRawButton(B_HOME))
             hood.homePeriodic();
     }
 }

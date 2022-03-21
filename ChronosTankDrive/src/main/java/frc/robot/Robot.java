@@ -3,8 +3,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.Solenoid;
 
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
@@ -18,6 +21,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterSupersystem;
 
 import com.revrobotics.RelativeEncoder;
+import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.IDS.*;
@@ -45,7 +49,7 @@ public class Robot extends TimedRobot {
   XboxController weaponStick;
 
   // Sendable Chooser
-  // SendableChooser<String> autoChoices = new SendableChooser<>();
+  SendableChooser<String> autoChoices = new SendableChooser<>();
   String autoSelected;
 
   // Acceleration Limiting Variables
@@ -78,7 +82,7 @@ public class Robot extends TimedRobot {
   Timer velocityTimer = new Timer();
 
   // DriveTrain Pneumatics
-  //Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);  // TODO: fix this call!
+  Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
   PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight;
@@ -100,6 +104,7 @@ public class Robot extends TimedRobot {
   Subsystem[] subSystems;
   ShooterSupersystem shooter;
   Intake intake;
+
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -107,7 +112,7 @@ public class Robot extends TimedRobot {
     // gearbox is constructed, you might have to invert the left side instead.
     rightStick = new Joystick(0);
     leftStick = new Joystick(2);
-    weaponStick=new XboxController(1);
+    weaponStick = new XboxController(1);
     // For later notes: assign buttons for when we are on red/blue alliance so that
     // we can
     // identify what color balls we have in transport and whether to shoot them or
@@ -127,28 +132,39 @@ public class Robot extends TimedRobot {
     rightBackDrive.restoreFactoryDefaults();
     leftEncoder.setPosition(0);
     rightEncoder.setPosition(0);
-    /*
-     * autoChoices.setDefaultOption("AutoLine", "AutoLine");
-     * autoChoices.addOption("BallPickup", "BallPickup");
-     * autoChoices.addOption("Shoot", "Shoot");
-     */
+    autoChoices.setDefaultOption("Shoot1", "Shoot1");
+    autoChoices.addOption("Shoot2", "Shoot2");
+    SmartDashboard.putData(autoChoices);
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
     rightBackDrive.follow(rightFrontDrive);
-    limelight=new Limelight(24,32+3,9.5,16.5);
-    chronosDrive = new DifferentialDrive(leftFrontDrive,rightFrontDrive);
-    intake=new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick);
-    shooter=new ShooterSupersystem(new Shooter(SHOOT_PORT,KICKER_PORT,.01,leftStick), new Hood(HOOD_PORT,HOOD_LIMIT_PORT,leftStick), limelight,chronosDrive, leftStick);
-    subSystems=new Subsystem[]{intake,shooter,new Climber(8, 10, weaponStick)};
-    for(Subsystem subSystem :subSystems){
+    limelight = new Limelight(24, 32 + 3, 9.5, 16.5);
+    chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
+    intake = new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick);
+    shooter = new ShooterSupersystem(new Shooter(SHOOT_PORT, KICKER_PORT, .01, leftStick),
+        new Hood(HOOD_PORT, HOOD_LIMIT_PORT, leftStick), limelight, chronosDrive, leftStick, weaponStick);
+    subSystems = new Subsystem[] { intake, shooter, new Climber(8, 10, weaponStick) };
+    for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
   }
-  public void accelLimit(double leftInput,double rightInput){
-    rightAdjusted=(1/accelDriveKonstant)*rightInput+(accelDriveKonstant-1)/accelDriveKonstant*rightAdjusted;
-    leftAdjusted=(1/accelDriveKonstant)*leftInput+(accelDriveKonstant-1)/accelDriveKonstant*leftAdjusted;
-    //chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+
+  public void accelLimit(double leftInput, double rightInput) {
+    rightAdjusted = (1 / accelDriveKonstant) * rightInput
+        + (accelDriveKonstant - 1) / accelDriveKonstant * rightAdjusted;
+    leftAdjusted = (1 / accelDriveKonstant) * leftInput + (accelDriveKonstant - 1) / accelDriveKonstant * leftAdjusted;
+    // chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
+
+  public void teleopInit() {
+    shooter.getHood().home();
+  }
+
+  /*
+   * public void autonomousInit(){
+   * shooter.getHood().init();
+   * }
+   */
   @Override
   public void teleopPeriodic() {
     /*
@@ -162,16 +178,18 @@ public class Robot extends TimedRobot {
      * 
      * }
      */
-    if(!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) 
-    if(accelerationLimiting){
-      accelLimit(leftStick.getY(), rightStick.getY());
-    }else{
-      rightAdjusted=rightStick.getY();
-      leftAdjusted=leftStick.getY();
-    }
-    //if(rightStick.getRawButton(1)) driveSol.set(true);
-    //else driveSol.set(false);
-    chronosDrive.tankDrive(leftAdjusted,rightAdjusted);
+    if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN))
+      if (accelerationLimiting) {
+        accelLimit(leftStick.getY(), rightStick.getY());
+      } else {
+        rightAdjusted = rightStick.getY();
+        leftAdjusted = leftStick.getY();
+      }
+    if (rightStick.getRawButton(1))
+      driveSol.set(true);
+    else
+      driveSol.set(false);
+    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for
@@ -180,69 +198,74 @@ public class Robot extends TimedRobot {
     // Trigger is shoot on right
 
     // intake/extake button assignments
-    for(Subsystem subSystem:subSystems){
+    for (Subsystem subSystem : subSystems) {
       subSystem.periodic();
     }
   }
-  private boolean alignToTarget(double desiredDistance,boolean shouldDrive){
-    double[] out=new double[2];
-    //This is more computationally efficient, and conserves bandwidth
-    if(shouldDrive){
-      out=limelight.getDistanceAndAngleToTarget();
-    }else{
-      out[1]=limelight.getDistanceFromTarget();
+
+  private boolean alignToTarget(double desiredDistance, boolean shouldDrive) {
+    double[] out = new double[2];
+    // This is more computationally efficient, and conserves bandwidth
+    if (shouldDrive) {
+      out = limelight.getDistanceAndAngleToTarget();
+    } else {
+      out[1] = limelight.getDistanceFromTarget();
     }
-    double forward=0;
-    boolean adjusted=true;
-    if(shouldDrive){
-      double distAway=out[0]-desiredDistance;
-      if(Math.abs(distAway)>12){
-        if(Math.abs(distAway)>36){
-          forward=.7;
-        }else{
-          forward=.5;
+    double forward = 0;
+    boolean adjusted = true;
+    if (shouldDrive) {
+      double distAway = out[0] - desiredDistance;
+      if (Math.abs(distAway) > 12) {
+        if (Math.abs(distAway) > 36) {
+          forward = .7;
+        } else {
+          forward = .5;
         }
-        adjusted=false;
+        adjusted = false;
       }
-      if(distAway<0)forward*=-1;
+      if (distAway < 0)
+        forward *= -1;
     }
-    double turn=0;
-    double angleAway=out[1];
-    if(Math.abs(angleAway)>2){
-      if(Math.abs(angleAway)>20){
-        turn=.7;
-      }else{
-        turn=.5;
+    double turn = 0;
+    double angleAway = out[1];
+    if (Math.abs(angleAway) > 2) {
+      if (Math.abs(angleAway) > 20) {
+        turn = .7;
+      } else {
+        turn = .5;
       }
-      adjusted=false;
+      adjusted = false;
     }
-    if(angleAway<0)turn*=-1;
-    double rightInput=forward-turn;
-    double leftInput=forward+turn;
+    if (angleAway < 0)
+      turn *= -1;
+    double rightInput = forward - turn;
+    double leftInput = forward + turn;
     accelLimit(rightInput, leftInput);
     return adjusted;
   }
+
   public void Drive(double distance) {
     distanceTraveled = leftEncoder.getPosition() * -1 / 12;
     desiredDistance = distance + distanceTraveled;
     velocityTimer.start();
-    
-      DriveLabel: if (distance > 0) {
+
+    DriveLabel: if (distance > 0) {
       while (desiredDistance > distanceTraveled) {
-      distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-     // ballToggleButton = ballSwitch.get();
-      chronosDrive.tankDrive(-.6, -.6);
-      // Set Button to Integer Value
-     // if (ballToggleButton == false && ballToggle == 0) { 
-     // First Press ballToggle = 1; 
-      // If trigger is pressed and toggle hasn't been set yet/has cycled through then
-      // toggle = 1
+        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
+        // ballToggleButton = ballSwitch.get();
+        chronosDrive.tankDrive(-.6, -.6);
+        // Set Button to Integer Value
+        // if (ballToggleButton == false && ballToggle == 0) {
+        // First Press ballToggle = 1;
+        // If trigger is pressed and toggle hasn't been set yet/has cycled through then
+        // toggle = 1
       }
     }
-      /* else if (ballToggleButton == true && ballToggle == 1) { // First Release
-      ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
-      }
-      // Determine Piston Position Based on Integer Value
+    /*
+     * else if (ballToggleButton == true && ballToggle == 1) { // First Release
+     * ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
+     * }
+     * // Determine Piston Position Based on Integer Value
      * if (ballToggle == 1 || ballToggle == 2) { // Trigger is Pressed
      * if (frontBallTransport.getSelectedSensorPosition() * ballMagScale <
      * ballDesiredDistance) {
@@ -256,8 +279,8 @@ public class Robot extends TimedRobot {
      * frontBallTransport.setSelectedSensorPosition(0);
      * }
      * }
-    chronosDrive.tankDrive(-7, 7);
-    */
+     * chronosDrive.tankDrive(-7, 7);
+     */
     /*
      * if (velocityTimer.get() >= tLateDrive) {
      * break DriveLabel;
@@ -298,17 +321,61 @@ public class Robot extends TimedRobot {
      */
   }
 
+  public void autoAlignShoot() {
+    while (!shooter.align()) {
+      shooter.getHood().update();
+    }
+    long start = System.currentTimeMillis();
+    while (start + 5000 > System.currentTimeMillis())
+      shooter.shoot();
+    shooter.stop();
+  }
+
   @Override
   public void autonomousInit() {
-    // autoSelected = autoChoices.getSelected();
-
+    autoSelected = autoChoices.getSelected();
+    System.out.println(autoSelected);
     compressor.enableDigital();
-    //driveSol.set(Value.kReverse);
- 
-    Drive(5); // left should be negative, right should be positive
+    switch (autoSelected) {
+      case "Shoot1":
+        shooter.getHood().resetHomed();
+        long start = System.currentTimeMillis();
+        while (start + 3000 > System.currentTimeMillis()) {
+          chronosDrive.tankDrive(.7, .7);
+          shooter.getHood().homePeriodic();
+        }
+        shooter.getHood().home();
+
+        autoAlignShoot();
+        break;
+      case "Shoot2":
+        intake.getDeploy().set(true);
+        intake.getMotor().set(VictorSPXControlMode.PercentOutput, 1);
+        shooter.getHood().resetHomed();
+        start = System.currentTimeMillis();
+        while (start + 1000 > System.currentTimeMillis()) {
+          chronosDrive.tankDrive(.7, .7);
+          shooter.getHood().homePeriodic();
+        }
+        intake.getDeploy().set(false);
+        start = System.currentTimeMillis();
+        while (start + 1500 > System.currentTimeMillis() || !limelight.sees()) {
+          chronosDrive.tankDrive(.5, -.5);
+          shooter.getHood().homePeriodic();
+        }
+        autoAlignShoot();
+        break;
     }
-  
+
+  }
+
+  public void delay(long time) {
+    long start = System.currentTimeMillis();
+    while (start + time >= System.currentTimeMillis())
+      ;
+  }
 
   public void autonomousPeriodic() {
+
   }
 }

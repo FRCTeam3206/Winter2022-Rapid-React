@@ -11,7 +11,7 @@ public class Constants {
         public static final double sparkmax_kMaxOut = 1;
         public static final double sparkmax_kMinOut = -1;
 
-        public static final double hood_kP = 0.01;
+        public static final double hood_kP = 0.64;
         public static final double hood_kI = 0;
         public static final double hood_kD = 0;
         public static final double hood_kF = 0;
@@ -62,9 +62,10 @@ public class Constants {
         public static final int B_INTAKE=1;
         public static final int B_DEPLOY=6;
         public static final int B_ALIGN=2;
-        public static final int B_SHOOT=3;
-        public static final int B_REVERSE_INTAKE=4;
+        public static final int B_SHOOT=2;
+        public static final int B_REVERSE_INTAKE=5;
         public static final int B_SHOOTER_FAILSAFE=7;
+        public static final int B_HOME=10;
     }
     public static class IDS{
         public static final int SHOOT_PORT=5;

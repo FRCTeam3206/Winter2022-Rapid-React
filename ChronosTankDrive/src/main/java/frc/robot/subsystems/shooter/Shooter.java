@@ -71,7 +71,7 @@ public class Shooter extends Subsystem{
     }
 
     public void showEncoderValOnSmartDashboard() {
-        SmartDashboard.putNumber("Encoder", m_encoder.getVelocity());
+        SmartDashboard.putNumber("Encoder", -m_encoder.getVelocity());
     }
     public void setSpeed(double rpm_target){
       shooterSetPoint=rpm_target/maxRPM;
@@ -88,14 +88,16 @@ public class Shooter extends Subsystem{
     public void shoot(double desiredRPM){
       desiredRPM=-desiredRPM;
       setSpeed(desiredRPM);//To be implemented with LL This is just for Testing
-      if(Math.abs(m_encoder.getVelocity()-desiredRPM)<25){
+      if(Math.abs(m_encoder.getVelocity()-desiredRPM)<25||isShooting){
         //Shoot
         kickerWheel.set(VictorSPXControlMode.PercentOutput, -1);
+        isShooting=true;
      }
     }
     public void stop(){
       m_shooter.set(0);
       kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
+      isShooting=false;
     }
     @Override
     public void init() {
