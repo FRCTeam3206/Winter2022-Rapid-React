@@ -13,58 +13,69 @@ public class ShooterSupersystem extends Subsystem {
     private Hood hood;
     private Limelight limelight;
     private DifferentialDrive driveTrain;
-    private GenericHID joystick1,joystick2;
-    public Hood getHood(){
+    private GenericHID joystick1, joystick2;
+
+    public Hood getHood() {
         return hood;
     }
+
     public ShooterSupersystem(Shooter shooter, Hood hood, Limelight limelight, DifferentialDrive driveTrain,
-            GenericHID joystick1,GenericHID joystick2) {
+            GenericHID joystick1, GenericHID joystick2) {
         this.shooter = shooter;
         this.hood = hood;
         this.limelight = limelight;
         this.driveTrain = driveTrain;
         this.joystick1 = joystick1;
-        this.joystick2=joystick2;
+        this.joystick2 = joystick2;
     }
 
     @Override
     public void init() {
         shooter.init();
-        //hood.init();
+        // hood.init();
         SmartDashboard.putNumber("RPM", 0);
     }
-    public double hoodAngle(double distance){
-        return 90-Math.atan((Constants.Shooter.SHOOTER_HEIGHT_DIFF+Math.sqrt(Math.pow(Constants.Shooter.SHOOTER_HEIGHT_DIFF,2)+Math.pow(distance,2)))/distance)*180/Math.PI;
+
+    public double hoodAngle(double distance) {
+        return 90 - Math.atan((Constants.Shooter.SHOOTER_HEIGHT_DIFF
+                + Math.sqrt(Math.pow(Constants.Shooter.SHOOTER_HEIGHT_DIFF, 2) + Math.pow(distance, 2))) / distance)
+                * 180 / Math.PI;
     }
-    public boolean alignTo(double angle,double distance){
+
+    public boolean alignTo(double angle, double distance) {
         double turn = -angle / 25;
         SmartDashboard.putNumber("Turn", turn);
         if (Math.abs(turn) < .03) {
             turn = 0;
         }
         driveTrain.arcadeDrive(0, turn);
-        double hoodAngle=hoodAngle(distance);
+        double hoodAngle = hoodAngle(distance);
         SmartDashboard.putNumber("Hood Angle", hoodAngle);
         hood.setAngle(hoodAngle);
-        return turn<.2&&Math.abs(hood.getAngle()-hoodAngle)<2;
+        return turn < .2 && Math.abs(hood.getAngle() - hoodAngle) < 2;
     }
-    public boolean align(){
+
+    public boolean align() {
         double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
         double distance = distanceAndAngle[0];
-        double angle=distanceAndAngle[1];
+        double angle = distanceAndAngle[1];
         return alignTo(angle, distance);
     }
-    public void shoot(double distance){
-        shooter.shoot(4.045*distance+2374.7);
+
+    public void shoot(double distance) {// 4.045*distance+2374.7 is from pure testing
+        shooter.shoot(4.1 * distance + 2374.7);
     }
-    public void shoot(){
+
+    public void shoot() {
         double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
-        double distance=distanceAndAngle[0];
+        double distance = distanceAndAngle[0];
         shoot(distance);
     }
-    public void stop(){
+
+    public void stop() {
         shooter.stop();
     }
+
     @Override
     public void periodic() {
         // boolean shooting=false; // I don't think this is used
@@ -88,8 +99,8 @@ public class ShooterSupersystem extends Subsystem {
             turn = 0;
             forward = 0;
             if (joystick1.getRawButton(B_ALIGN) && limelight.sees()) {
-                //aligned=alignTo(angle, distance);
-                aligned=align();
+                // aligned=alignTo(angle, distance);
+                aligned = align();
             }
             if (joystick2.getRawButton(B_SHOOT)) {
                 shoot(distance);// There will be a function based on ll to find this
