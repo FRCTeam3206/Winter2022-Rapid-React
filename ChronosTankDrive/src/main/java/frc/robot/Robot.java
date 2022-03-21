@@ -340,7 +340,7 @@ public class Robot extends TimedRobot {
       case "Shoot1":
         shooter.getHood().resetHomed();
         long start = System.currentTimeMillis();
-        while (start + 3000 > System.currentTimeMillis()) {
+        while (start + 1500 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(.7, .7);
           shooter.getHood().homePeriodic();
         }
@@ -363,7 +363,7 @@ public class Robot extends TimedRobot {
           chronosDrive.tankDrive(.5, -.5);
           shooter.getHood().homePeriodic();
         }
-        autoAlignShoot();
+        //autoAlignShoot();
         break;
     }
 
