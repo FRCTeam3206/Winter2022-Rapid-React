@@ -134,6 +134,8 @@ public class Robot extends TimedRobot {
     rightEncoder.setPosition(0);
     autoChoices.setDefaultOption("Shoot1", "Shoot1");
     autoChoices.addOption("Shoot2", "Shoot2");
+    autoChoices.addOption("ShootFrontNoBack", "ShootFrontNoBack");
+    autoChoices.addOption("ShootFrontBack", "ShootFrontBack");
     SmartDashboard.putData(autoChoices);
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
@@ -375,6 +377,28 @@ public class Robot extends TimedRobot {
 
         autoAlignShoot();
         break;
+      case "ShootFrontNoBack":
+        shooter.getHood().resetHomed();
+        shooter.getHood().home();
+        start=System.currentTimeMillis();
+        while(start+7000>System.currentTimeMillis()){
+          shooter.shootFront();
+          shooter.getHood().update();
+        }
+      break;
+      case "ShootFrontBack":
+        shooter.getHood().resetHomed();
+        shooter.getHood().home();
+        start=System.currentTimeMillis();
+        while(start+7000>System.currentTimeMillis()){
+          shooter.shootFront();
+          shooter.getHood().update();
+        }
+        start=System.currentTimeMillis();
+        while(start+2000>System.currentTimeMillis()){
+          chronosDrive.tankDrive(.7, .7);
+        }
+      break;
     }
 
   }

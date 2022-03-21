@@ -71,7 +71,12 @@ public class ShooterSupersystem extends Subsystem {
         double distance = distanceAndAngle[0];
         shoot(distance);
     }
-
+    public void shootFront(){
+        hood.setAngle(12);
+        if(Math.abs(hood.getAngle()-12)<1){
+            shooter.shoot(2300);
+        }
+    }
     public void stop() {
         shooter.stop();
     }
@@ -87,10 +92,7 @@ public class ShooterSupersystem extends Subsystem {
         double turn;
         double forward;
         if (joystick2.getRawButton(B_SHOOTER_FAILSAFE)) {
-            // assumes driver has parked robot against dasher board under hub
-            hood.setAngle(12); // launch angle of 78 deg, found by limited testing tonight
-            shooter.shoot(2300); // found by limited testing tonight
-            // shooting=true;
+            shootFront();
         } else {
             distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
             distance = distanceAndAngle[0];
