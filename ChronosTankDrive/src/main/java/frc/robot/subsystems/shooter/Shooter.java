@@ -94,6 +94,9 @@ public class Shooter extends Subsystem{
         isShooting=true;
      }
     }
+    public void frontShoot(){
+      
+    }
     public void stop(){
       m_shooter.set(0);
       kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);

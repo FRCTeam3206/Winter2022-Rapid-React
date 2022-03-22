@@ -24,9 +24,9 @@ public class Climber extends Subsystem{
     @Override
     public void periodic() {
         if(joystick.getPOV()==0){
-            motor1.set(ControlMode.PercentOutput, .5);
+            motor1.set(ControlMode.PercentOutput, 1);
         }else if(joystick.getPOV()==180){
-            motor1.set(ControlMode.PercentOutput,-.5);
+            motor1.set(ControlMode.PercentOutput,-1);
         }else{
             motor1.set(ControlMode.PercentOutput,0);
         }

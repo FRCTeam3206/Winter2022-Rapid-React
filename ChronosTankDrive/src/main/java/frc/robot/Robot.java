@@ -134,6 +134,8 @@ public class Robot extends TimedRobot {
     rightEncoder.setPosition(0);
     autoChoices.setDefaultOption("Shoot1", "Shoot1");
     autoChoices.addOption("Shoot2", "Shoot2");
+    autoChoices.addOption("ShootFrontNoBack", "ShootFrontNoBack");
+    autoChoices.addOption("ShootFrontBack", "ShootFrontBack");
     SmartDashboard.putData(autoChoices);
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
@@ -340,7 +342,7 @@ public class Robot extends TimedRobot {
       case "Shoot1":
         shooter.getHood().resetHomed();
         long start = System.currentTimeMillis();
-        while (start + 3000 > System.currentTimeMillis()) {
+        while (start + 1500 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(.7, .7);
           shooter.getHood().homePeriodic();
         }
@@ -353,18 +355,50 @@ public class Robot extends TimedRobot {
         intake.getMotor().set(VictorSPXControlMode.PercentOutput, 1);
         shooter.getHood().resetHomed();
         start = System.currentTimeMillis();
-        while (start + 1000 > System.currentTimeMillis()) {
+        while (start + 3000 > System.currentTimeMillis()) {
+          chronosDrive.tankDrive(-.7, -.7);
+          shooter.getHood().homePeriodic();
+        }
+        intake.getMotor().set(VictorSPXControlMode.PercentOutput, 1);
+        intake.getDeploy().set(false);
+        delay(1500);
+        intake.getDeploy().set(true);
+        start = System.currentTimeMillis();
+        while (start + 2500 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(.7, .7);
           shooter.getHood().homePeriodic();
         }
         intake.getDeploy().set(false);
         start = System.currentTimeMillis();
-        while (start + 1500 > System.currentTimeMillis() || !limelight.sees()) {
+        while (start + 750 > System.currentTimeMillis() || !limelight.sees()) {
           chronosDrive.tankDrive(.5, -.5);
           shooter.getHood().homePeriodic();
         }
+
         autoAlignShoot();
         break;
+      case "ShootFrontNoBack":
+        shooter.getHood().resetHomed();
+        shooter.getHood().home();
+        start=System.currentTimeMillis();
+        while(start+7000>System.currentTimeMillis()){
+          shooter.shootFront();
+          shooter.getHood().update();
+        }
+      break;
+      case "ShootFrontBack":
+        shooter.getHood().resetHomed();
+        shooter.getHood().home();
+        start=System.currentTimeMillis();
+        while(start+7000>System.currentTimeMillis()){
+          shooter.shootFront();
+          shooter.getHood().update();
+        }
+        start=System.currentTimeMillis();
+        while(start+2000>System.currentTimeMillis()){
+          chronosDrive.tankDrive(.7, .7);
+        }
+      break;
     }
 
   }
