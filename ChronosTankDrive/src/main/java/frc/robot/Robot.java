@@ -385,6 +385,7 @@ public class Robot extends TimedRobot {
           shooter.shootFront();
           shooter.getHood().update();
         }
+        shooter.stop();
       break;
       case "ShootFrontBack":
         shooter.getHood().resetHomed();
@@ -394,6 +395,7 @@ public class Robot extends TimedRobot {
           shooter.shootFront();
           shooter.getHood().update();
         }
+        shooter.stop();
         start=System.currentTimeMillis();
         while(start+2000>System.currentTimeMillis()){
           chronosDrive.tankDrive(.7, .7);
