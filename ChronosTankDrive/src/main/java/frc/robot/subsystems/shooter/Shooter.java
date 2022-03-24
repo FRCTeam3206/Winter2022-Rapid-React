@@ -73,6 +73,10 @@ public class Shooter extends Subsystem{
     public void showEncoderValOnSmartDashboard() {
         SmartDashboard.putNumber("Encoder", -m_encoder.getVelocity());
     }
+    public void invert(){
+      m_shooter.set(.3);
+      kickerWheel.set(VictorSPXControlMode.PercentOutput, .3);
+    }
     public void setSpeed(double rpm_target){
       shooterSetPoint=rpm_target/maxRPM;
       shooterSetPoint = MathUtil.clamp(shooterSetPoint, kMinOutput, kMaxOutput);

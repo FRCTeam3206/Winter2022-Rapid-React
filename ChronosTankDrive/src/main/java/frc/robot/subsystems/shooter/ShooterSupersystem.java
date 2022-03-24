@@ -123,6 +123,9 @@ public class ShooterSupersystem extends Subsystem {
             hood.resetHomed();
         if (joystick2.getRawButton(B_HOME))
             hood.homePeriodic();
+        if(joystick2.getRawButton(8)){
+            shooter.invert();
+        }
     }
 }
 

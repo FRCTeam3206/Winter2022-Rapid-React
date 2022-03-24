@@ -367,7 +367,7 @@ public class Robot extends TimedRobot {
           shooter.getHood().homePeriodic();
         }
         start = System.currentTimeMillis();
-        while (start + 2750 > System.currentTimeMillis() || !limelight.sees()) {
+        while (start + 2750 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(.5, -.5);
           shooter.getHood().homePeriodic();
         }
