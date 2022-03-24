@@ -159,7 +159,7 @@ public class Robot extends TimedRobot {
   }
 
   public void teleopInit() {
-    shooter.getHood().home();
+
   }
 
   /*
@@ -361,14 +361,11 @@ public class Robot extends TimedRobot {
         }
         intake.getMotor().set(VictorSPXControlMode.PercentOutput, 1);
         intake.getDeploy().set(false);
-        delay(1500);
-        intake.getDeploy().set(true);
         start = System.currentTimeMillis();
         while (start + 2500 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(.7, .7);
           shooter.getHood().homePeriodic();
         }
-        intake.getDeploy().set(false);
         start = System.currentTimeMillis();
         while (start + 750 > System.currentTimeMillis() || !limelight.sees()) {
           chronosDrive.tankDrive(.5, -.5);
@@ -380,27 +377,27 @@ public class Robot extends TimedRobot {
       case "ShootFrontNoBack":
         shooter.getHood().resetHomed();
         shooter.getHood().home();
-        start=System.currentTimeMillis();
-        while(start+7000>System.currentTimeMillis()){
+        start = System.currentTimeMillis();
+        while (start + 7000 > System.currentTimeMillis()) {
           shooter.shootFront();
           shooter.getHood().update();
         }
         shooter.stop();
-      break;
+        break;
       case "ShootFrontBack":
         shooter.getHood().resetHomed();
         shooter.getHood().home();
-        start=System.currentTimeMillis();
-        while(start+7000>System.currentTimeMillis()){
+        start = System.currentTimeMillis();
+        while (start + 7000 > System.currentTimeMillis()) {
           shooter.shootFront();
           shooter.getHood().update();
         }
         shooter.stop();
-        start=System.currentTimeMillis();
-        while(start+2000>System.currentTimeMillis()){
+        start = System.currentTimeMillis();
+        while (start + 2000 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(.7, .7);
         }
-      break;
+        break;
     }
 
   }
