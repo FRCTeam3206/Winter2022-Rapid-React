@@ -352,17 +352,17 @@ public class Robot extends TimedRobot {
         break;
       case "Shoot2":
         intake.getDeploy().set(true);
-        intake.getMotor().set(VictorSPXControlMode.PercentOutput, .5);
+        intake.getMotor().set(VictorSPXControlMode.PercentOutput, .6);
         shooter.getHood().resetHomed();
         start = System.currentTimeMillis();
-        while (start + 4000 > System.currentTimeMillis()) {
+        while (start + 3000 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(-.7, -.7);
           shooter.getHood().homePeriodic();
         }
         intake.getMotor().set(VictorSPXControlMode.PercentOutput, 0);
         intake.getDeploy().set(false);
         start = System.currentTimeMillis();
-        while (start + 1000 > System.currentTimeMillis()) {
+        while (start + 500 > System.currentTimeMillis()) {
           chronosDrive.tankDrive(.7, .7);
           shooter.getHood().homePeriodic();
         }
