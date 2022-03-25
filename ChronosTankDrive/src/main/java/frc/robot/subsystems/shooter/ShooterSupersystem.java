@@ -64,7 +64,7 @@ public class ShooterSupersystem extends Subsystem {
 
     public void shoot(double distance) {// 4.045*distance+2374.7 is from pure testing
         shooter.shoot(4.045 * distance + 2374.7);
-        //shooter.shoot(SmartDashboard.getNumber("RPM",0.0));
+        // shooter.shoot(SmartDashboard.getNumber("RPM",0.0));
     }
 
     public void shoot() {
@@ -72,12 +72,14 @@ public class ShooterSupersystem extends Subsystem {
         double distance = distanceAndAngle[0];
         shoot(distance);
     }
-    public void shootFront(){
-        hood.setAngle(12);
-        if(Math.abs(hood.getAngle()-12)<1){
+
+    public void shootFront() {
+        hood.setAngle(10);
+        if (Math.abs(hood.getAngle() - 10) < 1) {
             shooter.shoot(2500);
         }
     }
+
     public void stop() {
         shooter.stop();
     }
@@ -97,7 +99,7 @@ public class ShooterSupersystem extends Subsystem {
         } else {
             distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
             distance = distanceAndAngle[0];
-            SmartDashboard.putNumber("Distance",distance);
+            SmartDashboard.putNumber("Distance", distance);
             angle = distanceAndAngle[1];
             aligned = false;
             turn = 0;
@@ -123,7 +125,7 @@ public class ShooterSupersystem extends Subsystem {
             hood.resetHomed();
         if (joystick2.getRawButton(B_HOME))
             hood.homePeriodic();
-        if(joystick2.getRawButton(8)){
+        if (joystick2.getRawButton(8)) {
             shooter.invert();
         }
     }
