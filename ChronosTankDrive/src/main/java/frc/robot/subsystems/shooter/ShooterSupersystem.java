@@ -63,7 +63,7 @@ public class ShooterSupersystem extends Subsystem {
     }
 
     public void shoot(double distance) {// 4.045*distance+2374.7 is from pure testing
-        shooter.shoot(4.045 * distance + 2374.7+25);
+        shooter.shoot(4.045 * distance + 2374.7+0);
         // shooter.shoot(SmartDashboard.getNumber("RPM",0.0));
     }
 
