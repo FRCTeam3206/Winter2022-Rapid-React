@@ -359,7 +359,7 @@ public class Robot extends TimedRobot {
           chronosDrive.tankDrive(-.7, -.7);
           shooter.getHood().homePeriodic();
         }
-        intake.getMotor().set(VictorSPXControlMode.PercentOutput, 1);
+        intake.getMotor().set(VictorSPXControlMode.PercentOutput, .5);
         intake.getDeploy().set(false);
         start = System.currentTimeMillis();
         while (start + 1000 > System.currentTimeMillis()) {
