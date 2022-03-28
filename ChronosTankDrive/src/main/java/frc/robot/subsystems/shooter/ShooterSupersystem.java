@@ -76,7 +76,7 @@ public class ShooterSupersystem extends Subsystem {
     public void shootFront() {
         hood.setAngle(10);
         if (Math.abs(hood.getAngle() - 10) < 1) {
-            shooter.shoot(2700);
+            shooter.shoot(2500);
         }
     }
 
