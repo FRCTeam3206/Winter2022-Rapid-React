@@ -203,6 +203,14 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.periodic();
     }
+
+    if (weaponStick.getRawButtonReleased(9)) {
+      if (compressor.enabled()) {
+        compressor.disable();
+      } else {
+        compressor.enableDigital();
+      }
+    }
   }
 
   private boolean alignToTarget(double desiredDistance, boolean shouldDrive) {
