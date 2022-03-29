@@ -48,7 +48,7 @@ public class Constants {
 
         public static final double SHOOTER_HEIGHT_DIFF=104-17.25;//Goal height-Shooter height
 
-        public static double HOOD_ZERO_POS=5;
+        public static double HOOD_ZERO_POS=6;
 
         public static double HOOD_TICKS_PER_ROTATION=409600;
 
