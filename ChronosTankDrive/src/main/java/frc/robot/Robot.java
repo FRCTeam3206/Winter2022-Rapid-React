@@ -26,6 +26,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.IDS.*;
 import static frc.robot.Constants.Limelight.*;
+import static frc.robot.Constants.Drive.*;
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.cscore.UsbCamera;
@@ -187,6 +188,14 @@ public class Robot extends TimedRobot {
         rightAdjusted = rightStick.getY();
         leftAdjusted = leftStick.getY();
       }
+    if (TURN_LIMIT) {
+      // this would be simpler if we switched to arcadeDrive()
+      double forward = (rightAdjusted + leftAdjusted) / 2.0;
+      double turn = (leftAdjusted - rightAdjusted) / 2.0 * TURN_SCALE;
+
+      leftAdjusted = forward + turn;
+      rightAdjusted = forward - turn;
+    }
     if (rightStick.getRawButton(1))
       driveSol.set(true);
     else
