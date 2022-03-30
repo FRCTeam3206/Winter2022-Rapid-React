@@ -182,27 +182,34 @@ public class Robot extends TimedRobot {
      * 
      * }
      */
-    if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN))
+    // lock out drive controls when aligning for a shot
+    if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
       if (accelerationLimiting) {
         accelLimit(leftStick.getY(), rightStick.getY());
       } else {
         rightAdjusted = rightStick.getY();
         leftAdjusted = leftStick.getY();
       }
-    if (TURN_LIMIT) {
-      // this would be simpler if we switched to arcadeDrive()
-      double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
-      double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
-      turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
 
-      leftAdjusted = forwardLimit + turnLimit;
-      rightAdjusted = forwardLimit - turnLimit;
+      if (TURN_LIMIT) {
+        // this would be simpler if we switched to arcadeDrive()
+        double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
+        double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
+        turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
+
+        leftAdjusted = forwardLimit + turnLimit;
+        rightAdjusted = forwardLimit - turnLimit;
+      }
+
+      if (rightStick.getRawButton(1)) {
+        driveSol.set(true);
+      } else {
+        driveSol.set(false);
+      }
+
+      chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+
     }
-    if (rightStick.getRawButton(1))
-      driveSol.set(true);
-    else
-      driveSol.set(false);
-    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
 
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for
