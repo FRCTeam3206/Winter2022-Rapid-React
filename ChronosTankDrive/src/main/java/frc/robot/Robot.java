@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
   String autoSelected;
 
   // Acceleration Limiting Variables
-  boolean accelerationLimiting = true;
+  boolean accelerationLimiting = false;
   double accelLimitedLeftGetY;
   double accelLimitedRightGetY;
   double accelLimitedSlideDrive;
@@ -190,11 +190,12 @@ public class Robot extends TimedRobot {
       }
     if (TURN_LIMIT) {
       // this would be simpler if we switched to arcadeDrive()
-      double forward = (rightAdjusted + leftAdjusted) / 2.0;
-      double turn = (leftAdjusted - rightAdjusted) / 2.0 * TURN_SCALE;
+      double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
+      double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
+      turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
 
-      leftAdjusted = forward + turn;
-      rightAdjusted = forward - turn;
+      leftAdjusted = forwardLimit + turnLimit;
+      rightAdjusted = forwardLimit - turnLimit;
     }
     if (rightStick.getRawButton(1))
       driveSol.set(true);

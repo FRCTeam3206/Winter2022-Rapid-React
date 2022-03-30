@@ -39,7 +39,7 @@ public class Intake extends Subsystem{
         if(joystick.getRawButton(B_REVERSE_INTAKE)){
             intakeMotor.set(ControlMode.PercentOutput, -1);
         }else if(deploy.get()){
-            intakeMotor.set(ControlMode.PercentOutput,1);
+            intakeMotor.set(ControlMode.PercentOutput, 0.7);
         }else{
             intakeMotor.set(ControlMode.PercentOutput, 0);
         }
