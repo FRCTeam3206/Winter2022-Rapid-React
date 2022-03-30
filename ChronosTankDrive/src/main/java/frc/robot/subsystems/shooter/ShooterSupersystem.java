@@ -14,6 +14,7 @@ public class ShooterSupersystem extends Subsystem {
     private Limelight limelight;
     private DifferentialDrive driveTrain;
     private GenericHID joystick1, joystick2;
+    private boolean aligned = false;
 
     public Hood getHood() {
         return hood;
@@ -32,6 +33,7 @@ public class ShooterSupersystem extends Subsystem {
     @Override
     public void init() {
         shooter.init();
+        aligned = false;
         // hood.init();
         SmartDashboard.putNumber("RPM", 0);
     }
@@ -91,7 +93,7 @@ public class ShooterSupersystem extends Subsystem {
         double distance;
         double angle;
         double distAway;
-        boolean aligned = false;
+        // boolean aligned = false;
         double turn;
         double forward;
         if (joystick2.getRawButton(B_SHOOTER_FAILSAFE)) {
@@ -101,17 +103,24 @@ public class ShooterSupersystem extends Subsystem {
             distance = distanceAndAngle[0];
             SmartDashboard.putNumber("Distance", distance);
             angle = distanceAndAngle[1];
-            aligned = false;
+            // aligned = false;
             turn = 0;
             forward = 0;
             if (joystick1.getRawButton(B_ALIGN) && limelight.sees()) {
                 // aligned=alignTo(angle, distance);
-                aligned = align();
-            }
-            if (joystick2.getRawButton(B_SHOOT)) {
+                if (aligned) {
+                    aligned = align();
+                    if (aligned) {
+                        shoot(distance);
+                    }
+                } else {
+                    aligned = align();
+                }
+            } else if (joystick2.getRawButton(B_SHOOT)) {
                 shoot(distance);// There will be a function based on ll to find this
             } else {
                 shooter.stop();
+                aligned = false;
             }
             if (angle > 0) {
                 turn *= -1;
