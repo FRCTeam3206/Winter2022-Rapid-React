@@ -26,6 +26,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.IDS.*;
 import static frc.robot.Constants.Limelight.*;
+import static frc.robot.Constants.Drive.*;
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.cscore.UsbCamera;
@@ -53,7 +54,7 @@ public class Robot extends TimedRobot {
   String autoSelected;
 
   // Acceleration Limiting Variables
-  boolean accelerationLimiting = true;
+  boolean accelerationLimiting = false;
   double accelLimitedLeftGetY;
   double accelLimitedRightGetY;
   double accelLimitedSlideDrive;
@@ -187,6 +188,15 @@ public class Robot extends TimedRobot {
         rightAdjusted = rightStick.getY();
         leftAdjusted = leftStick.getY();
       }
+    if (TURN_LIMIT) {
+      // this would be simpler if we switched to arcadeDrive()
+      double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
+      double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
+      turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
+
+      leftAdjusted = forwardLimit + turnLimit;
+      rightAdjusted = forwardLimit - turnLimit;
+    }
     if (rightStick.getRawButton(1))
       driveSol.set(true);
     else
@@ -202,6 +212,14 @@ public class Robot extends TimedRobot {
     // intake/extake button assignments
     for (Subsystem subSystem : subSystems) {
       subSystem.periodic();
+    }
+
+    if (weaponStick.getRawButtonReleased(9)) {
+      if (compressor.enabled()) {
+        compressor.disable();
+      } else {
+        compressor.enableDigital();
+      }
     }
   }
 
