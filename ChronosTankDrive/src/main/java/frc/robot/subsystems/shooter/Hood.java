@@ -140,7 +140,7 @@ public class Hood extends Subsystem {
         }
         break;
       case 1:
-        m_hoodMotor.set(.2);
+        m_hoodMotor.set(.1);
         if (limit.get()) {
           m_hoodMotor.set(0);
           setHome();
