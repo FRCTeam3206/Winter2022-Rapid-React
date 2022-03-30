@@ -91,4 +91,8 @@ public class Constants {
         public static final double TURN_SCALE = 0.5;
 
     }
+
+    public static final class Pneumatics {
+        public static final boolean COMPRESSOR_TOGGLE_ENABLED = false;
+    }
 }

@@ -27,6 +27,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.IDS.*;
 import static frc.robot.Constants.Limelight.*;
 import static frc.robot.Constants.Drive.*;
+import static frc.robot.Constants.Pneumatics.*;
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.cscore.UsbCamera;
@@ -214,7 +215,7 @@ public class Robot extends TimedRobot {
       subSystem.periodic();
     }
 
-    if (weaponStick.getRawButtonReleased(9)) {
+    if (COMPRESSOR_TOGGLE_ENABLED && weaponStick.getRawButtonReleased(9)) {
       if (compressor.enabled()) {
         compressor.disable();
       } else {
