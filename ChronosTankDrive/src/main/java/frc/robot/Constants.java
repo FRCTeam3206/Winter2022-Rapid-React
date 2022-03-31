@@ -87,7 +87,7 @@ public class Constants {
     }
 
     public static final class Drive {
-        public static final boolean TURN_LIMIT = true;
+        public static final boolean TURN_LIMIT = false;
         public static final double TURN_SCALE = 0.5;
 
     }

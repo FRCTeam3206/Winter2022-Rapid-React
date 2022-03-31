@@ -108,13 +108,9 @@ public class ShooterSupersystem extends Subsystem {
             forward = 0;
             if (joystick1.getRawButton(B_ALIGN) && limelight.sees()) {
                 // aligned=alignTo(angle, distance);
+                aligned = align();
                 if (aligned) {
-                    aligned = align();
-                    if (aligned) {
-                        shoot(distance);
-                    }
-                } else {
-                    aligned = align();
+                    shoot(distance);
                 }
             } else if (joystick2.getRawButton(B_SHOOT)) {
                 shoot(distance);// There will be a function based on ll to find this
