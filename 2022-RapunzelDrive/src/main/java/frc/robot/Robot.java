@@ -15,8 +15,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import org.photonvision.PhotonCamera;
-
 /**
  * This is a demo program showing the use of the DifferentialDrive class, specifically it contains
  * the code necessary to operate a robot with tank drive.
@@ -35,7 +33,6 @@ public class Robot extends TimedRobot {
   private CANSparkMax m_rightFollowMotor;
   private double lastVelocity=0;
   private long lastTime;
-  private PhotonCamera camera;
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -57,7 +54,6 @@ public class Robot extends TimedRobot {
     CameraServer.startAutomaticCapture();
 
     lastTime=System.currentTimeMillis();
-    camera=new PhotonCamera(NetworkTableInstance.create(), "Microsoft_LifeCam_HD-3000");
   }
 
   double currRight=0;
