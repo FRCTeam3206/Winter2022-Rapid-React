@@ -85,7 +85,7 @@ public class Robot extends TimedRobot {
 
   // DriveTrain Pneumatics
   Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
-  PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
+  // PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   Limelight limelight;
   // DriveTrain Encoders
