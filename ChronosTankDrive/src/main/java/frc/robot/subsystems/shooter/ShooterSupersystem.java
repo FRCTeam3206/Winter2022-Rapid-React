@@ -52,7 +52,9 @@ public class ShooterSupersystem extends Subsystem {
     public void agitate() {
         agitator.set(VictorSPXControlMode.PercentOutput, .5);
     }
-
+    public void stopAgitate(){
+        agitator.set(VictorSPXControlMode.PercentOutput, 0);
+    }
     public boolean alignTo(double angle, double distance) {
         agitate();
         double turn = -angle / 25;
@@ -95,10 +97,12 @@ public class ShooterSupersystem extends Subsystem {
 
     public void stop() {
         shooter.stop();
+        stopAgitate();
     }
 
     @Override
     public void periodic() {
+
         // boolean shooting=false; // I don't think this is used
         double[] distanceAndAngle;
         double distance;
@@ -126,7 +130,7 @@ public class ShooterSupersystem extends Subsystem {
             } else if (joystick2.getRawButton(B_SHOOT)) {
                 shoot(distance);// There will be a function based on ll to find this
             } else {
-                shooter.stop();
+                stop();
                 aligned = false;
             }
             if (angle > 0) {
