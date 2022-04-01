@@ -9,7 +9,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 import com.revrobotics.CANSparkMax;
@@ -51,7 +53,6 @@ public class Robot extends TimedRobot {
     m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
     m_joystick = new XboxController(0);
 
-    CameraServer.startAutomaticCapture();
 
     lastTime=System.currentTimeMillis();
   }
@@ -71,6 +72,16 @@ public class Robot extends TimedRobot {
      
      
     m_myRobot.tankDrive(rightInput, leftInput);
+    NetworkTable table=(NetworkTable) NetworkTableInstance.getDefault().getTable("photonvision").getSubTable("Microsoft_LifeCam_HD-3000");
+    if(true){
+      double yaw=table.getEntry("targetYaw").getDouble(0.0);
+      double turn=-yaw/30;
+      turn=Math.sqrt(Math.abs(turn))*Math.signum(turn);
+      SmartDashboard.putNumber("Yaw", yaw);
+      m_myRobot.arcadeDrive(0, turn);
+    }else{
+      m_myRobot.tankDrive(rightInput, leftInput);
+    }
   }
   
   private double cut(double val){
