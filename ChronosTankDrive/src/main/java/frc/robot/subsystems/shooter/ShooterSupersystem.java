@@ -8,6 +8,9 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Subsystem;
 import static frc.robot.Constants.Buttons.*;
 
+import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
 public class ShooterSupersystem extends Subsystem {
     private Shooter shooter;
     private Hood hood;
@@ -15,6 +18,7 @@ public class ShooterSupersystem extends Subsystem {
     private DifferentialDrive driveTrain;
     private GenericHID joystick1, joystick2;
     private boolean aligned = false;
+    private VictorSPX agitator;
 
     public Hood getHood() {
         return hood;
@@ -28,6 +32,7 @@ public class ShooterSupersystem extends Subsystem {
         this.driveTrain = driveTrain;
         this.joystick1 = joystick1;
         this.joystick2 = joystick2;
+        this.agitator = new VictorSPX(Constants.IDS.AGITATE_PORT);
     }
 
     @Override
@@ -44,7 +49,14 @@ public class ShooterSupersystem extends Subsystem {
                 * 180 / Math.PI;
     }
 
+    public void agitate() {
+        agitator.set(VictorSPXControlMode.PercentOutput, .5);
+    }
+    public void stopAgitate(){
+        agitator.set(VictorSPXControlMode.PercentOutput, 0);
+    }
     public boolean alignTo(double angle, double distance) {
+        agitate();
         double turn = -angle / 25;
         SmartDashboard.putNumber("Turn", turn);
         if (Math.abs(turn) < .03) {
@@ -65,7 +77,8 @@ public class ShooterSupersystem extends Subsystem {
     }
 
     public void shoot(double distance) {// 4.045*distance+2374.7 is from pure testing
-        shooter.shoot(4.045 * distance + 2374.7+0);
+        agitate();
+        shooter.shoot(4.045 * distance + 2374.7 + 0);
         // shooter.shoot(SmartDashboard.getNumber("RPM",0.0));
     }
 
@@ -84,10 +97,12 @@ public class ShooterSupersystem extends Subsystem {
 
     public void stop() {
         shooter.stop();
+        stopAgitate();
     }
 
     @Override
     public void periodic() {
+
         // boolean shooting=false; // I don't think this is used
         double[] distanceAndAngle;
         double distance;
@@ -115,7 +130,7 @@ public class ShooterSupersystem extends Subsystem {
             } else if (joystick2.getRawButton(B_SHOOT)) {
                 shoot(distance);// There will be a function based on ll to find this
             } else {
-                shooter.stop();
+                stop();
                 aligned = false;
             }
             if (angle > 0) {

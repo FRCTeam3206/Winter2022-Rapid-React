@@ -51,7 +51,7 @@ public class Constants {
 
         public static double HOOD_ZERO_POS = 6;
 
-        public static double HOOD_TICKS_PER_ROTATION = 40960;  // constant for 10:1 gearbox
+        public static double HOOD_TICKS_PER_ROTATION = 40960; // constant for 10:1 gearbox
 
         public static double HOOD_TEETH_ANGLE_RAT = 48 / 41.233;
 
@@ -77,6 +77,7 @@ public class Constants {
         public static final int INTAKE_DEPLOY_PORT = 0;
         public static final int HOOD_PORT = 9;
         public static final int HOOD_LIMIT_PORT = 0;
+        public static final int AGITATE_PORT = 11;
     }
 
     public static final class Limelight {
