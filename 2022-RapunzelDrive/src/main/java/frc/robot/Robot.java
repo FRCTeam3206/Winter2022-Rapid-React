@@ -62,25 +62,19 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    //for acceleration limiting(uncomplete)
-     double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
-     double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
-     long currTime=System.currentTimeMillis();
-     double rightDiff=rightInput-currRight;
-     double leftDiff=leftInput-currLeft;
-     double timeDiff=currTime-lastTime;
-     
-     
-    m_myRobot.tankDrive(rightInput, leftInput);
     NetworkTable table=(NetworkTable) NetworkTableInstance.getDefault().getTable("photonvision").getSubTable("Microsoft_LifeCam_HD-3000");
-    if(true){
+    if(m_joystick.getAButton()){
       double yaw=table.getEntry("targetYaw").getDouble(0.0);
       double turn=-yaw/30;
       turn=Math.sqrt(Math.abs(turn))*Math.signum(turn);
       SmartDashboard.putNumber("Yaw", yaw);
+      double forward=0;
+      if(Math.abs(yaw)<5){
+        forward=.4;
+      }
       m_myRobot.arcadeDrive(0, turn);
     }else{
-      m_myRobot.tankDrive(rightInput, leftInput);
+      m_myRobot.arcadeDrive(m_joystick.getLeftX(), m_joystick.getLeftY());
     }
   }
   
