@@ -166,7 +166,7 @@ public class Robot extends TimedRobot {
   public void chaseBall() {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision")
         .getSubTable("Microsoft_LifeCam_HD-3000");
-    double angle = table.getEntry("yaw").getDouble(0.0);
+    double angle = table.getEntry("targetYaw").getDouble(0.0);
     double turn = angle / 30;
     double left = turn;
     double right = -turn;
