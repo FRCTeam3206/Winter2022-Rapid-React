@@ -17,7 +17,7 @@ public class Hood extends Subsystem {
   public double angle = Constants.Shooter.HOOD_ZERO_POS;
   private double inc = .25;
   public double kP, kI, kD, kIz, kFF;
-  private DigitalInput limit;
+  public DigitalInput limit;
 
   public Hood(int port, int limitPort, GenericHID joystick) {
     m_joystick = joystick;
