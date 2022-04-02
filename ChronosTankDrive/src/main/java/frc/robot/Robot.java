@@ -166,11 +166,18 @@ public class Robot extends TimedRobot {
   public void chaseBall() {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision")
         .getSubTable("Microsoft_LifeCam_HD-3000");
-    double angle = table.getEntry("targetYaw").getDouble(0.0);
-    double turn = angle / 30;
+    double angle = table.getEntry("targetYaw").getDouble(-9.0);
+    double turn = -(angle) / 30;
     double left = turn;
     double right = -turn;
+    double forward = 0;
+    System.out.println(angle);
+    if (Math.abs(angle) < 7) {
+      left = -.7;
+      right = -.7;
+    }
     accelLimit(left, right);
+    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
   }
 
   public void teleopInit() {
@@ -184,19 +191,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    /*
-     * //joystick drive
-     * if (rightStick.getRawButton(1)) { // Low Speed
-     * driveSol.set(Value.kForward);
-     * } else if (rightStick.getRawButton(2)) { // High Speed
-     * driveSol.set(Value.kReverse);
-     * } else {
-     * driveSol.set(Value.kOff); // Ensures Pistons are Off
-     * 
-     * }
-     */
-    // lock out drive controls when aligning for a shot
-    if (rightStick.getRawButtonPressed(2)) {
+    if (rightStick.getRawButton(5)) {
       chaseBall();
     } else {
       if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
