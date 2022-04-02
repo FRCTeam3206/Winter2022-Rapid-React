@@ -60,7 +60,7 @@ public class Limelight {
         double rawAngle = table.getEntry("tx").getDouble(0.0) * Math.PI / 180;
         double realDist = Math.sqrt(rawDist * rawDist + X_OFF * X_OFF - 2 * rawDist * X_OFF * Math.sin(rawAngle));
         double realAngle = (rawAngle + Math.atan(X_OFF / rawDist)) * 180 / Math.PI;
-        SmartDashboard.putNumber("Distance", rawDist + Y_OFF);
+        SmartDashboard.putNumber("Distance", (rawDist + Y_OFF));
         SmartDashboard.putNumber("Adjusted Angle", realAngle);
         // return new double[]{realDist+Y_OFF,realAngle};
         return new double[] { rawDist + Y_OFF, realAngle };

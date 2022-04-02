@@ -14,8 +14,7 @@ import frc.robot.subsystems.Subsystem;
 public class Hood extends Subsystem {
   private WPI_TalonSRX m_hoodMotor;
   private GenericHID m_joystick;
-
-  private double angle = Constants.Shooter.HOOD_ZERO_POS;
+  public double angle = Constants.Shooter.HOOD_ZERO_POS;
   private double inc = .25;
   public double kP, kI, kD, kIz, kFF;
   private DigitalInput limit;
@@ -140,7 +139,7 @@ public class Hood extends Subsystem {
         }
         break;
       case 1:
-        m_hoodMotor.set(.1);
+        m_hoodMotor.set(.4);
         if (limit.get()) {
           m_hoodMotor.set(0);
           setHome();
@@ -181,6 +180,7 @@ public class Hood extends Subsystem {
     angle = MathUtil.clamp(angle, Constants.Shooter.HOOD_ZERO_POS,
         Constants.Shooter.HOOD_ZERO_POS + Constants.Shooter.HOOD_RANGE);
     this.angle = angle;
+    
     update();
   }
 
