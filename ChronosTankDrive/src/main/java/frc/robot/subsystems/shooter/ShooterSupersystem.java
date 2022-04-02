@@ -100,6 +100,17 @@ public class ShooterSupersystem extends Subsystem {
         stopAgitate();
     }
 
+    public void alignAndShoot() {
+        double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
+        double distance = distanceAndAngle[0];
+        SmartDashboard.putNumber("Distance", distance);
+        double angle = distanceAndAngle[1];
+        aligned = align();
+        if (aligned) {
+            shoot(distance);
+        }
+    }
+
     @Override
     public void periodic() {
 
@@ -114,32 +125,20 @@ public class ShooterSupersystem extends Subsystem {
         if (joystick2.getRawButton(B_SHOOTER_FAILSAFE)) {
             shootFront();
         } else {
-            distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
-            distance = distanceAndAngle[0];
-            SmartDashboard.putNumber("Distance", distance);
-            angle = distanceAndAngle[1];
+
             // aligned = false;
             turn = 0;
             forward = 0;
             if (joystick1.getRawButton(B_ALIGN) && limelight.sees()) {
                 // aligned=alignTo(angle, distance);
-                aligned = align();
-                if (aligned) {
-                    shoot(distance);
-                }
-            } else if (joystick2.getRawButton(B_SHOOT)) {
-                shoot(distance);// There will be a function based on ll to find this
+                alignAndShoot();
             } else {
                 stop();
                 aligned = false;
             }
-            if (angle > 0) {
-                turn *= -1;
-            }
             // hood.setAngle(20);//There will be a function based on ll to find this
         }
         SmartDashboard.putBoolean("Aligned", aligned);
-        hood.update();
         shooter.showEncoderValOnSmartDashboard();
         if (joystick2.getRawButtonPressed(B_HOME))
             hood.resetHomed();

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import frc.robot.auton.*;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.Shooter;
@@ -359,73 +360,82 @@ public class Robot extends TimedRobot {
     shooter.stop();
   }
 
+  private Auton selectedAutoRoutine;
+
   @Override
   public void autonomousInit() {
+    /*
+     * autoSelected = autoChoices.getSelected();
+     * System.out.println(autoSelected);
+     * compressor.enableDigital();
+     * switch (autoSelected) {
+     * case "Shoot1":
+     * shooter.getHood().resetHomed();
+     * long start = System.currentTimeMillis();
+     * while (start + 1500 > System.currentTimeMillis()) {
+     * chronosDrive.tankDrive(.7, .7);
+     * shooter.getHood().homePeriodic();
+     * }
+     * shooter.getHood().home();
+     * 
+     * autoAlignShoot();
+     * break;
+     * case "Shoot2":
+     * intake.getDeploy().set(true);
+     * intake.getMotor().set(VictorSPXControlMode.PercentOutput, .6);
+     * shooter.getHood().resetHomed();
+     * start = System.currentTimeMillis();
+     * while (start + 3000 > System.currentTimeMillis()) {
+     * chronosDrive.tankDrive(-.7, -.7);
+     * shooter.getHood().homePeriodic();
+     * }
+     * intake.getMotor().set(VictorSPXControlMode.PercentOutput, 0);
+     * intake.getDeploy().set(false);
+     * start = System.currentTimeMillis();
+     * while (start + 500 > System.currentTimeMillis()) {
+     * chronosDrive.tankDrive(.7, .7);
+     * shooter.getHood().homePeriodic();
+     * }
+     * start = System.currentTimeMillis();
+     * while (start + 2750 > System.currentTimeMillis()) {
+     * chronosDrive.tankDrive(.5, -.5);
+     * shooter.getHood().homePeriodic();
+     * }
+     * 
+     * autoAlignShoot();
+     * break;
+     * case "ShootFrontNoBack":
+     * shooter.getHood().resetHomed();
+     * shooter.getHood().home();
+     * start = System.currentTimeMillis();
+     * while (start + 7000 > System.currentTimeMillis()) {
+     * shooter.shootFront();
+     * shooter.getHood().update();
+     * }
+     * shooter.stop();
+     * break;
+     * case "ShootFrontBack":
+     * shooter.getHood().resetHomed();
+     * shooter.getHood().home();
+     * start = System.currentTimeMillis();
+     * while (start + 7000 > System.currentTimeMillis()) {
+     * shooter.shootFront();
+     * shooter.getHood().update();
+     * }
+     * shooter.stop();
+     * start = System.currentTimeMillis();
+     * while (start + 2000 > System.currentTimeMillis()) {
+     * chronosDrive.tankDrive(.7, .7);
+     * }
+     * break;
+     * }
+     */
     autoSelected = autoChoices.getSelected();
-    System.out.println(autoSelected);
-    compressor.enableDigital();
     switch (autoSelected) {
       case "Shoot1":
-        shooter.getHood().resetHomed();
-        long start = System.currentTimeMillis();
-        while (start + 1500 > System.currentTimeMillis()) {
-          chronosDrive.tankDrive(.7, .7);
-          shooter.getHood().homePeriodic();
-        }
-        shooter.getHood().home();
-
-        autoAlignShoot();
-        break;
-      case "Shoot2":
-        intake.getDeploy().set(true);
-        intake.getMotor().set(VictorSPXControlMode.PercentOutput, .6);
-        shooter.getHood().resetHomed();
-        start = System.currentTimeMillis();
-        while (start + 3000 > System.currentTimeMillis()) {
-          chronosDrive.tankDrive(-.7, -.7);
-          shooter.getHood().homePeriodic();
-        }
-        intake.getMotor().set(VictorSPXControlMode.PercentOutput, 0);
-        intake.getDeploy().set(false);
-        start = System.currentTimeMillis();
-        while (start + 500 > System.currentTimeMillis()) {
-          chronosDrive.tankDrive(.7, .7);
-          shooter.getHood().homePeriodic();
-        }
-        start = System.currentTimeMillis();
-        while (start + 2750 > System.currentTimeMillis()) {
-          chronosDrive.tankDrive(.5, -.5);
-          shooter.getHood().homePeriodic();
-        }
-
-        autoAlignShoot();
-        break;
-      case "ShootFrontNoBack":
-        shooter.getHood().resetHomed();
-        shooter.getHood().home();
-        start = System.currentTimeMillis();
-        while (start + 7000 > System.currentTimeMillis()) {
-          shooter.shootFront();
-          shooter.getHood().update();
-        }
-        shooter.stop();
-        break;
-      case "ShootFrontBack":
-        shooter.getHood().resetHomed();
-        shooter.getHood().home();
-        start = System.currentTimeMillis();
-        while (start + 7000 > System.currentTimeMillis()) {
-          shooter.shootFront();
-          shooter.getHood().update();
-        }
-        shooter.stop();
-        start = System.currentTimeMillis();
-        while (start + 2000 > System.currentTimeMillis()) {
-          chronosDrive.tankDrive(.7, .7);
-        }
+        selectedAutoRoutine = new Shoot1(chronosDrive, intake, shooter);
         break;
     }
-
   }
 
   public void delay(long time) {
@@ -435,6 +445,6 @@ public class Robot extends TimedRobot {
   }
 
   public void autonomousPeriodic() {
-
+    selectedAutoRoutine.periodic();
   }
 }

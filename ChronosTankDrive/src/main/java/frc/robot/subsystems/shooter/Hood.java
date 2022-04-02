@@ -103,7 +103,7 @@ public class Hood extends Subsystem {
   }
 
   public void init() {
-    
+
   }
 
   public void setHome() {
@@ -113,8 +113,8 @@ public class Hood extends Subsystem {
 
   public void home() {
     resetHomed();
-    long start=System.currentTimeMillis();
-    while(start+10000>System.currentTimeMillis()&&!homed){
+    long start = System.currentTimeMillis();
+    while (start + 10000 > System.currentTimeMillis() && !homed) {
       homePeriodic();
     }
   }
@@ -149,6 +149,7 @@ public class Hood extends Subsystem {
         }
         break;
     }
+    SmartDashboard.putBoolean("Homed", homed);
   }
 
   public void periodic() {
@@ -174,17 +175,13 @@ public class Hood extends Subsystem {
     double targetPositionRotations = (angle - Constants.Shooter.HOOD_ZERO_POS) * Constants.Shooter.HOOD_TEETH_ANGLE_RAT
         / Constants.Shooter.HOOD_SPOOL_TEETH * Constants.Shooter.HOOD_TICKS_PER_ROTATION;
     m_hoodMotor.set(ControlMode.Position, targetPositionRotations);
-    this.updateSmartDashboard();
-    SmartDashboard.putNumber("Target Position Rotations", targetPositionRotations);
-    SmartDashboard.putNumber("Current Position", m_hoodMotor.getSelectedSensorPosition());
-    SmartDashboard.putBoolean("Switch State", limit.get());
-    SmartDashboard.putBoolean("Homed", homed);
   }
 
   public void setAngle(double angle) {
     angle = MathUtil.clamp(angle, Constants.Shooter.HOOD_ZERO_POS,
         Constants.Shooter.HOOD_ZERO_POS + Constants.Shooter.HOOD_RANGE);
     this.angle = angle;
+    update();
   }
 
   public double getAngle() {
