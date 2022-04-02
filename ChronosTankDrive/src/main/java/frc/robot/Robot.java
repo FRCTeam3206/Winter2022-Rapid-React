@@ -435,6 +435,9 @@ public class Robot extends TimedRobot {
       case "Shoot1":
         selectedAutoRoutine = new Shoot1(chronosDrive, intake, shooter);
         break;
+      case "Shoot2":
+        selectedAutoRoutine = new Shoot2(chronosDrive,intake,shooter);
+        break;
     }
   }
 
