@@ -58,6 +58,8 @@ public class Constants {
         public static double HOOD_SPOOL_TEETH = 24;
 
         public static double HOOD_RANGE = 41;
+
+        public static double HOOD_MULTIPLIER=1.05;
     }
 
     public static class Buttons {
@@ -82,7 +84,7 @@ public class Constants {
 
     public static final class Limelight {
         public static final double LIME_HEIGHT = 24;
-        public static final double LIME_X_OFFSET = 9.5;
+        public static final double LIME_X_OFFSET = 7.5;
         public static final double LIME_ANGLE_OFFSET = 32 + 3;
         public static final double LIME_Y_OFFSET = 5 + 9.5;
     }
