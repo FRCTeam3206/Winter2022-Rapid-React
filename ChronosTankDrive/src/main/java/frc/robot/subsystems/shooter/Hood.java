@@ -18,7 +18,7 @@ public class Hood extends Subsystem {
   private double angle = Constants.Shooter.HOOD_ZERO_POS;
   private double inc = .25;
   public double kP, kI, kD, kIz, kFF;
-  private DigitalInput limit;
+  public DigitalInput limit;
 
   public Hood(int port, int limitPort, GenericHID joystick) {
     m_joystick = joystick;
@@ -140,7 +140,7 @@ public class Hood extends Subsystem {
         }
         break;
       case 1:
-        m_hoodMotor.set(.1);
+        m_hoodMotor.set(.4);
         if (limit.get()) {
           m_hoodMotor.set(0);
           setHome();
