@@ -8,11 +8,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Solenoid;
 
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -154,6 +156,13 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
+    NetworkTable camTable = NetworkTableInstance.getDefault().getTable("photonvision")
+        .getSubTable("Microsoft_LifeCam_HD-3000");
+    if (DriverStation.getAlliance() == Alliance.Red) {
+      camTable.getEntry("pipelineIndex").setNumber(1);
+    } else {
+      camTable.getEntry("pipelineIndex").setNumber(0);
+    }
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -166,18 +175,17 @@ public class Robot extends TimedRobot {
   public void chaseBall() {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision")
         .getSubTable("Microsoft_LifeCam_HD-3000");
-    double angle = table.getEntry("targetYaw").getDouble(-9.0);
-    double turn = -(angle) / 30;
-    double left = turn;
-    double right = -turn;
-    double forward = 0;
-    System.out.println(angle);
-    if (Math.abs(angle) < 7) {
-      left = -.7;
-      right = -.7;
-    }
-    accelLimit(left, right);
-    chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+    if (!table.getEntry("hasTarget").getBoolean(false))
+      return;
+    double angle = table.getEntry("targetYaw").getDouble(0);
+    double turn = -(angle) / 30 * .5;
+    double distance = 9.5
+        / (Math
+            .tan(Math.sqrt(Math.tan(table.getEntry("targetArea").getDouble(1000000) / 100)) * (54.8 / 180 * Math.PI)))
+        / 12;
+    SmartDashboard.putNumber("Ball Dist", distance);
+    double forward = Math.sqrt(distance / 5);
+    chronosDrive.arcadeDrive(-forward, turn);
   }
 
   public void teleopInit() {
