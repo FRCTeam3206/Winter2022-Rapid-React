@@ -180,7 +180,7 @@ public class Hood extends Subsystem {
     angle = MathUtil.clamp(angle, Constants.Shooter.HOOD_ZERO_POS,
         Constants.Shooter.HOOD_ZERO_POS + Constants.Shooter.HOOD_RANGE);
     this.angle = angle;
-    
+
     update();
   }
 

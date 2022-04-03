@@ -46,15 +46,17 @@ public class ShooterSupersystem extends Subsystem {
     public double hoodAngle(double distance) {
         return 90 - Math.atan((Constants.Shooter.SHOOTER_HEIGHT_DIFF
                 + Math.sqrt(Math.pow(Constants.Shooter.SHOOTER_HEIGHT_DIFF, 2) + Math.pow(distance, 2))) / distance)
-                * 180 / Math.PI*Constants.Shooter.HOOD_MULTIPLIER;
+                * 180 / Math.PI * Constants.Shooter.HOOD_MULTIPLIER;
     }
 
     public void agitate() {
         agitator.set(VictorSPXControlMode.PercentOutput, .5);
     }
-    public void stopAgitate(){
+
+    public void stopAgitate() {
         agitator.set(VictorSPXControlMode.PercentOutput, 0);
     }
+
     public boolean alignTo(double angle, double distance) {
         agitate();
         double turn = -angle / 25;
@@ -77,9 +79,9 @@ public class ShooterSupersystem extends Subsystem {
     }
 
     public void shoot(double distance) {// 4.045*distance+2374.7 is from pure testing
-        //New 5.57x+2014
+        // New 5.57x+2014
         agitate();
-        shooter.shoot(5.57*(distance+18)+2014);
+        shooter.shoot(5.57 * (distance + 18) + 2014);
         // shooter.shoot(SmartDashboard.getNumber("RPM",0.0));
     }
 
@@ -104,7 +106,7 @@ public class ShooterSupersystem extends Subsystem {
     public void alignAndShoot() {
         double[] distanceAndAngle = limelight.getAdjustedDistanceAndAngleToTarget();
         double distance = distanceAndAngle[0];
-        SmartDashboard.putNumber("Calculated RPM",4.045*distance+2374.7);
+        SmartDashboard.putNumber("Calculated RPM", 4.045 * distance + 2374.7);
         SmartDashboard.putNumber("Distance", distance);
         double angle = distanceAndAngle[1];
         aligned = align();
@@ -149,7 +151,7 @@ public class ShooterSupersystem extends Subsystem {
         if (joystick2.getRawButton(8)) {
             shooter.invert();
         }
-        SmartDashboard.putNumber("Hood Angle",hood.angle);
+        SmartDashboard.putNumber("Hood Angle", hood.angle);
     }
 }
 
