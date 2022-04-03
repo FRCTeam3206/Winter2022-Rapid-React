@@ -184,7 +184,7 @@ public class Robot extends TimedRobot {
             .tan(Math.sqrt(Math.tan(table.getEntry("targetArea").getDouble(1000000) / 100)) * (54.8 / 180 * Math.PI)))
         / 12;
     SmartDashboard.putNumber("Ball Dist", distance);
-    double forward = Math.sqrt(distance / 5);
+    double forward = Math.sqrt((distance - .8) / 5);
     chronosDrive.arcadeDrive(-forward, turn);
   }
 
