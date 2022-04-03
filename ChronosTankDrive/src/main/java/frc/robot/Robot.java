@@ -5,12 +5,16 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Solenoid;
 
 import java.lang.Math;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -152,6 +156,13 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
+    NetworkTable camTable = NetworkTableInstance.getDefault().getTable("photonvision")
+        .getSubTable("Microsoft_LifeCam_HD-3000");
+    if (DriverStation.getAlliance() == Alliance.Red) {
+      camTable.getEntry("pipelineIndex").setNumber(1);
+    } else {
+      camTable.getEntry("pipelineIndex").setNumber(0);
+    }
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -159,6 +170,22 @@ public class Robot extends TimedRobot {
         + (accelDriveKonstant - 1) / accelDriveKonstant * rightAdjusted;
     leftAdjusted = (1 / accelDriveKonstant) * leftInput + (accelDriveKonstant - 1) / accelDriveKonstant * leftAdjusted;
     // chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+  }
+
+  public void chaseBall() {
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision")
+        .getSubTable("Microsoft_LifeCam_HD-3000");
+    if (!table.getEntry("hasTarget").getBoolean(false))
+      return;
+    double angle = table.getEntry("targetYaw").getDouble(0);
+    double turn = -(angle) / 30 * .5;
+    double distance = 9.5
+        / (Math
+            .tan(Math.sqrt(Math.tan(table.getEntry("targetArea").getDouble(1000000) / 100)) * (54.8 / 180 * Math.PI)))
+        / 12;
+    SmartDashboard.putNumber("Ball Dist", distance);
+    double forward = Math.sqrt((distance - .8) / 5);
+    chronosDrive.arcadeDrive(-forward, turn);
   }
 
   public void teleopInit() {
@@ -172,46 +199,37 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    /*
-     * //joystick drive
-     * if (rightStick.getRawButton(1)) { // Low Speed
-     * driveSol.set(Value.kForward);
-     * } else if (rightStick.getRawButton(2)) { // High Speed
-     * driveSol.set(Value.kReverse);
-     * } else {
-     * driveSol.set(Value.kOff); // Ensures Pistons are Off
-     * 
-     * }
-     */
-    // lock out drive controls when aligning for a shot
-    if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
-      if (accelerationLimiting) {
-        accelLimit(leftStick.getY(), rightStick.getY());
-      } else {
-        rightAdjusted = rightStick.getY();
-        leftAdjusted = leftStick.getY();
+    if (rightStick.getRawButton(5)) {
+      chaseBall();
+    } else {
+      if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
+        if (accelerationLimiting) {
+          accelLimit(leftStick.getY(), rightStick.getY());
+        } else {
+          rightAdjusted = rightStick.getY();
+          leftAdjusted = leftStick.getY();
+        }
+
+        if (TURN_LIMIT) {
+          // this would be simpler if we switched to arcadeDrive()
+          double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
+          double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
+          turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
+
+          leftAdjusted = forwardLimit + turnLimit;
+          rightAdjusted = forwardLimit - turnLimit;
+        }
+
+        if (rightStick.getRawButton(1)) {
+          driveSol.set(true);
+        } else {
+          driveSol.set(false);
+        }
+
+        chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+
       }
-
-      if (TURN_LIMIT) {
-        // this would be simpler if we switched to arcadeDrive()
-        double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
-        double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
-        turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
-
-        leftAdjusted = forwardLimit + turnLimit;
-        rightAdjusted = forwardLimit - turnLimit;
-      }
-
-      if (rightStick.getRawButton(1)) {
-        driveSol.set(true);
-      } else {
-        driveSol.set(false);
-      }
-
-      chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
-
     }
-
     // make toggle button to switch between automated shooting and manual shooting
     // and have the value for
     // shooterSpeed only be taken into account when on manual
@@ -232,124 +250,6 @@ public class Robot extends TimedRobot {
     }
   }
 
-  private boolean alignToTarget(double desiredDistance, boolean shouldDrive) {
-    double[] out = new double[2];
-    // This is more computationally efficient, and conserves bandwidth
-    if (shouldDrive) {
-      out = limelight.getDistanceAndAngleToTarget();
-    } else {
-      out[1] = limelight.getDistanceFromTarget();
-    }
-    double forward = 0;
-    boolean adjusted = true;
-    if (shouldDrive) {
-      double distAway = out[0] - desiredDistance;
-      if (Math.abs(distAway) > 12) {
-        if (Math.abs(distAway) > 36) {
-          forward = .7;
-        } else {
-          forward = .5;
-        }
-        adjusted = false;
-      }
-      if (distAway < 0)
-        forward *= -1;
-    }
-    double turn = 0;
-    double angleAway = out[1];
-    if (Math.abs(angleAway) > 2) {
-      if (Math.abs(angleAway) > 20) {
-        turn = .7;
-      } else {
-        turn = .5;
-      }
-      adjusted = false;
-    }
-    if (angleAway < 0)
-      turn *= -1;
-    double rightInput = forward - turn;
-    double leftInput = forward + turn;
-    accelLimit(rightInput, leftInput);
-    return adjusted;
-  }
-
-  public void Drive(double distance) {
-    distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-    desiredDistance = distance + distanceTraveled;
-    velocityTimer.start();
-
-    DriveLabel: if (distance > 0) {
-      while (desiredDistance > distanceTraveled) {
-        distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-        // ballToggleButton = ballSwitch.get();
-        chronosDrive.tankDrive(-.6, -.6);
-        // Set Button to Integer Value
-        // if (ballToggleButton == false && ballToggle == 0) {
-        // First Press ballToggle = 1;
-        // If trigger is pressed and toggle hasn't been set yet/has cycled through then
-        // toggle = 1
-      }
-    }
-    /*
-     * else if (ballToggleButton == true && ballToggle == 1) { // First Release
-     * ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
-     * }
-     * // Determine Piston Position Based on Integer Value
-     * if (ballToggle == 1 || ballToggle == 2) { // Trigger is Pressed
-     * if (frontBallTransport.getSelectedSensorPosition() * ballMagScale <
-     * ballDesiredDistance) {
-     * frontBallTransport.set(ControlMode.PercentOutput, -.7);
-     * backBallTransport.set(ControlMode.PercentOutput, -.7);
-     * } else if (frontBallTransport.getSelectedSensorPosition() * ballMagScale >
-     * ballDesiredDistance) {
-     * ballToggle = 0;
-     * frontBallTransport.stopMotor();
-     * backBallTransport.stopMotor();
-     * frontBallTransport.setSelectedSensorPosition(0);
-     * }
-     * }
-     * chronosDrive.tankDrive(-7, 7);
-     */
-    /*
-     * if (velocityTimer.get() >= tLateDrive) {
-     * break DriveLabel;
-     * }
-     * }
-     * } else if (distance < 0) {
-     * while (desiredDistance < distanceTraveled) {
-     * distanceTraveled = leftEncoder.getPosition() * -1 / 12;
-     * ballToggleButton = ballSwitch.get();
-     * // Set Button to Integer Value
-     * if (ballToggleButton == false && ballToggle == 0) { // First Press
-     * ballToggle = 1; // If trigger is pressed and toggle hasn't been set yet/has
-     * cycled through then
-     * // toggle = 1
-     * } else if (ballToggleButton == true && ballToggle == 1) { // First Release
-     * ballToggle = 2; // If trigger is released and toggle = 1 then toggle = 2
-     * }
-     * // Determine Piston Position Based on Integer Value
-     * if (ballToggle == 1 || ballToggle == 2) { // Trigger is Pressed
-     * if (frontBallTransport.getSelectedSensorPosition() * ballMagScale <
-     * ballDesiredDistance) {
-     * frontBallTransport.set(ControlMode.PercentOutput, -.7);
-     * backBallTransport.set(ControlMode.PercentOutput, -.7);
-     * } else if (frontBallTransport.getSelectedSensorPosition() * ballMagScale >
-     * ballDesiredDistance) {
-     * ballToggle = 0;
-     * frontBallTransport.stopMotor();
-     * backBallTransport.stopMotor();
-     * frontBallTransport.setSelectedSensorPosition(0);
-     * }
-     * }
-     * chronosDrive.tankDrive(.8, .8);
-     * if (velocityTimer.get() >= tLateDrive) {
-     * break DriveLabel;
-     * }
-     * }
-     * }
-     */
-  }
-
   public void autoAlignShoot() {
     while (!shooter.align()) {
       shooter.getHood().update();
@@ -364,72 +264,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    /*
-     * autoSelected = autoChoices.getSelected();
-     * System.out.println(autoSelected);
-     * compressor.enableDigital();
-     * switch (autoSelected) {
-     * case "Shoot1":
-     * shooter.getHood().resetHomed();
-     * long start = System.currentTimeMillis();
-     * while (start + 1500 > System.currentTimeMillis()) {
-     * chronosDrive.tankDrive(.7, .7);
-     * shooter.getHood().homePeriodic();
-     * }
-     * shooter.getHood().home();
-     * 
-     * autoAlignShoot();
-     * break;
-     * case "Shoot2":
-     * intake.getDeploy().set(true);
-     * intake.getMotor().set(VictorSPXControlMode.PercentOutput, .6);
-     * shooter.getHood().resetHomed();
-     * start = System.currentTimeMillis();
-     * while (start + 3000 > System.currentTimeMillis()) {
-     * chronosDrive.tankDrive(-.7, -.7);
-     * shooter.getHood().homePeriodic();
-     * }
-     * intake.getMotor().set(VictorSPXControlMode.PercentOutput, 0);
-     * intake.getDeploy().set(false);
-     * start = System.currentTimeMillis();
-     * while (start + 500 > System.currentTimeMillis()) {
-     * chronosDrive.tankDrive(.7, .7);
-     * shooter.getHood().homePeriodic();
-     * }
-     * start = System.currentTimeMillis();
-     * while (start + 2750 > System.currentTimeMillis()) {
-     * chronosDrive.tankDrive(.5, -.5);
-     * shooter.getHood().homePeriodic();
-     * }
-     * 
-     * autoAlignShoot();
-     * break;
-     * case "ShootFrontNoBack":
-     * shooter.getHood().resetHomed();
-     * shooter.getHood().home();
-     * start = System.currentTimeMillis();
-     * while (start + 7000 > System.currentTimeMillis()) {
-     * shooter.shootFront();
-     * shooter.getHood().update();
-     * }
-     * shooter.stop();
-     * break;
-     * case "ShootFrontBack":
-     * shooter.getHood().resetHomed();
-     * shooter.getHood().home();
-     * start = System.currentTimeMillis();
-     * while (start + 7000 > System.currentTimeMillis()) {
-     * shooter.shootFront();
-     * shooter.getHood().update();
-     * }
-     * shooter.stop();
-     * start = System.currentTimeMillis();
-     * while (start + 2000 > System.currentTimeMillis()) {
-     * chronosDrive.tankDrive(.7, .7);
-     * }
-     * break;
-     * }
-     */
     autoSelected = autoChoices.getSelected();
     switch (autoSelected) {
       case "Shoot1":

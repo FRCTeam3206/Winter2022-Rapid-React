@@ -7,46 +7,54 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import static frc.robot.Constants.Buttons.*;
 
-public class Intake extends Subsystem{
+public class Intake extends Subsystem {
     GenericHID joystick;
     VictorSPX intakeMotor;
     Solenoid deploy;
     boolean on = false;
-    public Solenoid getDeploy(){
+
+    public Solenoid getDeploy() {
         return deploy;
     }
-    public VictorSPX getMotor(){
+
+    public VictorSPX getMotor() {
         return intakeMotor;
     }
-    public Intake(int motorId,int pistonId1,GenericHID joystick){
-        this.joystick=joystick;
-        intakeMotor=new VictorSPX(motorId);
-        deploy=new Solenoid(PneumaticsModuleType.CTREPCM,pistonId1);
+
+    public Intake(int motorId, int pistonId1, GenericHID joystick) {
+        this.joystick = joystick;
+        intakeMotor = new VictorSPX(motorId);
+        deploy = new Solenoid(PneumaticsModuleType.CTREPCM, pistonId1);
         deploy.set(on);
     }
-    boolean deployed=false;
-    public void periodic(){
-        /*if(joystick.getRawButton(B_INTAKE)){
-            intakeMotor.set(ControlMode.PercentOutput, 1);
-        }else if(joystick.getRawButton(B_REVERSE_INTAKE)){
-            intakeMotor.set(ControlMode.PercentOutput, -1);
-        }else{
-            intakeMotor.set(ControlMode.PercentOutput, 0);
-        }*/
-        if(joystick.getRawButtonPressed(B_DEPLOY)){
+
+    boolean deployed = false;
+
+    public void periodic() {
+        /*
+         * if(joystick.getRawButton(B_INTAKE)){
+         * intakeMotor.set(ControlMode.PercentOutput, 1);
+         * }else if(joystick.getRawButton(B_REVERSE_INTAKE)){
+         * intakeMotor.set(ControlMode.PercentOutput, -1);
+         * }else{
+         * intakeMotor.set(ControlMode.PercentOutput, 0);
+         * }
+         */
+        if (joystick.getRawButtonPressed(B_DEPLOY)) {
             deploy.toggle();
         }
-        if(joystick.getRawButton(B_REVERSE_INTAKE)){
+        if (joystick.getRawButton(B_REVERSE_INTAKE)) {
             intakeMotor.set(ControlMode.PercentOutput, -1);
-        }else if(deploy.get()){
+        } else if (deploy.get()) {
             intakeMotor.set(ControlMode.PercentOutput, 0.7);
-        }else{
+        } else {
             intakeMotor.set(ControlMode.PercentOutput, 0);
         }
     }
+
     @Override
     public void init() {
         // TODO Auto-generated method stub
-        
+
     }
 }
