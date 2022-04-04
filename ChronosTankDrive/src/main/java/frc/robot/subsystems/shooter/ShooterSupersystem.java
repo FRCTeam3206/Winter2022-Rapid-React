@@ -96,6 +96,7 @@ public class ShooterSupersystem extends Subsystem {
         if (Math.abs(hood.getAngle() - 10) < 1) {
             shooter.shoot(2550);
         }
+        agitate();
     }
 
     public void stop() {
