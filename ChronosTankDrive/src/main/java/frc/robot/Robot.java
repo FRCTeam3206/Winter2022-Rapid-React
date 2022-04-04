@@ -111,7 +111,7 @@ public class Robot extends TimedRobot {
   Subsystem[] subSystems;
   ShooterSupersystem shooter;
   Intake intake;
-
+  BallChaser ballChaser;
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -156,13 +156,7 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
-    NetworkTable camTable = NetworkTableInstance.getDefault().getTable("photonvision")
-        .getSubTable("Microsoft_LifeCam_HD-3000");
-    if (DriverStation.getAlliance() == Alliance.Red) {
-      camTable.getEntry("pipelineIndex").setNumber(1);
-    } else {
-      camTable.getEntry("pipelineIndex").setNumber(0);
-    }
+    ballChaser=new BallChaser(chronosDrive);
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -170,22 +164,6 @@ public class Robot extends TimedRobot {
         + (accelDriveKonstant - 1) / accelDriveKonstant * rightAdjusted;
     leftAdjusted = (1 / accelDriveKonstant) * leftInput + (accelDriveKonstant - 1) / accelDriveKonstant * leftAdjusted;
     // chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
-  }
-
-  public void chaseBall() {
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision")
-        .getSubTable("Microsoft_LifeCam_HD-3000");
-    if (!table.getEntry("hasTarget").getBoolean(false))
-      return;
-    double angle = table.getEntry("targetYaw").getDouble(0);
-    double turn = -(angle) / 30 * .5;
-    double distance = 9.5
-        / (Math
-            .tan(Math.sqrt(Math.tan(table.getEntry("targetArea").getDouble(1000000) / 100)) * (54.8 / 180 * Math.PI)))
-        / 12;
-    SmartDashboard.putNumber("Ball Dist", distance);
-    double forward = Math.sqrt((distance - .8) / 5);
-    chronosDrive.arcadeDrive(-forward, turn);
   }
 
   public void teleopInit() {
@@ -200,7 +178,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (rightStick.getRawButton(5)) {
-      chaseBall();
+      ballChaser.chase();
     } else {
       if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
         if (accelerationLimiting) {
