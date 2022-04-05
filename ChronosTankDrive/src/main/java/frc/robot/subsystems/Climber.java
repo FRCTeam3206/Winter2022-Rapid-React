@@ -4,17 +4,21 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 
 public class Climber extends Subsystem {
     VictorSPX motor1, motor2;
     GenericHID joystick;
+    Solenoid sol;
 
-    public Climber(int port1, int port2, GenericHID joystick) {
+    public Climber(int port1, int port2, int solPort, GenericHID joystick) {
         this.motor1 = new VictorSPX(port1);
         this.motor2 = new VictorSPX(port2);
         motor2.follow(motor1);
         this.joystick = joystick;
+        sol = new Solenoid(PneumaticsModuleType.CTREPCM, solPort);
     }
 
     @Override
@@ -32,7 +36,11 @@ public class Climber extends Subsystem {
         } else {
             motor1.set(ControlMode.PercentOutput, 0);
         }
-
+        if (joystick.getPOV() == 90) {
+            sol.set(true);
+        } else if (joystick.getPOV() == 270) {
+            sol.set(false);
+        }
     }
 
 }
