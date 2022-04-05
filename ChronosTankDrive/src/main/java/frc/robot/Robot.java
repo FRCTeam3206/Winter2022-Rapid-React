@@ -112,6 +112,7 @@ public class Robot extends TimedRobot {
   ShooterSupersystem shooter;
   Intake intake;
   BallChaser ballChaser;
+
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
@@ -143,6 +144,8 @@ public class Robot extends TimedRobot {
     autoChoices.addOption("Shoot2", "Shoot2");
     autoChoices.addOption("ShootFrontNoBack", "ShootFrontNoBack");
     autoChoices.addOption("ShootFrontBack", "ShootFrontBack");
+    autoChoices.addOption("Shoot4", "Shoot4");
+    autoChoices.addOption("Shoot3", "Shoot3");
     SmartDashboard.putData(autoChoices);
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
@@ -156,7 +159,7 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
-    ballChaser=new BallChaser(chronosDrive);
+    ballChaser = new BallChaser(chronosDrive);
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -255,6 +258,12 @@ public class Robot extends TimedRobot {
         break;
       case "ShootFrontNoBack":
         selectedAutoRoutine = new ShootFrontNoBack(chronosDrive, intake, shooter);
+        break;
+      case "Shoot4":
+        selectedAutoRoutine = new Shoot4(chronosDrive, intake, shooter, ballChaser);
+        break;
+      case "Shoot3":
+        selectedAutoRoutine = new Shoot3Improved(chronosDrive, intake, shooter, ballChaser);
         break;
     }
   }

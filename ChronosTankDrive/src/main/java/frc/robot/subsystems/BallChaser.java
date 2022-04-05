@@ -20,12 +20,12 @@ public class BallChaser {
             camTable.getEntry("pipelineIndex").setNumber(0);
         }
     }
-
+    boolean lastVal=false;
     public boolean chase() {
         NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision")
                 .getSubTable("Microsoft_LifeCam_HD-3000");
-        if (!table.getEntry("hasTarget").getBoolean(false))
-            return true;
+        //if (!table.getEntry("hasTarget").getBoolean(lastVal))    
+        //return true;
         double angle = table.getEntry("targetYaw").getDouble(0);
         double turn = -(angle) / 30 * .5;
         // double d = Math.sqrt(table.getEntry("targetArea").getDouble(1000000) / 100);
@@ -36,7 +36,9 @@ public class BallChaser {
                 / 12;
         SmartDashboard.putNumber("Ball Dist", distance);
         double forward = Math.sqrt((distance - .8) / 3);
+        forward=Math.min(forward,.7);
         drive.arcadeDrive(-forward, turn);
-        return distance < 1;
+        lastVal=distance<1.5;
+        return distance < 1.5;
     }
 }
