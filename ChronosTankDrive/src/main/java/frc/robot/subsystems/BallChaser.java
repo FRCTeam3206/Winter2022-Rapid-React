@@ -28,14 +28,15 @@ public class BallChaser {
             return true;
         double angle = table.getEntry("targetYaw").getDouble(0);
         double turn = -(angle) / 30 * .5;
-        double d = Math.sqrt(table.getEntry("targetArea").getDouble(1000000) / 100);
-        double distance = 4.75
+        // double d = Math.sqrt(table.getEntry("targetArea").getDouble(1000000) / 100);
+        double distance = 9.5
                 / (Math
-                        .tan(d/2*(58.4/180*Math.PI)))
+                        .tan(Math.sqrt(table.getEntry("targetArea").getDouble(1000000) / 100)
+                                * (54.8 / 180 * Math.PI)))
                 / 12;
         SmartDashboard.putNumber("Ball Dist", distance);
-        double forward = Math.sqrt((distance - .8) / 5);
-        // drive.arcadeDrive(-forward, turn);
+        double forward = Math.sqrt((distance - .8) / 3);
+        drive.arcadeDrive(-forward, turn);
         return distance < 1;
     }
 }
