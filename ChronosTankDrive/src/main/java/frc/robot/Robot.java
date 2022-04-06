@@ -111,6 +111,7 @@ public class Robot extends TimedRobot {
   Subsystem[] subSystems;
   ShooterSupersystem shooter;
   Intake intake;
+  BallChaser ballChaser;
 
   @Override
   public void robotInit() {
@@ -143,6 +144,8 @@ public class Robot extends TimedRobot {
     autoChoices.addOption("Shoot2", "Shoot2");
     autoChoices.addOption("ShootFrontNoBack", "ShootFrontNoBack");
     autoChoices.addOption("ShootFrontBack", "ShootFrontBack");
+    autoChoices.addOption("Shoot4", "Shoot4");
+    autoChoices.addOption("Shoot3", "Shoot3");
     SmartDashboard.putData(autoChoices);
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
@@ -156,13 +159,7 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
-    NetworkTable camTable = NetworkTableInstance.getDefault().getTable("photonvision")
-        .getSubTable("Microsoft_LifeCam_HD-3000");
-    if (DriverStation.getAlliance() == Alliance.Red) {
-      camTable.getEntry("pipelineIndex").setNumber(1);
-    } else {
-      camTable.getEntry("pipelineIndex").setNumber(0);
-    }
+    ballChaser = new BallChaser(chronosDrive);
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -170,22 +167,6 @@ public class Robot extends TimedRobot {
         + (accelDriveKonstant - 1) / accelDriveKonstant * rightAdjusted;
     leftAdjusted = (1 / accelDriveKonstant) * leftInput + (accelDriveKonstant - 1) / accelDriveKonstant * leftAdjusted;
     // chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
-  }
-
-  public void chaseBall() {
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("photonvision")
-        .getSubTable("Microsoft_LifeCam_HD-3000");
-    if (!table.getEntry("hasTarget").getBoolean(false))
-      return;
-    double angle = table.getEntry("targetYaw").getDouble(0);
-    double turn = -(angle) / 30 * .5;
-    double distance = 9.5
-        / (Math
-            .tan(Math.sqrt(Math.tan(table.getEntry("targetArea").getDouble(1000000) / 100)) * (54.8 / 180 * Math.PI)))
-        / 12;
-    SmartDashboard.putNumber("Ball Dist", distance);
-    double forward = Math.sqrt((distance - .8) / 5);
-    chronosDrive.arcadeDrive(-forward, turn);
   }
 
   public void teleopInit() {
@@ -200,7 +181,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (rightStick.getRawButton(5)) {
-      chaseBall();
+      ballChaser.chase();
     } else {
       if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
         if (accelerationLimiting) {
@@ -277,6 +258,12 @@ public class Robot extends TimedRobot {
         break;
       case "ShootFrontNoBack":
         selectedAutoRoutine = new ShootFrontNoBack(chronosDrive, intake, shooter);
+        break;
+      case "Shoot4":
+        selectedAutoRoutine = new Shoot4(chronosDrive, intake, shooter, ballChaser);
+        break;
+      case "Shoot3":
+        selectedAutoRoutine = new Shoot3Improved(chronosDrive, intake, shooter, ballChaser);
         break;
     }
   }
