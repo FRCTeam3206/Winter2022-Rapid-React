@@ -13,11 +13,14 @@ public class BallChaser {
     public BallChaser(DifferentialDrive drive) {
         this.drive = drive;
         NetworkTable camTable = NetworkTableInstance.getDefault().getTable("photonvision")
-                .getSubTable("Microsoft_LifeCam_HD-3000");
+                //.getSubTable("Microsoft_LifeCam_HD-3000");
+                ;
         if (DriverStation.getAlliance() == Alliance.Red) {
             camTable.getEntry("pipelineIndex").setNumber(1);
+            SmartDashboard.putString("Alliance","Red");
         } else {
             camTable.getEntry("pipelineIndex").setNumber(0);
+            SmartDashboard.putString("Alliance","Blue");
         }
     }
     boolean lastVal=false;
