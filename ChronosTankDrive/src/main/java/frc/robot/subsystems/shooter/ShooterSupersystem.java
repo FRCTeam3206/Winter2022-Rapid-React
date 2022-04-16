@@ -48,9 +48,8 @@ public class ShooterSupersystem extends Subsystem {
                 + Math.sqrt(Math.pow(Constants.Shooter.SHOOTER_HEIGHT_DIFF, 2) + Math.pow(distance, 2))) / distance)
                 * 180 / Math.PI * Constants.Shooter.HOOD_MULTIPLIER;
     }
-
     public void agitate() {
-        agitator.set(VictorSPXControlMode.PercentOutput, .5);
+        agitator.set(VictorSPXControlMode.PercentOutput, .42);
     }
 
     public void stopAgitate() {
@@ -94,7 +93,15 @@ public class ShooterSupersystem extends Subsystem {
     public void shootFront() {
         hood.setAngle(10);
         if (Math.abs(hood.getAngle() - 10) < 1) {
-            shooter.shoot(2550);
+            shooter.shoot(2575);
+        }
+        agitate();
+    }
+
+    public void shootLow() {
+        hood.setAngle(25);
+        if (Math.abs(hood.getAngle() - 25) < 1) {
+            shooter.shoot(2000);
         }
         agitate();
     }
@@ -127,6 +134,9 @@ public class ShooterSupersystem extends Subsystem {
         // boolean aligned = false;
         double turn;
         double forward;
+        if (joystick1.getRawButton(7)) {
+            shoot();
+        }
         if (joystick2.getRawButton(B_SHOOTER_FAILSAFE)) {
             shootFront();
         } else {
@@ -151,6 +161,9 @@ public class ShooterSupersystem extends Subsystem {
             hood.homePeriodic();
         if (joystick2.getRawButton(8)) {
             shooter.invert();
+        }
+        if (joystick2.getRawButton(1)) {
+            shootLow();
         }
         SmartDashboard.putNumber("Hood Angle", hood.angle);
     }

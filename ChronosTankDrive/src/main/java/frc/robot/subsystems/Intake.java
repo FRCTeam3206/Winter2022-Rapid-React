@@ -1,10 +1,14 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
+import frc.robot.Constants;
+import frc.robot.subsystems.shooter.ShooterSupersystem;
+
 import static frc.robot.Constants.Buttons.*;
 
 public class Intake extends Subsystem {
@@ -26,6 +30,7 @@ public class Intake extends Subsystem {
         intakeMotor = new VictorSPX(motorId);
         deploy = new Solenoid(PneumaticsModuleType.CTREPCM, pistonId1);
         deploy.set(on);
+
     }
 
     boolean deployed = false;

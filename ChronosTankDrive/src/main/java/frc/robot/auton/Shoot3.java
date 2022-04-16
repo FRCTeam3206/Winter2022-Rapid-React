@@ -29,7 +29,7 @@ public class Shoot3 extends Auton{
                 break;
             case 1:
                 drive.tankDrive(-.7, -.7);
-                if(stateRunTime()>=3000){
+                if(stateRunTime()>=750){
                     intake.getMotor().set(VictorSPXControlMode.PercentOutput, 0);
                     intake.getDeploy().set(false);
                     nextState();

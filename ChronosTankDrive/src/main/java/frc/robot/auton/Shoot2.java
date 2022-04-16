@@ -44,6 +44,12 @@ public class Shoot2 extends Auton{
                 }
                 break;
             case 4:
+                drive.tankDrive(0,0);
+                if(stateRunTime()>=1000){
+                    nextState();
+                }
+                break;
+            case 5:
                 shooter.alignAndShoot();
                 if(stateRunTime()>=4000){
                     nextState();

@@ -21,7 +21,8 @@ public class Shoot3Improved extends Auton {
         switch (state) {
             case 0:
                 shooter.getHood().homePeriodic();
-
+                intake.getDeploy().set(true);
+                intake.getMotor().set(VictorSPXControlMode.PercentOutput, .6);
                 if (shooter.getHood().homed) {
                     nextState();
                 }
@@ -29,13 +30,12 @@ public class Shoot3Improved extends Auton {
             case 1:
                 drive.tankDrive(-.7, -.7);
                 if (stateRunTime() >= 1500) {
-                    intake.getDeploy().set(true);
-                    intake.getMotor().set(VictorSPXControlMode.PercentOutput, .6);
+
                     nextState();
                 }
                 break;
             case 2:
-                if (stateRunTime() >= 1500) {
+                if (stateRunTime() >= 500) {
                     intake.getDeploy().set(false);
                     intake.getMotor().set(VictorSPXControlMode.PercentOutput, 0);
                     nextState();
@@ -62,7 +62,7 @@ public class Shoot3Improved extends Auton {
                 break;
             case 6:
                 drive.tankDrive(.7, -.7);
-                if (stateRunTime() >= 750) {
+                if (stateRunTime() >= 500) {
                     nextState();
                 }
                 break;

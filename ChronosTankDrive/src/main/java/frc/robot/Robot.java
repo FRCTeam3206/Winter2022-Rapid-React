@@ -111,7 +111,6 @@ public class Robot extends TimedRobot {
   Subsystem[] subSystems;
   ShooterSupersystem shooter;
   Intake intake;
-  BallChaser ballChaser;
 
   @Override
   public void robotInit() {
@@ -140,12 +139,10 @@ public class Robot extends TimedRobot {
     rightBackDrive.restoreFactoryDefaults();
     leftEncoder.setPosition(0);
     rightEncoder.setPosition(0);
-    autoChoices.setDefaultOption("Shoot1", "Shoot1");
+    autoChoices.setDefaultOption("Shoot2", "Shoot2");
     autoChoices.addOption("Shoot2", "Shoot2");
     autoChoices.addOption("ShootFrontNoBack", "ShootFrontNoBack");
     autoChoices.addOption("ShootFrontBack", "ShootFrontBack");
-    autoChoices.addOption("Shoot4", "Shoot4");
-    autoChoices.addOption("Shoot3", "Shoot3");
     SmartDashboard.putData(autoChoices);
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
@@ -159,7 +156,7 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
-    ballChaser = new BallChaser(chronosDrive);
+    
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -181,7 +178,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if (rightStick.getRawButton(5)) {
-      ballChaser.chase();
+      
     } else {
       if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
         if (accelerationLimiting) {
@@ -258,12 +255,6 @@ public class Robot extends TimedRobot {
         break;
       case "ShootFrontNoBack":
         selectedAutoRoutine = new ShootFrontNoBack(chronosDrive, intake, shooter);
-        break;
-      case "Shoot4":
-        selectedAutoRoutine = new Shoot4(chronosDrive, intake, shooter, ballChaser);
-        break;
-      case "Shoot3":
-        selectedAutoRoutine = new Shoot3Improved(chronosDrive, intake, shooter, ballChaser);
         break;
     }
   }
