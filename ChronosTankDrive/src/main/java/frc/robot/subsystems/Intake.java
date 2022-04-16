@@ -16,7 +16,7 @@ public class Intake extends Subsystem {
     VictorSPX intakeMotor;
     Solenoid deploy;
     boolean on = false;
-    private VictorSPX agitator;
+
     public Solenoid getDeploy() {
         return deploy;
     }
@@ -34,6 +34,7 @@ public class Intake extends Subsystem {
     }
 
     boolean deployed = false;
+
     public void periodic() {
         /*
          * if(joystick.getRawButton(B_INTAKE)){
