@@ -53,7 +53,6 @@ public class Intake extends Subsystem {
             intakeMotor.set(ControlMode.PercentOutput, 0.7);
         } else {
             intakeMotor.set(ControlMode.PercentOutput, 0);
-            ShooterSupersystem.stopAgitate();
         }
     }
 
