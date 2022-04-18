@@ -49,9 +49,10 @@ public class ShooterSupersystem extends Subsystem {
                 * 180 / Math.PI * Constants.Shooter.HOOD_MULTIPLIER;
     }
     public void agitate() {
-        agitator.set(VictorSPXControlMode.PercentOutput, .42);
-    }
-
+        if(System.currentTimeMillis()/500%3<1)//It works, albeit questionably
+            agitator.set(VictorSPXControlMode.PercentOutput, .42);
+        else stopAgitate();
+        }
     public void stopAgitate() {
         agitator.set(VictorSPXControlMode.PercentOutput, 0);
     }
