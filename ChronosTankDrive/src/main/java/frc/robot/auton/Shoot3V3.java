@@ -13,7 +13,7 @@ public class Shoot3V3 extends Auton {
 
     public Shoot3V3(DifferentialDrive drive, Intake intake, ShooterSupersystem shooter, GyroControl gyroControl) {
         super(drive, intake, shooter);
-        this.gyroControl=gyroControl;
+        this.gyroControl = gyroControl;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class Shoot3V3 extends Auton {
                 break;
             case 1:
                 drive.tankDrive(-.7, -.7);
-                if (stateRunTime() >= 1500) {
+                if (stateRunTime() >= 750) {
                     intake.getDeploy().set(true);
                     intake.getMotor().set(VictorSPXControlMode.PercentOutput, .6);
                     nextState();
@@ -60,8 +60,8 @@ public class Shoot3V3 extends Auton {
                 }
                 break;
             case 6:
-                gyroControl.turnTo(106);//23.3 between the 2 balls
-                if (stateRunTime() >= 1500) {
+                // 23.3 between the 2 balls
+                if (gyroControl.turnTo(104)) {
                     nextState();
                 }
                 break;
@@ -81,8 +81,8 @@ public class Shoot3V3 extends Auton {
                 }
                 break;
             case 9:
-                drive.tankDrive(.7, -.7);
-                if (stateRunTime() >= 1750) {
+                gyroControl.turnTo(250);
+                if (stateRunTime() >= 1000) {
                     nextState();
                 }
                 break;

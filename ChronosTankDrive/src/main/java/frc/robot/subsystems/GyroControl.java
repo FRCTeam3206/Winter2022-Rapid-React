@@ -29,6 +29,6 @@ public class GyroControl {
     public boolean turnTo(double angle) {
         double angleDiff = getAngle() - angle;
         drive.arcadeDrive(0, angleDiff / 60);
-        return angleDiff < 3;
+        return angleDiff / 60 < .2;
     }
 }
