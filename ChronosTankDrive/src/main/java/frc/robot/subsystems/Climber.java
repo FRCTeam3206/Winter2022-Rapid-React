@@ -28,7 +28,6 @@ public class Climber extends Subsystem {
         // TODO Auto-generated method stub
 
     }
-
     @Override
     public void periodic() {
         if (joystick.getPOV() == 0) {
@@ -39,7 +38,6 @@ public class Climber extends Subsystem {
             sol.set(Value.kForward);
         } else {
             motor1.set(ControlMode.PercentOutput, 0);
-            sol.set(Value.kReverse);
         }
     }
 
