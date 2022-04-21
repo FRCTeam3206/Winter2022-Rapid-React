@@ -154,7 +154,7 @@ public class Robot extends TimedRobot {
     intake = new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick);
     shooter = new ShooterSupersystem(new Shooter(SHOOT_PORT, KICKER_PORT, .01, leftStick),
         new Hood(HOOD_PORT, HOOD_LIMIT_PORT, leftStick), limelight, chronosDrive, leftStick, weaponStick);
-    subSystems = new Subsystem[] { intake, shooter, new Climber(8, 10, weaponStick) };
+    subSystems = new Subsystem[] { intake, shooter, new Climber(8, 10, 7,6, weaponStick) };
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
