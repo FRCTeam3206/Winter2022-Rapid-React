@@ -180,7 +180,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     gyroControl.getAngle();
     if (rightStick.getRawButton(5)) {
-      gyroControl.turnTo(106);
+      
     } else {
       if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
         if (accelerationLimiting) {
