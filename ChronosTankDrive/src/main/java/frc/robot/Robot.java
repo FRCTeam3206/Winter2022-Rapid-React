@@ -111,6 +111,7 @@ public class Robot extends TimedRobot {
   Subsystem[] subSystems;
   ShooterSupersystem shooter;
   Intake intake;
+  GyroControl gyroControl;
 
   @Override
   public void robotInit() {
@@ -143,6 +144,7 @@ public class Robot extends TimedRobot {
     autoChoices.addOption("Shoot2", "Shoot2");
     autoChoices.addOption("ShootFrontNoBack", "ShootFrontNoBack");
     autoChoices.addOption("ShootFrontBack", "ShootFrontBack");
+    autoChoices.addOption("Shoot3", "Shoot3");
     SmartDashboard.putData(autoChoices);
     rightFrontDrive.setInverted(true);
     leftBackDrive.follow(leftFrontDrive);
@@ -156,7 +158,7 @@ public class Robot extends TimedRobot {
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
-    
+    gyroControl = new GyroControl(chronosDrive);
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -169,7 +171,6 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
 
   }
-
   /*
    * public void autonomousInit(){
    * shooter.getHood().init();
@@ -177,6 +178,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    gyroControl.getAngle();
     if (rightStick.getRawButton(5)) {
       
     } else {
@@ -255,6 +257,9 @@ public class Robot extends TimedRobot {
         break;
       case "ShootFrontNoBack":
         selectedAutoRoutine = new ShootFrontNoBack(chronosDrive, intake, shooter);
+        break;
+      case "Shoot3":
+        selectedAutoRoutine = new Shoot3V3(chronosDrive, intake, shooter, gyroControl);
         break;
     }
   }
