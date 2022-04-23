@@ -48,11 +48,14 @@ public class ShooterSupersystem extends Subsystem {
                 + Math.sqrt(Math.pow(Constants.Shooter.SHOOTER_HEIGHT_DIFF, 2) + Math.pow(distance, 2))) / distance)
                 * 180 / Math.PI * Constants.Shooter.HOOD_MULTIPLIER;
     }
+
     public void agitate() {
-        if(System.currentTimeMillis()/500%3<1)//It works, albeit questionably
+        if (System.currentTimeMillis() / 500 % 3 < 1)// It works, albeit questionably
             agitator.set(VictorSPXControlMode.PercentOutput, .42);
-        else stopAgitate();
-        }
+        else
+            stopAgitate();
+    }
+
     public void stopAgitate() {
         agitator.set(VictorSPXControlMode.PercentOutput, 0);
     }
@@ -68,6 +71,7 @@ public class ShooterSupersystem extends Subsystem {
         double hoodAngle = hoodAngle(distance);
         SmartDashboard.putNumber("Hood Angle", hoodAngle);
         hood.setAngle(hoodAngle);
+        // shooter.setSpeed(getRPMFromDistance(distance));
         return turn < .2 && Math.abs(hood.getAngle() - hoodAngle) < 2;
     }
 
@@ -81,8 +85,12 @@ public class ShooterSupersystem extends Subsystem {
     public void shoot(double distance) {// 4.045*distance+2374.7 is from pure testing
         // New 5.57x+2014
         agitate();
-        shooter.shoot(5.57 * (distance + 18) + 2014);
+        shooter.shoot(getRPMFromDistance(distance));
         // shooter.shoot(SmartDashboard.getNumber("RPM",0.0));
+    }
+
+    public double getRPMFromDistance(double distance) {
+        return 5.57 * (distance + 18) + 2014;
     }
 
     public void shoot() {

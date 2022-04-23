@@ -93,16 +93,28 @@ public class Shooter extends Subsystem {
   long kickerStartTime = -1;
   boolean canShoot = true;
   boolean isShooting = false;
+  double accError = 0;
+  int shots = 0;
 
   public void shoot(double desiredRPM) {
     desiredRPM = -desiredRPM;
     setSpeed(desiredRPM);// To be implemented with LL This is just for Testing
-    if (Math.abs(m_encoder.getVelocity() - desiredRPM) < 25 || isShooting) {
+    double speedError = m_encoder.getVelocity() - desiredRPM;
+    if (Math.abs(speedError) < 25 || isShooting) {
       // Shoot
       kickerWheel.set(VictorSPXControlMode.PercentOutput, -1);
       isShooting = true;
+      if (Math.abs(speedError) > 25) {
+        accError += speedError;
+      }
+      if (accError > 1000) {
+        shots += 1;
+        isShooting = false;
+        accError = 0;
+        SmartDashboard.putNumber("Shots", shots);
+      }
     }
-
+    SmartDashboard.putNumber("AccumulatedError", accError);
   }
 
   public void frontShoot() {
@@ -113,6 +125,8 @@ public class Shooter extends Subsystem {
     m_shooter.set(0);
     kickerWheel.set(VictorSPXControlMode.PercentOutput, 0);
     isShooting = false;
+    accError = 0;
+    SmartDashboard.putNumber("AccumulatedError", accError);
   }
 
   @Override
