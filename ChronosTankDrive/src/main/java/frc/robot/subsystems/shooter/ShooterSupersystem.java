@@ -71,7 +71,7 @@ public class ShooterSupersystem extends Subsystem {
         double hoodAngle = hoodAngle(distance);
         SmartDashboard.putNumber("Hood Angle", hoodAngle);
         hood.setAngle(hoodAngle);
-        // shooter.setSpeed(getRPMFromDistance(distance));
+        shooter.setSpeed(-getRPMFromDistance(distance));
         return turn < .2 && Math.abs(hood.getAngle() - hoodAngle) < 2;
     }
 

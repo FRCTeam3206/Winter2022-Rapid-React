@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
@@ -60,11 +61,11 @@ public class Robot extends TimedRobot {
   String autoSelected;
 
   // Acceleration Limiting Variables
-  boolean accelerationLimiting = false;
+  boolean accelerationLimiting = true;
   double accelLimitedLeftGetY;
   double accelLimitedRightGetY;
   double accelLimitedSlideDrive;
-  double accelDriveKonstant = 9; // Change from 2-32. 32 is super slow to react, 2 is little improvement
+  double accelDriveKonstant = 6; // Change from 2-32. 32 is super slow to react, 2 is little improvement
   double leftDriveCoef = .7;
   double rightDriveCoef = .7;
   double rightStickDeadband = .1;
@@ -154,11 +155,12 @@ public class Robot extends TimedRobot {
     intake = new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick);
     shooter = new ShooterSupersystem(new Shooter(SHOOT_PORT, KICKER_PORT, .01, leftStick),
         new Hood(HOOD_PORT, HOOD_LIMIT_PORT, leftStick), limelight, chronosDrive, leftStick, weaponStick);
-    subSystems = new Subsystem[] { intake, shooter, new Climber(8, 10, 7,6, weaponStick) };
+    subSystems = new Subsystem[] { intake, shooter, new Climber(8, 10, 7, 6, weaponStick) };
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
     }
     gyroControl = new GyroControl(chronosDrive);
+    CameraServer.startAutomaticCapture();
   }
 
   public void accelLimit(double leftInput, double rightInput) {
@@ -171,6 +173,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
 
   }
+
   /*
    * public void autonomousInit(){
    * shooter.getHood().init();
@@ -180,7 +183,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     gyroControl.getAngle();
     if (rightStick.getRawButton(5)) {
-      
+
     } else {
       if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
         if (accelerationLimiting) {
