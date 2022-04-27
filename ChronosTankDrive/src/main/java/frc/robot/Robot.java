@@ -33,6 +33,8 @@ import static frc.robot.Constants.IDS.*;
 import static frc.robot.Constants.Limelight.*;
 import static frc.robot.Constants.Drive.*;
 import static frc.robot.Constants.Pneumatics.*;
+
+import edu.wpi.first.wpilibj.AnalogInput;
 //import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.cscore.UsbCamera;
@@ -92,6 +94,7 @@ public class Robot extends TimedRobot {
   Solenoid driveSol = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
   // PowerDistribution pdp = new PowerDistribution(0, ModuleType.kCTRE);
   Compressor compressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
+  AnalogInput pressureInput = new AnalogInput(0);
   Limelight limelight;
   // DriveTrain Encoders
   RelativeEncoder leftEncoder;
@@ -248,6 +251,8 @@ public class Robot extends TimedRobot {
         compressor.enableDigital();
       }
     }
+
+    SmartDashboard.putNumber("Current Max Pressure", 250.0 * (pressureInput.getVoltage() / 5.0) - 25.0);
   }
 
   public void autoAlignShoot() {
