@@ -15,14 +15,14 @@ public class GyroControl {
     }
 
     public void zero() {
-        zeroPos = imu.getGyroAngleX();
+        imu.reset();
     }
 
     public double getAngle() {
         SmartDashboard.putNumber("rotX", imu.getGyroAngleX());
         SmartDashboard.putNumber("rotY", imu.getGyroAngleY());
         SmartDashboard.putNumber("rotZ", imu.getGyroAngleZ());
-        double angle=Math.floorMod((long)(imu.getGyroAngleX()-zeroPos), 360l);
+        double angle = Math.floorMod((long) (imu.getGyroAngleX() - zeroPos), 360l);
         return (angle);
     }
 
