@@ -270,6 +270,7 @@ public class Robot extends TimedRobot {
         selectedAutoRoutine = new Shoot3V3(chronosDrive, intake, shooter, gyroControl);
         break;
     }
+    gyroControl.zero();
   }
 
   public void delay(long time) {
