@@ -62,7 +62,7 @@ public class ShooterSupersystem extends Subsystem {
 
     public boolean alignTo(double angle, double distance) {
         agitate();
-        double turn = -angle / 25;
+        double turn = -angle / 20;
         SmartDashboard.putNumber("Turn", turn);
         if (Math.abs(turn) < .03) {
             turn = 0;
