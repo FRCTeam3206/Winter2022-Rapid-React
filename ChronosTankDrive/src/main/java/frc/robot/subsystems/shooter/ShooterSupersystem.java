@@ -148,7 +148,9 @@ public class ShooterSupersystem extends Subsystem {
         }
         if (joystick2.getRawButton(B_SHOOTER_FAILSAFE)) {
             shootFront();
-        } else {
+        } else if (joystick2.getRawButton(1)) {
+            shootLow();
+        }else {
 
             // aligned = false;
             turn = 0;
@@ -170,9 +172,6 @@ public class ShooterSupersystem extends Subsystem {
             hood.homePeriodic();
         if (joystick2.getRawButton(8)) {
             shooter.invert();
-        }
-        if (joystick2.getRawButton(1)) {
-            shootLow();
         }
         SmartDashboard.putNumber("Hood Angle", hood.angle);
     }
