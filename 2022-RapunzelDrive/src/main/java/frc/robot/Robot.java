@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -20,40 +21,37 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
  */
 
 public class Robot extends TimedRobot {
-  private DifferentialDrive m_myRobot;
-  private XboxController m_joystick;
+  private DifferentialDrive robot;
+  private GenericHID joystick;
   private static final int leftLeadDeviceID = 1; 
   private static final int rightLeadDeviceID = 3;
   private static final int leftFollowDeviceID = 2;
   private static final int rightFollowDeviceID = 4;
-  private CANSparkMax m_leftLeadMotor;
-  private CANSparkMax m_rightLeadMotor;
-  private CANSparkMax m_leftFollowMotor;
-  private CANSparkMax m_rightFollowMotor;
-  private double lastVelocity=0;
-  private long lastTime;
+  private CANSparkMax leftLeadMotor;
+  private CANSparkMax rightLeadMotor;
+  private CANSparkMax leftFollowMotor;
+  private CANSparkMax rightFollowMotor;
+  private SlewRateLimiter accelLimit=new SlewRateLimiter(.8);
 
   @Override
   public void robotInit() {
     // We need to invert one side of the drivetrain so that positive voltages
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
-    m_leftLeadMotor = new CANSparkMax(leftLeadDeviceID, MotorType.kBrushed);
-    m_leftFollowMotor = new CANSparkMax(leftFollowDeviceID, MotorType.kBrushed);
-    m_rightLeadMotor = new CANSparkMax(rightLeadDeviceID, MotorType.kBrushed);
-    m_rightFollowMotor = new CANSparkMax(rightFollowDeviceID, MotorType.kBrushed);
+    leftLeadMotor = new CANSparkMax(leftLeadDeviceID, MotorType.kBrushed);
+    leftFollowMotor = new CANSparkMax(leftFollowDeviceID, MotorType.kBrushed);
+    rightLeadMotor = new CANSparkMax(rightLeadDeviceID, MotorType.kBrushed);
+    rightFollowMotor = new CANSparkMax(rightFollowDeviceID, MotorType.kBrushed);
 
-    m_leftFollowMotor.follow(m_leftLeadMotor);
-    m_rightFollowMotor.follow(m_rightLeadMotor);
+    leftFollowMotor.follow(leftLeadMotor);
+    rightFollowMotor.follow(rightLeadMotor);
 
-    m_leftLeadMotor.setInverted(true);
+    leftLeadMotor.setInverted(true);
 
-    m_myRobot = new DifferentialDrive(m_leftLeadMotor, m_rightLeadMotor);
-    m_joystick = new XboxController(0);
+    robot = new DifferentialDrive(leftLeadMotor, rightLeadMotor);
+    joystick = new GenericHID(0);
 
     CameraServer.startAutomaticCapture();
-
-    lastTime=System.currentTimeMillis();
   }
 
   double currRight=0;
@@ -61,16 +59,11 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    //for acceleration limiting(uncomplete)
-     double rightInput=cut(m_joystick.getLeftY()+m_joystick.getLeftX());
-     double leftInput=cut(m_joystick.getLeftY()-m_joystick.getLeftX());
-     long currTime=System.currentTimeMillis();
-     double rightDiff=rightInput-currRight;
-     double leftDiff=leftInput-currLeft;
-     double timeDiff=currTime-lastTime;
-     
-     
-    m_myRobot.tankDrive(rightInput, leftInput);
+    double forward=accelLimit.calculate(joystick.getRawAxis(1)/1.5);
+    if(Math.abs(joystick.getRawAxis(1))<.5){
+      forward=0;
+    }
+    robot.arcadeDrive(forward, -joystick.getRawAxis(2)/1.5);
   }
   
   private double cut(double val){
