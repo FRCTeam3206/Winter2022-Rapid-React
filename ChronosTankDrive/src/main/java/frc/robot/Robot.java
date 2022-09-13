@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
@@ -63,17 +64,19 @@ public class Robot extends TimedRobot {
   String autoSelected;
 
   // Acceleration Limiting Variables
-  boolean accelerationLimiting = true;
-  double accelLimitedLeftGetY;
-  double accelLimitedRightGetY;
-  double accelLimitedSlideDrive;
-  double accelDriveKonstant = 6; // Change from 2-32. 32 is super slow to react, 2 is little improvement
-  double leftDriveCoef = .7;
-  double rightDriveCoef = .7;
-  double rightStickDeadband = .1;
-  double leftStickDeadband = .1;
-  double leftAdjusted;
-  double rightAdjusted;
+  // boolean accelerationLimiting = true;
+  // double accelLimitedLeftGetY;
+  // double accelLimitedRightGetY;
+  // double accelLimitedSlideDrive;
+  // double accelDriveKonstant = 6; // Change from 2-32. 32 is super slow to
+  // react, 2 is little improvement
+  // double leftDriveCoef = .7;
+  // double rightDriveCoef = .7;
+  // double rightStickDeadband = .1;
+  // double leftStickDeadband = .1;
+  // double leftAdjusted;
+  // double rightAdjusted;
+  SlewRateLimiter forward = new SlewRateLimiter(6);
 
   // DriveTrain
   DifferentialDrive chronosDrive;
@@ -157,7 +160,7 @@ public class Robot extends TimedRobot {
     chronosDrive = new DifferentialDrive(leftFrontDrive, rightFrontDrive);
     intake = new Intake(INTAKE_MOTOR_PORT, INTAKE_DEPLOY_PORT, weaponStick);
     shooter = new ShooterSupersystem(new Shooter(SHOOT_PORT, KICKER_PORT, .01, leftStick),
-        new Hood(HOOD_PORT, HOOD_LIMIT_PORT, leftStick), limelight, chronosDrive, leftStick, weaponStick);
+        new Hood(HOOD_PORT, HOOD_LIMIT_PORT, leftStick), limelight, chronosDrive, rightStick, weaponStick);
     subSystems = new Subsystem[] { intake, shooter, new Climber(8, 10, 7, 6, weaponStick) };
     for (Subsystem subSystem : subSystems) {
       subSystem.init();
@@ -166,12 +169,13 @@ public class Robot extends TimedRobot {
     CameraServer.startAutomaticCapture();
   }
 
-  public void accelLimit(double leftInput, double rightInput) {
-    rightAdjusted = (1 / accelDriveKonstant) * rightInput
-        + (accelDriveKonstant - 1) / accelDriveKonstant * rightAdjusted;
-    leftAdjusted = (1 / accelDriveKonstant) * leftInput + (accelDriveKonstant - 1) / accelDriveKonstant * leftAdjusted;
-    // chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
-  }
+  // public void accelLimit(double leftInput, double rightInput) {
+  // rightAdjusted = (1 / accelDriveKonstant) * rightInput
+  // + (accelDriveKonstant - 1) / accelDriveKonstant * rightAdjusted;
+  // leftAdjusted = (1 / accelDriveKonstant) * leftInput + (accelDriveKonstant -
+  // 1) / accelDriveKonstant * leftAdjusted;
+  // // chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+  // }
 
   public void teleopInit() {
 
@@ -189,30 +193,32 @@ public class Robot extends TimedRobot {
 
     } else {
       if (!leftStick.getRawButton(Constants.Buttons.B_ALIGN)) {
-        if (accelerationLimiting) {
-          accelLimit(leftStick.getY(), rightStick.getY());
-        } else {
-          rightAdjusted = rightStick.getY();
-          leftAdjusted = leftStick.getY();
-        }
+        // if (accelerationLimiting) {
+        // accelLimit(leftStick.getY(), rightStick.getY());
+        // } else {
+        // rightAdjusted = rightStick.getY();
+        // leftAdjusted = leftStick.getY();
+        // }
 
-        if (TURN_LIMIT) {
-          // this would be simpler if we switched to arcadeDrive()
-          double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
-          double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
-          turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
+        // // if (TURN_LIMIT) {
+        // // // this would be simpler if we switched to arcadeDrive()
+        // // double forwardLimit = (rightAdjusted + leftAdjusted) / 2.0;
+        // // double turnLimit = ((leftAdjusted - rightAdjusted) / 2.0);
+        // // turnLimit = Math.pow(turnLimit, 2) * Math.signum(turnLimit);
 
-          leftAdjusted = forwardLimit + turnLimit;
-          rightAdjusted = forwardLimit - turnLimit;
-        }
+        // // leftAdjusted = forwardLimit + turnLimit;
+        // // rightAdjusted = forwardLimit - turnLimit;
+        // // }
 
         if (rightStick.getRawButton(1)) {
-          driveSol.set(true);
+        driveSol.set(true);
         } else {
-          driveSol.set(false);
+        driveSol.set(false);
         }
 
-        chronosDrive.tankDrive(leftAdjusted, rightAdjusted);
+        // chronosDrive.arcadeDrive(l, zRotation);
+        double forwardpower = forward.calculate(rightStick.getY());
+        chronosDrive.arcadeDrive(forwardpower, -rightStick.getZ());
 
       }
     }

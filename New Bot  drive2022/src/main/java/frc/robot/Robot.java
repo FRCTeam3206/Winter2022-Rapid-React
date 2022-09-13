@@ -186,12 +186,6 @@ public class Robot extends TimedRobot {
 
     m_colorMatcher.addColorMatch(kBlueTarget);
     m_colorMatcher.addColorMatch(kRedTarget);
-
-    while (){
-        if(ballColor == "Red"){
-
-        }
-    }
   }
 
   public void accelLimit(double rightInput, double leftInput){
