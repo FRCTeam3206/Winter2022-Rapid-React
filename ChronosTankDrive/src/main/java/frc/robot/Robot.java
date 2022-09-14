@@ -209,16 +209,17 @@ public class Robot extends TimedRobot {
         // // leftAdjusted = forwardLimit + turnLimit;
         // // rightAdjusted = forwardLimit - turnLimit;
         // // }
-
+        double mul=.75;
         if (rightStick.getRawButton(1)) {
         driveSol.set(true);
+        mul=.9;
         } else {
         driveSol.set(false);
         }
 
         // chronosDrive.arcadeDrive(l, zRotation);
         double forwardpower = forward.calculate(rightStick.getY());
-        chronosDrive.arcadeDrive(forwardpower, -rightStick.getZ());
+        chronosDrive.arcadeDrive(forwardpower*mul, -rightStick.getZ()*.75);
 
       }
     }
