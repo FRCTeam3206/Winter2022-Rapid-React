@@ -43,8 +43,8 @@ public class Robot extends TimedRobot {
         m_rightMotor.set(ControlMode.Velocity, adj);
         m_leftMotor.set(ControlMode.Velocity, -adj);
     } else {*/
-      m_rightMotor.set(ControlMode.PercentOutput,-m_stick.getRawAxis(1)-m_stick.getRawAxis(0));
-      m_leftMotor.set(ControlMode.PercentOutput,-m_stick.getRawAxis(1)+m_stick.getRawAxis(0));
+      m_rightMotor.set(ControlMode.PercentOutput,-m_stick.getRawAxis(1)-m_stick.getRawAxis(2));
+      m_leftMotor.set(ControlMode.PercentOutput,-m_stick.getRawAxis(1)+m_stick.getRawAxis(2));
     //}
   }
 }
