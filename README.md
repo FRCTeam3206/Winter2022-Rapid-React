@@ -1,4 +1,5 @@
 # 2022-Rapid-React
+> **⚠️ BAD CODE DONT USE ⚠️**
 
 This repository contains the robot code for FRC Team 3206 "Royal T-Wrecks" for 2022 Rapid React.
 
